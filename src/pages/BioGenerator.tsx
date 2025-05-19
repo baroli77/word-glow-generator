@@ -19,6 +19,10 @@ const BioGenerator = () => {
                 Create the perfect bio for any platform with our AI-powered generator.
                 Fill in the form below and let us craft a compelling bio for you.
               </p>
+              <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
+                Now supporting LinkedIn, Twitter, Instagram, Tinder, Resume/CV, Portfolio, Twitch, 
+                Threads, Facebook, TikTok, YouTube, Reddit, Snapchat, and Pinterest!
+              </p>
             </div>
             
             <BioGeneratorForm />

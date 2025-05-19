@@ -8,6 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Copy, Download, Share2 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const toneOptions = [
   { value: 'professional', label: 'Professional' },
@@ -23,7 +31,15 @@ const platformOptions = [
   { value: 'instagram', label: 'Instagram' },
   { value: 'tinder', label: 'Tinder' },
   { value: 'resume', label: 'Resume/CV' },
-  { value: 'portfolio', label: 'Portfolio Website' }
+  { value: 'portfolio', label: 'Portfolio Website' },
+  { value: 'twitch', label: 'Twitch' },
+  { value: 'threads', label: 'Threads' },
+  { value: 'facebook', label: 'Facebook' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'youtube', label: 'YouTube' },
+  { value: 'reddit', label: 'Reddit' },
+  { value: 'snapchat', label: 'Snapchat' },
+  { value: 'pinterest', label: 'Pinterest' }
 ];
 
 const BioGeneratorForm: React.FC = () => {
@@ -42,7 +58,17 @@ const BioGeneratorForm: React.FC = () => {
     funFacts: '',
     tone: 'professional',
     platform: 'linkedin',
-    length: 'medium'
+    length: 'medium',
+    games: '',
+    channels: '',
+    topics: '',
+    skills: '',
+    content: '',
+    communities: '',
+    style: '',
+    niche: '',
+    charLimit: false,
+    customCharCount: 150
   });
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -52,6 +78,10 @@ const BioGeneratorForm: React.FC = () => {
   
   const handleRadioChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleSwitchChange = (name: string, checked: boolean) => {
+    setFormData(prev => ({ ...prev, [name]: checked }));
   };
   
   const handleNext = () => {
@@ -105,8 +135,63 @@ const BioGeneratorForm: React.FC = () => {
           ${formData.achievements ? `Proud to have ${formData.achievements}.` : ''}
           ${formData.interests ? `When not working, I enjoy ${formData.interests}.` : ''}`;
           break;
+        case 'twitch':
+          simulatedBio = `${formData.name} | ${formData.profession} 
+          ${formData.games ? `Playing ${formData.games}` : ''}
+          ${formData.schedule ? `Stream schedule: ${formData.schedule}` : ''}
+          ${formData.interests ? `${formData.interests}` : ''}
+          !socials !discord #${formData.tone}streamer`;
+          break;
+        case 'threads':
+          simulatedBio = `${formData.name} | ${formData.profession}
+          ${formData.interests ? `Into ${formData.interests}` : ''}
+          ${formData.topics ? `Discussing ${formData.topics}` : ''}
+          Join the conversation! 🧵`;
+          break;
+        case 'facebook':
+          simulatedBio = `${formData.name}
+          ${formData.profession ? `Working as ${formData.profession}` : ''}
+          ${formData.interests ? `Interests: ${formData.interests}` : ''}
+          ${formData.funFacts ? `About me: ${formData.funFacts}` : ''}`;
+          break;
+        case 'tiktok':
+          simulatedBio = `👋 ${formData.name}
+          ${formData.content ? `Creating ${formData.content}` : ''}
+          ${formData.interests ? `${formData.tone} about ${formData.interests}` : ''}
+          👇 New videos weekly`;
+          break;
+        case 'youtube':
+          simulatedBio = `${formData.name} - ${formData.profession}
+          ${formData.content ? `${formData.content}` : ''}
+          ${formData.schedule ? `Uploading ${formData.schedule}` : ''}
+          ${formData.interests ? `Passionate about ${formData.interests}` : ''}
+          Subscribe for more!`;
+          break;
+        case 'reddit':
+          simulatedBio = `${formData.name} | ${formData.profession}
+          ${formData.interests ? `Interests: ${formData.interests}` : ''}
+          ${formData.communities ? `Active in r/${formData.communities}` : ''}
+          ${formData.tone} contributor since 2023`;
+          break;
+        case 'snapchat':
+          simulatedBio = `${formData.name} 👻
+          ${formData.funFacts ? `${formData.funFacts}` : ''}
+          ${formData.interests ? `Into ${formData.interests}` : ''}
+          Add me for ${formData.content ? formData.content : 'daily snaps'}!`;
+          break;
+        case 'pinterest':
+          simulatedBio = `${formData.name} | ${formData.profession}
+          ${formData.niche ? `Curating ideas for ${formData.niche}` : ''}
+          ${formData.interests ? `Inspired by ${formData.interests}` : ''}
+          ${formData.style ? `Style: ${formData.style}` : ''}`;
+          break;
         default:
           simulatedBio = `I'm ${formData.name}, a ${formData.profession}.`;
+      }
+      
+      // Apply character limit if enabled
+      if (formData.charLimit && formData.customCharCount > 0) {
+        simulatedBio = simulatedBio.substring(0, formData.customCharCount);
       }
       
       setGeneratedBio(simulatedBio);
@@ -355,6 +440,413 @@ const BioGeneratorForm: React.FC = () => {
             </div>
           </>
         );
+
+      case 'twitch':
+        return (
+          <>
+            <div>
+              <Label htmlFor="name">Your Name/Username</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="GamerTag123"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="games">Games You Stream</Label>
+              <Input
+                id="games"
+                name="games"
+                value={formData.games}
+                onChange={handleChange}
+                placeholder="Minecraft, Valorant, Just Chatting, etc."
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="schedule">Stream Schedule</Label>
+              <Input
+                id="schedule"
+                name="schedule"
+                value={formData.schedule || ""}
+                onChange={handleChange}
+                placeholder="Mon/Wed/Fri 8PM EST"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="interests">Interests/Communities</Label>
+              <Input
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                placeholder="Speedrunning, eSports, Casual Gaming, etc."
+              />
+            </div>
+          </>
+        );
+
+      case 'threads':
+        return (
+          <>
+            <div>
+              <Label htmlFor="name">Your Name/Handle</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="@yourname"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="profession">What You Do</Label>
+              <Input
+                id="profession"
+                name="profession"
+                value={formData.profession}
+                onChange={handleChange}
+                placeholder="Writer, Creator, Designer, etc."
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="topics">Topics You Discuss</Label>
+              <Input
+                id="topics"
+                name="topics"
+                value={formData.topics || ""}
+                onChange={handleChange}
+                placeholder="Tech, Culture, Design, etc."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="interests">Interests</Label>
+              <Input
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                placeholder="Art, Music, Hiking, etc."
+              />
+            </div>
+          </>
+        );
+
+      case 'facebook':
+        return (
+          <>
+            <div>
+              <Label htmlFor="name">Your Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="John Doe"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="profession">Occupation</Label>
+              <Input
+                id="profession"
+                name="profession"
+                value={formData.profession}
+                onChange={handleChange}
+                placeholder="Teacher, Designer, Student, etc."
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="interests">Interests</Label>
+              <Textarea
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                placeholder="Your hobbies, passions, and interests..."
+                rows={2}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="funFacts">About Me</Label>
+              <Textarea
+                id="funFacts"
+                name="funFacts"
+                value={formData.funFacts}
+                onChange={handleChange}
+                placeholder="A brief description about yourself..."
+                rows={2}
+              />
+            </div>
+          </>
+        );
+
+      case 'tiktok':
+        return (
+          <>
+            <div>
+              <Label htmlFor="name">Your Name/Handle</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="@tiktokuser"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="content">Content Type</Label>
+              <Input
+                id="content"
+                name="content"
+                value={formData.content || ""}
+                onChange={handleChange}
+                placeholder="Comedy skits, Dance, Cooking tutorials, etc."
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="interests">Niche/Interests</Label>
+              <Input
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                placeholder="Fashion, Tech, Entertainment, etc."
+              />
+            </div>
+          </>
+        );
+
+      case 'youtube':
+        return (
+          <>
+            <div>
+              <Label htmlFor="name">Channel Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Your Channel Name"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="profession">Creator Type</Label>
+              <Input
+                id="profession"
+                name="profession"
+                value={formData.profession}
+                onChange={handleChange}
+                placeholder="Vlogger, Tech Reviewer, Educator, etc."
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="content">Channel Content</Label>
+              <Textarea
+                id="content"
+                name="content"
+                value={formData.content || ""}
+                onChange={handleChange}
+                placeholder="Describe what content you create..."
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="schedule">Upload Schedule</Label>
+              <Input
+                id="schedule"
+                name="schedule"
+                value={formData.schedule || ""}
+                onChange={handleChange}
+                placeholder="Weekly, Every Monday, Twice a month, etc."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="interests">Topics/Interests</Label>
+              <Input
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                placeholder="Gaming, Science, DIY, etc."
+              />
+            </div>
+          </>
+        );
+
+      case 'reddit':
+        return (
+          <>
+            <div>
+              <Label htmlFor="name">Username</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="u/username"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="profession">What You Do</Label>
+              <Input
+                id="profession"
+                name="profession"
+                value={formData.profession}
+                onChange={handleChange}
+                placeholder="Developer, Student, Hobbyist, etc."
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="interests">Interests</Label>
+              <Input
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                placeholder="Gaming, Science, Tech, etc."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="communities">Favorite Subreddits</Label>
+              <Input
+                id="communities"
+                name="communities"
+                value={formData.communities || ""}
+                onChange={handleChange}
+                placeholder="AskReddit, programming, gaming, etc."
+              />
+            </div>
+          </>
+        );
+
+      case 'snapchat':
+        return (
+          <>
+            <div>
+              <Label htmlFor="name">Your Name/Username</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="snapuser123"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="funFacts">About You</Label>
+              <Textarea
+                id="funFacts"
+                name="funFacts"
+                value={formData.funFacts}
+                onChange={handleChange}
+                placeholder="Quick facts or description about yourself..."
+                rows={2}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="interests">Interests</Label>
+              <Input
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                placeholder="Music, Travel, Photography, etc."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="content">Snap Content</Label>
+              <Input
+                id="content"
+                name="content"
+                value={formData.content || ""}
+                onChange={handleChange}
+                placeholder="Daily life, Travel vlogs, Food, etc."
+              />
+            </div>
+          </>
+        );
+
+      case 'pinterest':
+        return (
+          <>
+            <div>
+              <Label htmlFor="name">Your Name/Username</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Your Name or Business Name"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="profession">What You Do</Label>
+              <Input
+                id="profession"
+                name="profession"
+                value={formData.profession}
+                onChange={handleChange}
+                placeholder="Designer, Blogger, Business Owner, etc."
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="niche">Your Niche</Label>
+              <Input
+                id="niche"
+                name="niche"
+                value={formData.niche || ""}
+                onChange={handleChange}
+                placeholder="Home Decor, Fashion, DIY Projects, etc."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="interests">Interests</Label>
+              <Input
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                placeholder="Art, Design, Travel, etc."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="style">Your Style</Label>
+              <Input
+                id="style"
+                name="style"
+                value={formData.style || ""}
+                onChange={handleChange}
+                placeholder="Minimalist, Bohemian, Modern, etc."
+              />
+            </div>
+          </>
+        );
       
       default:
         return (
@@ -422,6 +914,7 @@ const BioGeneratorForm: React.FC = () => {
       
       case 'twitter':
       case 'instagram':
+      case 'threads':
         return (
           <div>
             <Label htmlFor="funFacts">Fun Facts/Hashtags</Label>
@@ -436,6 +929,9 @@ const BioGeneratorForm: React.FC = () => {
           </div>
         );
       
+      case 'facebook':
+        return null; // We already collected all needed fields in step 1
+      
       case 'portfolio':
         return (
           <div>
@@ -447,6 +943,66 @@ const BioGeneratorForm: React.FC = () => {
               onChange={handleChange}
               placeholder="Highlight your best work and accomplishments..."
               rows={3}
+            />
+          </div>
+        );
+
+      case 'twitch':
+        return (
+          <>
+            <div>
+              <Label htmlFor="channels">Other Social Media</Label>
+              <Input
+                id="channels"
+                name="channels"
+                value={formData.channels || ""}
+                onChange={handleChange}
+                placeholder="Twitter, Instagram, Discord, etc."
+              />
+            </div>
+            <div>
+              <Label htmlFor="achievements">Achievements/Milestones</Label>
+              <Textarea
+                id="achievements"
+                name="achievements"
+                value={formData.achievements}
+                onChange={handleChange}
+                placeholder="Affiliate, Partner, Subscriber goals reached, etc."
+                rows={2}
+              />
+            </div>
+          </>
+        );
+
+      case 'youtube':
+      case 'tiktok':
+        return (
+          <div>
+            <Label htmlFor="achievements">Channel Achievements</Label>
+            <Textarea
+              id="achievements"
+              name="achievements"
+              value={formData.achievements}
+              onChange={handleChange}
+              placeholder="100K Subscribers, Viral videos, Awards, etc."
+              rows={2}
+            />
+          </div>
+        );
+
+      case 'reddit':
+      case 'snapchat':
+      case 'pinterest':
+        return (
+          <div>
+            <Label htmlFor="funFacts">Additional Information</Label>
+            <Textarea
+              id="funFacts"
+              name="funFacts"
+              value={formData.funFacts}
+              onChange={handleChange}
+              placeholder="Any other information you want to include..."
+              rows={2}
             />
           </div>
         );
@@ -467,6 +1023,14 @@ const BioGeneratorForm: React.FC = () => {
         );
     }
   };
+
+  const charCountOptions = [
+    { value: '100', label: '100' },
+    { value: '150', label: '150' },
+    { value: '250', label: '250' },
+    { value: '500', label: '500' },
+    { value: 'custom', label: 'Custom' }
+  ];
   
   return (
     <div className="max-w-3xl mx-auto">
@@ -605,6 +1169,62 @@ const BioGeneratorForm: React.FC = () => {
                 </div>
               </RadioGroup>
             </div>
+
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="charLimit" className="font-medium">Character Limit</Label>
+                <Switch
+                  id="charLimit"
+                  checked={formData.charLimit}
+                  onCheckedChange={(checked) => handleSwitchChange('charLimit', checked)}
+                />
+              </div>
+              
+              {formData.charLimit && (
+                <div className="mt-4 space-y-2">
+                  <Label htmlFor="charCountSelect">Character Count</Label>
+                  <div className="flex gap-4">
+                    <Select 
+                      value={formData.customCharCount === 100 ? '100' : 
+                            formData.customCharCount === 150 ? '150' :
+                            formData.customCharCount === 250 ? '250' :
+                            formData.customCharCount === 500 ? '500' : 'custom'}
+                      onValueChange={(value) => {
+                        if (value === 'custom') {
+                          // Keep the current custom value if switching to custom
+                          return;
+                        }
+                        setFormData(prev => ({ ...prev, customCharCount: parseInt(value) }));
+                      }}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select limit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {charCountOptions.map(option => (
+                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    <Input
+                      type="number"
+                      value={formData.customCharCount}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        customCharCount: parseInt(e.target.value) || 0
+                      }))}
+                      placeholder="Custom character count"
+                      min="1"
+                      className="w-[150px]"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Character limits: Twitter (280), Instagram (150), TikTok (80), LinkedIn (2000)
+                  </p>
+                </div>
+              )}
+            </div>
             
             <div className="pt-4 flex justify-between">
               <Button variant="outline" onClick={handleBack}>
@@ -642,6 +1262,11 @@ const BioGeneratorForm: React.FC = () => {
               <Card>
                 <CardContent className="p-6 bg-white rounded-md shadow-sm">
                   <p className="whitespace-pre-line">{generatedBio}</p>
+                  {formData.charLimit && (
+                    <div className="mt-4 text-sm text-muted-foreground">
+                      Character count: {generatedBio.length} / {formData.customCharCount}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
               
@@ -668,10 +1293,16 @@ const BioGeneratorForm: React.FC = () => {
                     setLoading(true);
                     setTimeout(() => {
                       // This would call the API again with the same parameters
-                      const altBio = `I'm ${formData.name}, a dedicated ${formData.profession} with a passion for excellence and innovation.
+                      let altBio = `I'm ${formData.name}, a dedicated ${formData.profession} with a passion for excellence and innovation.
                       With experience across various projects, I bring a unique perspective to every challenge.
                       ${formData.interests ? `When I'm not working, you can find me ${formData.interests}.` : ''}
                       I'm always looking to connect with like-minded individuals and explore new opportunities.`;
+
+                      // Apply character limit if enabled
+                      if (formData.charLimit && formData.customCharCount > 0) {
+                        altBio = altBio.substring(0, formData.customCharCount);
+                      }
+                      
                       setGeneratedBio(altBio);
                       setLoading(false);
                     }, 1500);
@@ -700,6 +1331,19 @@ const BioGeneratorForm: React.FC = () => {
                 rows={8}
                 className="mb-4"
               />
+              
+              {formData.charLimit && (
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    Character count: {generatedBio.length} / {formData.customCharCount}
+                  </div>
+                  {generatedBio.length > formData.customCharCount && (
+                    <div className="text-sm text-red-500">
+                      Exceeds character limit by {generatedBio.length - formData.customCharCount} characters
+                    </div>
+                  )}
+                </div>
+              )}
               
               <div className="flex justify-end">
                 <Button onClick={handleCopy}>
