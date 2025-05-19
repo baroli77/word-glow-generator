@@ -68,7 +68,8 @@ const BioGeneratorForm: React.FC = () => {
     style: '',
     niche: '',
     charLimit: false,
-    customCharCount: 150
+    customCharCount: 150,
+    schedule: ''
   });
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
