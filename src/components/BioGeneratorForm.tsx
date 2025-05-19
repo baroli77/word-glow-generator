@@ -9,6 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Copy, Download, Share2 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
+import APIKeySettings from './APIKeySettings';
+import { generateWithAI, createBioPrompt } from '../services/openaiService';
 import {
   Select,
   SelectContent,
@@ -46,6 +48,7 @@ const BioGeneratorForm: React.FC = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [generatedBio, setGeneratedBio] = useState('');
+  const [apiKey, setApiKey] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -93,12 +96,46 @@ const BioGeneratorForm: React.FC = () => {
     setStep(prev => prev - 1);
   };
   
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setLoading(true);
     
-    // Simulate API call to generate bio
+    if (!apiKey) {
+      // If no API key, fall back to the simulated response
+      simulateGeneration();
+      return;
+    }
+    
+    try {
+      const prompt = createBioPrompt(formData);
+      const response = await generateWithAI(prompt, apiKey);
+      
+      if (response.error) {
+        // If there's an error with the API, fall back to simulated response
+        simulateGeneration();
+        return;
+      }
+      
+      let bio = response.content.trim();
+      
+      // Apply character limit if enabled
+      if (formData.charLimit && formData.customCharCount > 0) {
+        bio = bio.substring(0, formData.customCharCount);
+      }
+      
+      setGeneratedBio(bio);
+      setLoading(false);
+      setStep(4); // Move to results step
+    } catch (error) {
+      console.error("Error generating bio:", error);
+      // Fall back to simulated response
+      simulateGeneration();
+    }
+  };
+  
+  // Fallback function for when API is not available
+  const simulateGeneration = () => {
     setTimeout(() => {
-      // This would normally be where we'd call the OpenAI API
+      // This is the same as the original simulated response
       let simulatedBio = '';
       
       switch(formData.platform) {
@@ -201,6 +238,55 @@ const BioGeneratorForm: React.FC = () => {
     }, 2000);
   };
   
+  const handleRegenerate = async () => {
+    setLoading(true);
+    
+    if (!apiKey) {
+      // Fall back to simulated regeneration
+      setTimeout(() => {
+        // This would call the API again with the same parameters
+        let altBio = `I'm ${formData.name}, a dedicated ${formData.profession} with a passion for excellence and innovation.
+        With experience across various projects, I bring a unique perspective to every challenge.
+        ${formData.interests ? `When I'm not working, you can find me ${formData.interests}.` : ''}
+        I'm always looking to connect with like-minded individuals and explore new opportunities.`;
+
+        // Apply character limit if enabled
+        if (formData.charLimit && formData.customCharCount > 0) {
+          altBio = altBio.substring(0, formData.customCharCount);
+        }
+        
+        setGeneratedBio(altBio);
+        setLoading(false);
+      }, 1500);
+      return;
+    }
+    
+    try {
+      const prompt = createBioPrompt(formData) + "\nPlease provide a different variation from any previous bio you've created.";
+      const response = await generateWithAI(prompt, apiKey);
+      
+      if (response.error) {
+        // If there's an error with the API, fall back to simulated response
+        simulateGeneration();
+        return;
+      }
+      
+      let bio = response.content.trim();
+      
+      // Apply character limit if enabled
+      if (formData.charLimit && formData.customCharCount > 0) {
+        bio = bio.substring(0, formData.customCharCount);
+      }
+      
+      setGeneratedBio(bio);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error regenerating bio:", error);
+      // Fall back to simulated regeneration
+      simulateGeneration();
+    }
+  };
+
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedBio);
     toast({
@@ -1053,6 +1139,8 @@ const BioGeneratorForm: React.FC = () => {
       
       {step === 1 && (
         <div className="animate-fade-in">
+          <APIKeySettings onApiKeyChange={setApiKey} />
+          
           <h3 className="text-lg font-medium mb-4">Choose your platform</h3>
           <div className="space-y-6">
             <div>
@@ -1290,24 +1378,7 @@ const BioGeneratorForm: React.FC = () => {
                 <p className="text-muted-foreground mb-4">Not happy with your bio?</p>
                 <Button 
                   variant="outline" 
-                  onClick={() => {
-                    setLoading(true);
-                    setTimeout(() => {
-                      // This would call the API again with the same parameters
-                      let altBio = `I'm ${formData.name}, a dedicated ${formData.profession} with a passion for excellence and innovation.
-                      With experience across various projects, I bring a unique perspective to every challenge.
-                      ${formData.interests ? `When I'm not working, you can find me ${formData.interests}.` : ''}
-                      I'm always looking to connect with like-minded individuals and explore new opportunities.`;
-
-                      // Apply character limit if enabled
-                      if (formData.charLimit && formData.customCharCount > 0) {
-                        altBio = altBio.substring(0, formData.customCharCount);
-                      }
-                      
-                      setGeneratedBio(altBio);
-                      setLoading(false);
-                    }, 1500);
-                  }}
+                  onClick={handleRegenerate}
                   disabled={loading}
                 >
                   {loading ? (

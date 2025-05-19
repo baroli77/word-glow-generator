@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +7,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Copy, Download, Upload, FileText } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import APIKeySettings from './APIKeySettings';
+import { generateWithAI, createCoverLetterPrompt } from '../services/openaiService';
 
 const CoverLetterForm: React.FC = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [generatedLetter, setGeneratedLetter] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -49,7 +51,7 @@ const CoverLetterForm: React.FC = () => {
     setStep(prev => prev - 1);
   };
   
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!fileName) {
       toast({
         title: "CV Required",
@@ -61,6 +63,33 @@ const CoverLetterForm: React.FC = () => {
     
     setLoading(true);
     
+    if (!apiKey) {
+      // If no API key, fall back to simulated generation
+      simulateGeneration();
+      return;
+    }
+    
+    try {
+      const prompt = createCoverLetterPrompt(formData, fileName);
+      const response = await generateWithAI(prompt, apiKey);
+      
+      if (response.error) {
+        // If there's an error with the API, fall back to simulated response
+        simulateGeneration();
+        return;
+      }
+      
+      setGeneratedLetter(response.content.trim());
+      setLoading(false);
+      setStep(3); // Move to results step
+    } catch (error) {
+      console.error("Error generating cover letter:", error);
+      // Fall back to simulated generation
+      simulateGeneration();
+    }
+  };
+  
+  const simulateGeneration = () => {
     // Simulate API call to generate cover letter
     setTimeout(() => {
       // This would normally be where we'd call the API
@@ -83,6 +112,54 @@ Sincerely,
       setLoading(false);
       setStep(3); // Move to results step
     }, 2000);
+  };
+  
+  const handleRegenerate = async () => {
+    setLoading(true);
+    
+    if (!apiKey) {
+      // Fall back to simulated regeneration
+      setTimeout(() => {
+        // In a real app, this would call the API again with the same parameters
+        setGeneratedLetter(`
+Dear Hiring Team,
+
+I am excited to apply for the ${formData.jobTitle} position at ${formData.companyName}. After reviewing the job description, I am confident that my skills and experience make me an excellent candidate for this role.
+
+Based on my attached CV, you will find that I have a proven track record of success in similar roles, with a focus on delivering exceptional results and driving meaningful outcomes.
+
+${formData.additionalInfo ? `I would also like to mention that ${formData.additionalInfo}` : ''}
+
+I am particularly drawn to ${formData.companyName} because of its reputation for innovation and excellence. I am excited about the possibility of bringing my unique skills and perspective to your team.
+
+Thank you for considering my application. I look forward to the opportunity to discuss how I can contribute to your organization's continued success.
+
+Best regards,
+[Your Name]
+        `);
+        setLoading(false);
+      }, 1500);
+      return;
+    }
+    
+    try {
+      const prompt = createCoverLetterPrompt(formData, fileName) + 
+        "\nPlease provide a different variation from the previous cover letter.";
+      const response = await generateWithAI(prompt, apiKey);
+      
+      if (response.error) {
+        // If there's an error with the API, fall back to simulated response
+        simulateGeneration();
+        return;
+      }
+      
+      setGeneratedLetter(response.content.trim());
+      setLoading(false);
+    } catch (error) {
+      console.error("Error regenerating cover letter:", error);
+      // Fall back to simulated regeneration
+      simulateGeneration();
+    }
   };
   
   const handleCopy = () => {
@@ -121,6 +198,8 @@ Sincerely,
       
       {step === 1 && (
         <div className="animate-fade-in">
+          <APIKeySettings onApiKeyChange={setApiKey} />
+          
           <h3 className="text-lg font-medium mb-4">Upload your CV and job details</h3>
           <div className="space-y-4">
             <div>
@@ -272,29 +351,7 @@ Sincerely,
                 <p className="text-muted-foreground mb-4">Not satisfied with your cover letter?</p>
                 <Button 
                   variant="outline" 
-                  onClick={() => {
-                    setLoading(true);
-                    setTimeout(() => {
-                      // In a real app, this would call the API again with the same parameters
-                      setGeneratedLetter(`
-Dear Hiring Team,
-
-I am excited to apply for the ${formData.jobTitle} position at ${formData.companyName}. After reviewing the job description, I am confident that my skills and experience make me an excellent candidate for this role.
-
-Based on my attached CV, you will find that I have a proven track record of success in similar roles, with a focus on delivering exceptional results and driving meaningful outcomes.
-
-${formData.additionalInfo ? `I would also like to mention that ${formData.additionalInfo}` : ''}
-
-I am particularly drawn to ${formData.companyName} because of its reputation for innovation and excellence. I am excited about the possibility of bringing my unique skills and perspective to your team.
-
-Thank you for considering my application. I look forward to the opportunity to discuss how I can contribute to your organization's continued success.
-
-Best regards,
-[Your Name]
-                      `);
-                      setLoading(false);
-                    }, 1500);
-                  }}
+                  onClick={handleRegenerate}
                   disabled={loading}
                 >
                   {loading ? (
