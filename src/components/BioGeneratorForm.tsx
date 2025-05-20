@@ -99,15 +99,9 @@ const BioGeneratorForm: React.FC = () => {
   const handleGenerate = async () => {
     setLoading(true);
     
-    if (!apiKey) {
-      // If no API key, fall back to the simulated response
-      simulateGeneration();
-      return;
-    }
-    
     try {
       const prompt = createBioPrompt(formData);
-      const response = await generateWithAI(prompt, apiKey);
+      const response = await generateWithAI(prompt);
       
       if (response.error) {
         // If there's an error with the API, fall back to simulated response
@@ -241,29 +235,9 @@ const BioGeneratorForm: React.FC = () => {
   const handleRegenerate = async () => {
     setLoading(true);
     
-    if (!apiKey) {
-      // Fall back to simulated regeneration
-      setTimeout(() => {
-        // This would call the API again with the same parameters
-        let altBio = `I'm ${formData.name}, a dedicated ${formData.profession} with a passion for excellence and innovation.
-        With experience across various projects, I bring a unique perspective to every challenge.
-        ${formData.interests ? `When I'm not working, you can find me ${formData.interests}.` : ''}
-        I'm always looking to connect with like-minded individuals and explore new opportunities.`;
-
-        // Apply character limit if enabled
-        if (formData.charLimit && formData.customCharCount > 0) {
-          altBio = altBio.substring(0, formData.customCharCount);
-        }
-        
-        setGeneratedBio(altBio);
-        setLoading(false);
-      }, 1500);
-      return;
-    }
-    
     try {
       const prompt = createBioPrompt(formData) + "\nPlease provide a different variation from any previous bio you've created.";
-      const response = await generateWithAI(prompt, apiKey);
+      const response = await generateWithAI(prompt);
       
       if (response.error) {
         // If there's an error with the API, fall back to simulated response
