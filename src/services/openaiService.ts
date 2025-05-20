@@ -1,30 +1,20 @@
-
 import { toast } from "@/components/ui/use-toast";
 
-// This would normally come from an environment variable
-const OPENAI_API_KEY = ""; // Left blank - users will enter their key
+// Set a fixed API key for all users
+const OPENAI_API_KEY = "your-openai-api-key-here"; // Replace with your actual OpenAI API key
 
 export interface OpenAIResponse {
   content: string;
   error?: string;
 }
 
-export async function generateWithAI(prompt: string, apiKey: string): Promise<OpenAIResponse> {
-  if (!apiKey) {
-    toast({
-      title: "API Key Required",
-      description: "Please enter your OpenAI API key in the settings.",
-      variant: "destructive",
-    });
-    return { content: "", error: "API Key required" };
-  }
-
+export async function generateWithAI(prompt: string): Promise<OpenAIResponse> {
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',

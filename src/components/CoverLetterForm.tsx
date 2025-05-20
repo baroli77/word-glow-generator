@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Copy, Download, Upload, FileText } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
-import APIKeySettings from './APIKeySettings';
 import { generateWithAI, createCoverLetterPrompt } from '../services/openaiService';
 
 const CoverLetterForm: React.FC = () => {
@@ -15,7 +14,6 @@ const CoverLetterForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [generatedLetter, setGeneratedLetter] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -63,15 +61,9 @@ const CoverLetterForm: React.FC = () => {
     
     setLoading(true);
     
-    if (!apiKey) {
-      // If no API key, fall back to simulated generation
-      simulateGeneration();
-      return;
-    }
-    
     try {
       const prompt = createCoverLetterPrompt(formData, fileName);
-      const response = await generateWithAI(prompt, apiKey);
+      const response = await generateWithAI(prompt);
       
       if (response.error) {
         // If there's an error with the API, fall back to simulated response
@@ -117,35 +109,10 @@ Sincerely,
   const handleRegenerate = async () => {
     setLoading(true);
     
-    if (!apiKey) {
-      // Fall back to simulated regeneration
-      setTimeout(() => {
-        // In a real app, this would call the API again with the same parameters
-        setGeneratedLetter(`
-Dear Hiring Team,
-
-I am excited to apply for the ${formData.jobTitle} position at ${formData.companyName}. After reviewing the job description, I am confident that my skills and experience make me an excellent candidate for this role.
-
-Based on my attached CV, you will find that I have a proven track record of success in similar roles, with a focus on delivering exceptional results and driving meaningful outcomes.
-
-${formData.additionalInfo ? `I would also like to mention that ${formData.additionalInfo}` : ''}
-
-I am particularly drawn to ${formData.companyName} because of its reputation for innovation and excellence. I am excited about the possibility of bringing my unique skills and perspective to your team.
-
-Thank you for considering my application. I look forward to the opportunity to discuss how I can contribute to your organization's continued success.
-
-Best regards,
-[Your Name]
-        `);
-        setLoading(false);
-      }, 1500);
-      return;
-    }
-    
     try {
-      const prompt = createCoverLetterPrompt(formData, fileName) + 
+      const prompt = createCoverLetterPrompt(formData, fileName!) + 
         "\nPlease provide a different variation from the previous cover letter.";
-      const response = await generateWithAI(prompt, apiKey);
+      const response = await generateWithAI(prompt);
       
       if (response.error) {
         // If there's an error with the API, fall back to simulated response
@@ -198,8 +165,6 @@ Best regards,
       
       {step === 1 && (
         <div className="animate-fade-in">
-          <APIKeySettings onApiKeyChange={setApiKey} />
-          
           <h3 className="text-lg font-medium mb-4">Upload your CV and job details</h3>
           <div className="space-y-4">
             <div>
