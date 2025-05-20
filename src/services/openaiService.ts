@@ -1,7 +1,8 @@
+
 import { toast } from "@/components/ui/use-toast";
 
 // Set a fixed API key for all users
-const OPENAI_API_KEY = "your-openai-api-key-here"; // Replace with your actual OpenAI API key
+const OPENAI_API_KEY = "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"; 
 
 export interface OpenAIResponse {
   content: string;
