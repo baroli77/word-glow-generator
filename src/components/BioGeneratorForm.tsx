@@ -9,7 +9,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Copy, Download, Share2 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
-import APIKeySettings from './APIKeySettings';
 import { generateWithAI, createBioPrompt } from '../services/openaiService';
 import {
   Select,
@@ -27,28 +26,43 @@ const toneOptions = [
   { value: 'confident', label: 'Confident' }
 ];
 
+// Group platform options by category for better organization
 const platformOptions = [
-  { value: 'linkedin', label: 'LinkedIn' },
-  { value: 'twitter', label: 'Twitter' },
-  { value: 'instagram', label: 'Instagram' },
-  { value: 'tinder', label: 'Tinder' },
-  { value: 'resume', label: 'Resume/CV' },
-  { value: 'portfolio', label: 'Portfolio Website' },
-  { value: 'twitch', label: 'Twitch' },
-  { value: 'threads', label: 'Threads' },
-  { value: 'facebook', label: 'Facebook' },
-  { value: 'tiktok', label: 'TikTok' },
-  { value: 'youtube', label: 'YouTube' },
-  { value: 'reddit', label: 'Reddit' },
-  { value: 'snapchat', label: 'Snapchat' },
-  { value: 'pinterest', label: 'Pinterest' }
+  // Professional
+  { value: 'linkedin', label: 'LinkedIn', category: 'professional' },
+  { value: 'resume', label: 'Resume/CV', category: 'professional' },
+  { value: 'portfolio', label: 'Portfolio Website', category: 'professional' },
+  
+  // Social Media
+  { value: 'twitter', label: 'Twitter', category: 'social' },
+  { value: 'instagram', label: 'Instagram', category: 'social' },
+  { value: 'facebook', label: 'Facebook', category: 'social' },
+  { value: 'threads', label: 'Threads', category: 'social' },
+  { value: 'tiktok', label: 'TikTok', category: 'social' },
+  { value: 'snapchat', label: 'Snapchat', category: 'social' },
+  
+  // Content Creation
+  { value: 'youtube', label: 'YouTube', category: 'content' },
+  { value: 'twitch', label: 'Twitch', category: 'content' },
+  { value: 'pinterest', label: 'Pinterest', category: 'content' },
+  { value: 'reddit', label: 'Reddit', category: 'content' },
+  
+  // Dating
+  { value: 'tinder', label: 'Tinder', category: 'dating' }
 ];
+
+// Group platforms by category for display
+const platformCategories = {
+  professional: { title: 'Professional', platforms: platformOptions.filter(p => p.category === 'professional') },
+  social: { title: 'Social Media', platforms: platformOptions.filter(p => p.category === 'social') },
+  content: { title: 'Content Creation', platforms: platformOptions.filter(p => p.category === 'content') },
+  dating: { title: 'Dating', platforms: platformOptions.filter(p => p.category === 'dating') }
+};
 
 const BioGeneratorForm: React.FC = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [generatedBio, setGeneratedBio] = useState('');
-  const [apiKey, setApiKey] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -1113,29 +1127,34 @@ const BioGeneratorForm: React.FC = () => {
       
       {step === 1 && (
         <div className="animate-fade-in">
-          <APIKeySettings onApiKeyChange={setApiKey} />
-          
           <h3 className="text-lg font-medium mb-4">Choose your platform</h3>
           <div className="space-y-6">
             <div>
-              <Label className="mb-2 block">Platform</Label>
-              <RadioGroup 
-                defaultValue={formData.platform} 
-                onValueChange={(value) => handleRadioChange('platform', value)}
-                className="flex flex-wrap gap-4"
-              >
-                {platformOptions.map((option) => (
-                  <div key={option.value} className="flex items-center">
-                    <RadioGroupItem value={option.value} id={`platform-${option.value}`} className="peer sr-only" />
-                    <Label
-                      htmlFor={`platform-${option.value}`}
-                      className="px-4 py-2 rounded-full border cursor-pointer bg-background hover:bg-muted peer-data-[state=checked]:bg-wordcraft-purple peer-data-[state=checked]:text-white"
-                    >
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
+              <Label className="mb-4 block">Select the platform for your bio</Label>
+              
+              {/* Organized platform selection by categories */}
+              {Object.entries(platformCategories).map(([categoryKey, category]) => (
+                <div key={categoryKey} className="mb-6">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">{category.title}</h4>
+                  <RadioGroup 
+                    defaultValue={formData.platform} 
+                    onValueChange={(value) => handleRadioChange('platform', value)}
+                    className="flex flex-wrap gap-2"
+                  >
+                    {category.platforms.map((option) => (
+                      <div key={option.value} className="flex items-center">
+                        <RadioGroupItem value={option.value} id={`platform-${option.value}`} className="peer sr-only" />
+                        <Label
+                          htmlFor={`platform-${option.value}`}
+                          className="px-3 py-1.5 text-sm rounded-full border cursor-pointer bg-background hover:bg-muted peer-data-[state=checked]:bg-wordcraft-purple peer-data-[state=checked]:text-white transition-colors"
+                        >
+                          {option.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              ))}
             </div>
             
             <div className="pt-4 flex justify-end">

@@ -19,10 +19,6 @@ const BioGenerator = () => {
                 Create the perfect bio for any platform with our AI-powered generator.
                 Fill in the form below and let us craft a compelling bio for you.
               </p>
-              <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
-                Now supporting LinkedIn, Twitter, Instagram, Tinder, Resume/CV, Portfolio, Twitch, 
-                Threads, Facebook, TikTok, YouTube, Reddit, Snapchat, and Pinterest!
-              </p>
               <div className="mt-4 bg-wordcraft-purple/10 p-3 rounded-lg inline-block">
                 <p className="text-sm flex items-center">
                   <span className="bg-wordcraft-purple text-white rounded-full p-1 mr-2">
@@ -30,7 +26,7 @@ const BioGenerator = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
                     </svg>
                   </span>
-                  Powered by OpenAI's advanced GPT-4o-mini model!
+                  Powered by OpenAI's advanced GPT-4o-mini model
                 </p>
               </div>
             </div>
