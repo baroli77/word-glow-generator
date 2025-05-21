@@ -3,6 +3,7 @@ import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import CoverLetterForm from '../components/CoverLetterForm';
+import InfoBadge from '../components/InfoBadge';
 
 const CoverLetter = () => {
   return (
@@ -26,7 +27,10 @@ const CoverLetter = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
                     </svg>
                   </span>
-                  Powered by OpenAI's advanced GPT-4o-mini model!
+                  Powered by OpenAI's advanced GPT-4o-mini model
+                  <span className="ml-2">
+                    <InfoBadge text="This service uses a shared API key. No need to provide your own." />
+                  </span>
                 </p>
               </div>
             </div>

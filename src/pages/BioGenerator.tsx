@@ -3,6 +3,7 @@ import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BioGeneratorForm from '../components/BioGeneratorForm';
+import InfoBadge from '../components/InfoBadge';
 
 const BioGenerator = () => {
   return (
@@ -27,6 +28,9 @@ const BioGenerator = () => {
                     </svg>
                   </span>
                   Powered by OpenAI's advanced GPT-4o-mini model
+                  <span className="ml-2">
+                    <InfoBadge text="This service uses a shared API key. No need to provide your own." />
+                  </span>
                 </p>
               </div>
             </div>

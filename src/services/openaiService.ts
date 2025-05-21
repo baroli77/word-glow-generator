@@ -9,7 +9,29 @@ export interface OpenAIResponse {
   error?: string;
 }
 
-export async function generateWithAI(prompt: string): Promise<OpenAIResponse> {
+// Cache to store previously generated content
+const contentCache: Record<string, string> = {};
+
+// Simple hash function for caching
+const hashPrompt = (prompt: string): string => {
+  let hash = 0;
+  for (let i = 0; i < prompt.length; i++) {
+    const char = prompt.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash.toString();
+};
+
+export async function generateWithAI(prompt: string, retryCount = 0): Promise<OpenAIResponse> {
+  const maxRetries = 2;
+  const cacheKey = hashPrompt(prompt);
+  
+  // Check cache first
+  if (contentCache[cacheKey]) {
+    return { content: contentCache[cacheKey] };
+  }
+
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -36,23 +58,61 @@ export async function generateWithAI(prompt: string): Promise<OpenAIResponse> {
 
     if (!response.ok) {
       const errorData = await response.json();
+      const errorMessage = errorData.error?.message || "Failed to generate content";
+      
+      // Handle rate limiting specifically
+      if (response.status === 429 && retryCount < maxRetries) {
+        toast({
+          title: "Rate limited",
+          description: "Waiting and trying again...",
+          variant: "default",
+        });
+        
+        // Exponential backoff
+        const waitTime = Math.pow(2, retryCount) * 1000;
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+        
+        return generateWithAI(prompt, retryCount + 1);
+      }
+      
       toast({
         title: "API Error",
-        description: errorData.error?.message || "Failed to generate content",
+        description: errorMessage,
         variant: "destructive",
       });
-      return { content: "", error: errorData.error?.message || "API Error" };
+      
+      return { content: "", error: errorMessage };
     }
 
     const data = await response.json();
-    return { content: data.choices[0].message.content };
+    const generatedContent = data.choices[0].message.content;
+    
+    // Store in cache
+    contentCache[cacheKey] = generatedContent;
+    
+    return { content: generatedContent };
 
   } catch (error) {
+    // If network error and retries available, retry
+    if (retryCount < maxRetries && error instanceof Error && error.message.includes('network')) {
+      toast({
+        title: "Network issue",
+        description: "Retrying connection...",
+        variant: "default",
+      });
+      
+      const waitTime = Math.pow(2, retryCount) * 1000;
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+      
+      return generateWithAI(prompt, retryCount + 1);
+    }
+    
     toast({
       title: "Error",
       description: error instanceof Error ? error.message : "Failed to connect to OpenAI",
       variant: "destructive",
     });
+    
     return { content: "", error: error instanceof Error ? error.message : "Connection error" };
   }
 }
