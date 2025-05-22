@@ -48,7 +48,8 @@ const platformOptions = [
   { value: 'reddit', label: 'Reddit', category: 'content' },
   
   // Dating
-  { value: 'tinder', label: 'Tinder', category: 'dating' }
+  { value: 'tinder', label: 'Tinder', category: 'dating' },
+  { value: 'pof', label: 'PlentyOfFish', category: 'dating' }
 ];
 
 // Group platforms by category for display
@@ -141,7 +142,7 @@ const BioGeneratorForm: React.FC = () => {
       
       let bio = response.content.trim();
       
-      // Apply character limit if enabled
+      // Apply character limit if enabled and not set to unlimited
       if (formData.charLimit && formData.customCharCount > 0) {
         bio = bio.substring(0, formData.customCharCount);
       }
@@ -159,7 +160,6 @@ const BioGeneratorForm: React.FC = () => {
   // Fallback function for when API is not available
   const simulateGeneration = () => {
     setTimeout(() => {
-      // This is the same as the original simulated response
       let simulatedBio = '';
       
       switch(formData.platform) {
@@ -247,6 +247,12 @@ const BioGeneratorForm: React.FC = () => {
           ${formData.interests ? `Inspired by ${formData.interests}` : ''}
           ${formData.style ? `Style: ${formData.style}` : ''}`;
           break;
+        case 'pof':
+          simulatedBio = `${formData.name}, ${formData.tone} spirit
+          ${formData.funFacts ? `${formData.funFacts}` : ''}
+          ${formData.interests ? `I enjoy ${formData.interests}` : ''}
+          ${formData.lookingFor ? `Looking for ${formData.lookingFor}` : ''}`;
+          break;
         default:
           simulatedBio = `I'm ${formData.name}, a ${formData.profession}.`;
       }
@@ -277,7 +283,7 @@ const BioGeneratorForm: React.FC = () => {
       
       let bio = response.content.trim();
       
-      // Apply character limit if enabled
+      // Apply character limit if enabled and not set to unlimited
       if (formData.charLimit && formData.customCharCount > 0) {
         bio = bio.substring(0, formData.customCharCount);
       }
@@ -939,6 +945,57 @@ const BioGeneratorForm: React.FC = () => {
           </>
         );
       
+      case 'pof':
+        return (
+          <>
+            <div>
+              <Label htmlFor="name">Your Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="John"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="interests">Interests/Hobbies</Label>
+              <Input
+                id="interests"
+                name="interests"
+                value={formData.interests}
+                onChange={handleChange}
+                placeholder="hiking, movies, cooking, etc."
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="funFacts">About You</Label>
+              <Textarea
+                id="funFacts"
+                name="funFacts"
+                value={formData.funFacts}
+                onChange={handleChange}
+                placeholder="Something unique or interesting about you..."
+                rows={2}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="lookingFor">What You're Looking For</Label>
+              <Textarea
+                id="lookingFor"
+                name="lookingFor"
+                value={formData.lookingFor}
+                onChange={handleChange}
+                placeholder="Describe what kind of relationship you're seeking..."
+                rows={2}
+              />
+            </div>
+          </>
+        );
+
       default:
         return (
           <>
@@ -1116,11 +1173,11 @@ const BioGeneratorForm: React.FC = () => {
   };
 
   const charCountOptions = [
-    { value: '100', label: '100' },
-    { value: '150', label: '150' },
-    { value: '250', label: '250' },
-    { value: '500', label: '500' },
-    { value: 'custom', label: 'Custom' }
+    { value: '80', label: '80 (TikTok)' },
+    { value: '150', label: '150 (Instagram)' },
+    { value: '200', label: '200 (Twitter)' },
+    { value: 'custom', label: 'Custom' },
+    { value: 'unlimited', label: 'Unlimited' }
   ];
   
   return (
@@ -1296,16 +1353,19 @@ const BioGeneratorForm: React.FC = () => {
                   <Label htmlFor="charCountSelect">Character Count</Label>
                   <div className="flex gap-4">
                     <Select 
-                      value={formData.customCharCount === 100 ? '100' : 
+                      value={formData.customCharCount === 80 ? '80' : 
                             formData.customCharCount === 150 ? '150' :
-                            formData.customCharCount === 250 ? '250' :
-                            formData.customCharCount === 500 ? '500' : 'custom'}
+                            formData.customCharCount === 200 ? '200' :
+                            formData.customCharCount === 0 ? 'unlimited' : 'custom'}
                       onValueChange={(value) => {
                         if (value === 'custom') {
                           // Keep the current custom value if switching to custom
                           return;
+                        } else if (value === 'unlimited') {
+                          setFormData(prev => ({ ...prev, customCharCount: 0 }));
+                        } else {
+                          setFormData(prev => ({ ...prev, customCharCount: parseInt(value) }));
                         }
-                        setFormData(prev => ({ ...prev, customCharCount: parseInt(value) }));
                       }}
                     >
                       <SelectTrigger className="w-[180px]">
@@ -1318,20 +1378,22 @@ const BioGeneratorForm: React.FC = () => {
                       </SelectContent>
                     </Select>
                     
-                    <Input
-                      type="number"
-                      value={formData.customCharCount}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        customCharCount: parseInt(e.target.value) || 0
-                      }))}
-                      placeholder="Custom character count"
-                      min="1"
-                      className="w-[150px]"
-                    />
+                    {formData.customCharCount !== 0 && (
+                      <Input
+                        type="number"
+                        value={formData.customCharCount}
+                        onChange={(e) => setFormData(prev => ({ 
+                          ...prev, 
+                          customCharCount: parseInt(e.target.value) || 0
+                        }))}
+                        placeholder="Custom character count"
+                        min="1"
+                        className="w-[150px]"
+                      />
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Character limits: Twitter (280), Instagram (150), TikTok (80), LinkedIn (2000)
+                    Character limits: TikTok (80), Instagram (150), Twitter (200)
                   </p>
                 </div>
               )}
@@ -1375,7 +1437,8 @@ const BioGeneratorForm: React.FC = () => {
                   <p className="whitespace-pre-line">{generatedBio}</p>
                   {formData.charLimit && (
                     <div className="mt-4 text-sm text-muted-foreground">
-                      Character count: {generatedBio.length} / {formData.customCharCount}
+                      Character count: {generatedBio.length}
+                      {formData.customCharCount > 0 ? ` / ${formData.customCharCount}` : ' (Unlimited)'}
                     </div>
                   )}
                 </CardContent>
@@ -1429,9 +1492,10 @@ const BioGeneratorForm: React.FC = () => {
               {formData.charLimit && (
                 <div className="mb-4 flex items-center justify-between">
                   <div className="text-sm text-muted-foreground">
-                    Character count: {generatedBio.length} / {formData.customCharCount}
+                    Character count: {generatedBio.length}
+                    {formData.customCharCount > 0 ? ` / ${formData.customCharCount}` : ' (Unlimited)'}
                   </div>
-                  {generatedBio.length > formData.customCharCount && (
+                  {formData.customCharCount > 0 && generatedBio.length > formData.customCharCount && (
                     <div className="text-sm text-red-500">
                       Exceeds character limit by {generatedBio.length - formData.customCharCount} characters
                     </div>
