@@ -26,33 +26,24 @@ const toneOptions = [
   { value: 'confident', label: 'Confident' }
 ];
 
-// Group platform options by category for better organization
 const platformOptions = [
-  // Professional
   { value: 'linkedin', label: 'LinkedIn', category: 'professional' },
   { value: 'resume', label: 'Resume/CV', category: 'professional' },
   { value: 'portfolio', label: 'Portfolio Website', category: 'professional' },
-  
-  // Social Media
   { value: 'twitter', label: 'Twitter', category: 'social' },
   { value: 'instagram', label: 'Instagram', category: 'social' },
   { value: 'facebook', label: 'Facebook', category: 'social' },
   { value: 'threads', label: 'Threads', category: 'social' },
   { value: 'tiktok', label: 'TikTok', category: 'social' },
   { value: 'snapchat', label: 'Snapchat', category: 'social' },
-  
-  // Content Creation
   { value: 'youtube', label: 'YouTube', category: 'content' },
   { value: 'twitch', label: 'Twitch', category: 'content' },
   { value: 'pinterest', label: 'Pinterest', category: 'content' },
   { value: 'reddit', label: 'Reddit', category: 'content' },
-  
-  // Dating
   { value: 'tinder', label: 'Tinder', category: 'dating' },
   { value: 'pof', label: 'PlentyOfFish', category: 'dating' }
 ];
 
-// Group platforms by category for display
 const platformCategories = {
   professional: { 
     title: 'Professional', 
@@ -81,7 +72,6 @@ const BioGeneratorForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [generatedBio, setGeneratedBio] = useState('');
   
-  // Form state
   const [formData, setFormData] = useState({
     name: '',
     profession: '',
@@ -135,29 +125,25 @@ const BioGeneratorForm: React.FC = () => {
       const response = await generateWithAI(prompt);
       
       if (response.error) {
-        // If there's an error with the API, fall back to simulated response
         simulateGeneration();
         return;
       }
       
       let bio = response.content.trim();
       
-      // Apply character limit if enabled and not set to unlimited
       if (formData.charLimit && formData.customCharCount > 0) {
         bio = bio.substring(0, formData.customCharCount);
       }
       
       setGeneratedBio(bio);
       setLoading(false);
-      setStep(4); // Move to results step
+      setStep(4);
     } catch (error) {
       console.error("Error generating bio:", error);
-      // Fall back to simulated response
       simulateGeneration();
     }
   };
   
-  // Fallback function for when API is not available
   const simulateGeneration = () => {
     setTimeout(() => {
       let simulatedBio = '';
@@ -257,14 +243,13 @@ const BioGeneratorForm: React.FC = () => {
           simulatedBio = `I'm ${formData.name}, a ${formData.profession}.`;
       }
       
-      // Apply character limit if enabled
       if (formData.charLimit && formData.customCharCount > 0) {
         simulatedBio = simulatedBio.substring(0, formData.customCharCount);
       }
       
       setGeneratedBio(simulatedBio);
       setLoading(false);
-      setStep(4); // Move to results step
+      setStep(4);
     }, 2000);
   };
   
@@ -276,14 +261,12 @@ const BioGeneratorForm: React.FC = () => {
       const response = await generateWithAI(prompt);
       
       if (response.error) {
-        // If there's an error with the API, fall back to simulated response
         simulateGeneration();
         return;
       }
       
       let bio = response.content.trim();
       
-      // Apply character limit if enabled and not set to unlimited
       if (formData.charLimit && formData.customCharCount > 0) {
         bio = bio.substring(0, formData.customCharCount);
       }
@@ -292,7 +275,6 @@ const BioGeneratorForm: React.FC = () => {
       setLoading(false);
     } catch (error) {
       console.error("Error regenerating bio:", error);
-      // Fall back to simulated regeneration
       simulateGeneration();
     }
   };
@@ -305,7 +287,6 @@ const BioGeneratorForm: React.FC = () => {
     });
   };
 
-  // Determine which fields to show based on the selected platform
   const getFormFields = () => {
     switch(formData.platform) {
       case 'linkedin':
@@ -1025,7 +1006,6 @@ const BioGeneratorForm: React.FC = () => {
     }
   };
   
-  // Get additional fields for step 2 based on platform
   const getAdditionalFields = () => {
     switch(formData.platform) {
       case 'linkedin':
@@ -1058,7 +1038,7 @@ const BioGeneratorForm: React.FC = () => {
         );
       
       case 'tinder':
-        return null; // We already collected all needed fields in step 1
+        return null;
       
       case 'twitter':
       case 'instagram':
@@ -1078,7 +1058,7 @@ const BioGeneratorForm: React.FC = () => {
         );
       
       case 'facebook':
-        return null; // We already collected all needed fields in step 1
+        return null;
       
       case 'portfolio':
         return (
@@ -1176,8 +1156,7 @@ const BioGeneratorForm: React.FC = () => {
     { value: '80', label: '80 (TikTok)' },
     { value: '150', label: '150 (Instagram)' },
     { value: '200', label: '200 (Twitter)' },
-    { value: 'custom', label: 'Custom' },
-    { value: 'unlimited', label: 'Unlimited' }
+    { value: 'custom', label: 'Custom' }
   ];
   
   return (
@@ -1206,7 +1185,6 @@ const BioGeneratorForm: React.FC = () => {
               <Label className="mb-4 block">Select the platform for your bio</Label>
               
               <div className="border rounded-lg p-6 bg-white">
-                {/* Platform categories */}
                 {Object.entries(platformCategories).map(([categoryKey, category]) => (
                   <div key={categoryKey} className="mb-8">
                     <h4 className="flex items-center gap-2 text-lg font-semibold mb-4">
@@ -1354,15 +1332,11 @@ const BioGeneratorForm: React.FC = () => {
                   <div className="flex gap-4">
                     <Select 
                       value={formData.customCharCount === 80 ? '80' : 
-                            formData.customCharCount === 150 ? '150' :
-                            formData.customCharCount === 200 ? '200' :
-                            formData.customCharCount === 0 ? 'unlimited' : 'custom'}
+                             formData.customCharCount === 150 ? '150' :
+                             formData.customCharCount === 200 ? '200' : 'custom'}
                       onValueChange={(value) => {
                         if (value === 'custom') {
-                          // Keep the current custom value if switching to custom
                           return;
-                        } else if (value === 'unlimited') {
-                          setFormData(prev => ({ ...prev, customCharCount: 0 }));
                         } else {
                           setFormData(prev => ({ ...prev, customCharCount: parseInt(value) }));
                         }
@@ -1378,7 +1352,9 @@ const BioGeneratorForm: React.FC = () => {
                       </SelectContent>
                     </Select>
                     
-                    {formData.customCharCount !== 0 && (
+                    {(formData.customCharCount !== 80 && 
+                      formData.customCharCount !== 150 && 
+                      formData.customCharCount !== 200) && (
                       <Input
                         type="number"
                         value={formData.customCharCount}
@@ -1438,7 +1414,7 @@ const BioGeneratorForm: React.FC = () => {
                   {formData.charLimit && (
                     <div className="mt-4 text-sm text-muted-foreground">
                       Character count: {generatedBio.length}
-                      {formData.customCharCount > 0 ? ` / ${formData.customCharCount}` : ' (Unlimited)'}
+                      {formData.customCharCount > 0 ? ` / ${formData.customCharCount}` : ''}
                     </div>
                   )}
                 </CardContent>
@@ -1493,7 +1469,7 @@ const BioGeneratorForm: React.FC = () => {
                 <div className="mb-4 flex items-center justify-between">
                   <div className="text-sm text-muted-foreground">
                     Character count: {generatedBio.length}
-                    {formData.customCharCount > 0 ? ` / ${formData.customCharCount}` : ' (Unlimited)'}
+                    {formData.customCharCount > 0 ? ` / ${formData.customCharCount}` : ''}
                   </div>
                   {formData.customCharCount > 0 && generatedBio.length > formData.customCharCount && (
                     <div className="text-sm text-red-500">
