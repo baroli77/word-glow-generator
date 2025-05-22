@@ -92,12 +92,25 @@ export async function generateWithAI(prompt: string, retryCount = 0): Promise<Op
 // Functions to save and retrieve user-generated content
 export async function saveBio(platform: string, content: string, formData: any) {
   try {
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to save your bio.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     const { error } = await supabase
       .from('bios')
       .insert({
         platform,
         content,
-        form_data: formData
+        form_data: formData,
+        user_id: session.user.id
       });
     
     if (error) throw error;
@@ -120,6 +133,13 @@ export async function saveBio(platform: string, content: string, formData: any) 
 
 export async function getUserBios() {
   try {
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('bios')
       .select('*')
@@ -140,13 +160,26 @@ export async function getUserBios() {
 
 export async function saveCoverLetter(jobTitle: string, companyName: string, content: string, formData: any) {
   try {
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to save your cover letter.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     const { error } = await supabase
       .from('cover_letters')
       .insert({
         job_title: jobTitle,
         company_name: companyName,
         content,
-        form_data: formData
+        form_data: formData,
+        user_id: session.user.id
       });
     
     if (error) throw error;
@@ -169,6 +202,13 @@ export async function saveCoverLetter(jobTitle: string, companyName: string, con
 
 export async function getUserCoverLetters() {
   try {
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return [];
+    }
+
     const { data, error } = await supabase
       .from('cover_letters')
       .select('*')
