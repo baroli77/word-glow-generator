@@ -9,7 +9,7 @@ const BioGenerator = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow py-12 px-4">
+      <main className="flex-grow py-12 px-4 bg-gray-50">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">

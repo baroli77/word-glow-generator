@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, Copy, Download, Share2 } from 'lucide-react';
+import { Sparkles, Copy, Download, Share2, Briefcase, Smartphone, Video, Heart } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { generateWithAI, createBioPrompt } from '../services/openaiService';
@@ -53,10 +53,26 @@ const platformOptions = [
 
 // Group platforms by category for display
 const platformCategories = {
-  professional: { title: 'Professional', platforms: platformOptions.filter(p => p.category === 'professional') },
-  social: { title: 'Social Media', platforms: platformOptions.filter(p => p.category === 'social') },
-  content: { title: 'Content Creation', platforms: platformOptions.filter(p => p.category === 'content') },
-  dating: { title: 'Dating', platforms: platformOptions.filter(p => p.category === 'dating') }
+  professional: { 
+    title: 'Professional', 
+    icon: Briefcase,
+    platforms: platformOptions.filter(p => p.category === 'professional') 
+  },
+  social: { 
+    title: 'Social Media', 
+    icon: Smartphone,
+    platforms: platformOptions.filter(p => p.category === 'social') 
+  },
+  content: { 
+    title: 'Content Creation', 
+    icon: Video,
+    platforms: platformOptions.filter(p => p.category === 'content') 
+  },
+  dating: { 
+    title: 'Dating', 
+    icon: Heart,
+    platforms: platformOptions.filter(p => p.category === 'dating') 
+  }
 };
 
 const BioGeneratorForm: React.FC = () => {
@@ -1132,29 +1148,42 @@ const BioGeneratorForm: React.FC = () => {
             <div>
               <Label className="mb-4 block">Select the platform for your bio</Label>
               
-              {/* Organized platform selection by categories */}
-              {Object.entries(platformCategories).map(([categoryKey, category]) => (
-                <div key={categoryKey} className="mb-6">
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2">{category.title}</h4>
-                  <RadioGroup 
-                    defaultValue={formData.platform} 
-                    onValueChange={(value) => handleRadioChange('platform', value)}
-                    className="flex flex-wrap gap-2"
-                  >
-                    {category.platforms.map((option) => (
-                      <div key={option.value} className="flex items-center">
-                        <RadioGroupItem value={option.value} id={`platform-${option.value}`} className="peer sr-only" />
-                        <Label
-                          htmlFor={`platform-${option.value}`}
-                          className="px-3 py-1.5 text-sm rounded-full border cursor-pointer bg-background hover:bg-muted peer-data-[state=checked]:bg-wordcraft-purple peer-data-[state=checked]:text-white transition-colors"
-                        >
-                          {option.label}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                </div>
-              ))}
+              <div className="border rounded-lg p-6 bg-white">
+                {/* Platform categories */}
+                {Object.entries(platformCategories).map(([categoryKey, category]) => (
+                  <div key={categoryKey} className="mb-8">
+                    <h4 className="flex items-center gap-2 text-lg font-semibold mb-4">
+                      <category.icon className="h-5 w-5" />
+                      {category.title}
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {category.platforms.map((option) => (
+                        <div key={option.value} className="flex items-center">
+                          <RadioGroup 
+                            value={formData.platform} 
+                            onValueChange={(value) => handleRadioChange('platform', value)}
+                            className="flex"
+                          >
+                            <div className="flex items-center">
+                              <RadioGroupItem value={option.value} id={`platform-${option.value}`} className="peer sr-only" />
+                              <Label
+                                htmlFor={`platform-${option.value}`}
+                                className={`px-4 py-2 rounded-full border cursor-pointer transition-colors ${
+                                  formData.platform === option.value 
+                                    ? "bg-wordcraft-purple text-white" 
+                                    : "bg-white hover:bg-muted"
+                                }`}
+                              >
+                                {option.label}
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
             
             <div className="pt-4 flex justify-end">
