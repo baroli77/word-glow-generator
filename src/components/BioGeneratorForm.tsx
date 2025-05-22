@@ -82,7 +82,6 @@ const BioGeneratorForm: React.FC = () => {
     funFacts: '',
     tone: 'professional',
     platform: 'linkedin',
-    length: 'medium',
     games: '',
     channels: '',
     topics: '',
@@ -1277,45 +1276,6 @@ const BioGeneratorForm: React.FC = () => {
               </RadioGroup>
             </div>
             
-            <div>
-              <Label className="mb-2 block">Length</Label>
-              <RadioGroup 
-                defaultValue={formData.length}
-                onValueChange={(value) => handleRadioChange('length', value)}
-                className="flex gap-4"
-              >
-                <div className="flex items-center">
-                  <RadioGroupItem value="short" id="length-short" className="peer sr-only" />
-                  <Label
-                    htmlFor="length-short"
-                    className="px-4 py-2 rounded-full border cursor-pointer bg-background hover:bg-muted peer-data-[state=checked]:bg-wordcraft-purple peer-data-[state=checked]:text-white"
-                  >
-                    Short
-                  </Label>
-                </div>
-                
-                <div className="flex items-center">
-                  <RadioGroupItem value="medium" id="length-medium" className="peer sr-only" />
-                  <Label
-                    htmlFor="length-medium"
-                    className="px-4 py-2 rounded-full border cursor-pointer bg-background hover:bg-muted peer-data-[state=checked]:bg-wordcraft-purple peer-data-[state=checked]:text-white"
-                  >
-                    Medium
-                  </Label>
-                </div>
-                
-                <div className="flex items-center">
-                  <RadioGroupItem value="long" id="length-long" className="peer sr-only" />
-                  <Label
-                    htmlFor="length-long"
-                    className="px-4 py-2 rounded-full border cursor-pointer bg-background hover:bg-muted peer-data-[state=checked]:bg-wordcraft-purple peer-data-[state=checked]:text-white"
-                  >
-                    Long
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-
             <div className="border-t pt-4">
               <div className="flex items-center justify-between mb-2">
                 <Label htmlFor="charLimit" className="font-medium">Character Limit</Label>
