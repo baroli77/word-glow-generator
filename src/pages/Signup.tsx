@@ -1,13 +1,70 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "../context/AuthContext";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const Signup = () => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!firstName || !lastName || !email || !password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!acceptTerms) {
+      toast({
+        title: "Error",
+        description: "You must accept the terms and conditions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      await signUp(email, password, firstName, lastName);
+      toast({
+        title: "Account created",
+        description: "Please check your email for verification.",
+      });
+      navigate('/login');
+    } catch (error) {
+      console.error("Signup error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-accent/50 px-4">
       <div className="w-full max-w-md">
@@ -23,13 +80,16 @@ const Signup = () => {
             <CardDescription>Sign up to start crafting amazing bios and cover letters</CardDescription>
           </CardHeader>
           <CardContent>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
                   <Input 
                     id="firstName" 
                     placeholder="John" 
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    disabled={isLoading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -37,6 +97,9 @@ const Signup = () => {
                   <Input 
                     id="lastName" 
                     placeholder="Doe" 
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -46,6 +109,9 @@ const Signup = () => {
                   id="email" 
                   type="email" 
                   placeholder="name@example.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -53,11 +119,18 @@ const Signup = () => {
                 <Input 
                   id="password" 
                   type="password" 
-                  placeholder="••••••••" 
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="terms" />
+                <Checkbox 
+                  id="terms" 
+                  checked={acceptTerms}
+                  onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+                />
                 <Label htmlFor="terms" className="text-sm">
                   I agree to the{' '}
                   <Link to="/terms" className="text-wordcraft-purple hover:underline">
@@ -69,8 +142,12 @@ const Signup = () => {
                   </Link>
                 </Label>
               </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90">
-                Create Account
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90"
+                disabled={isLoading}
+              >
+                {isLoading ? <LoadingSpinner size="sm" /> : "Create Account"}
               </Button>
               
               <div className="relative mt-6">

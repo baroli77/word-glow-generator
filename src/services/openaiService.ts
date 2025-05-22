@@ -1,13 +1,5 @@
-
+import { generateWithAI as generateAI } from "./supabaseService";
 import { toast } from "@/components/ui/use-toast";
-
-// Set a fixed API key for all users
-const OPENAI_API_KEY = "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"; 
-
-export interface OpenAIResponse {
-  content: string;
-  error?: string;
-}
 
 // Cache to store previously generated content
 const contentCache: Record<string, string> = {};
@@ -23,8 +15,12 @@ const hashPrompt = (prompt: string): string => {
   return hash.toString();
 };
 
+export interface OpenAIResponse {
+  content: string;
+  error?: string;
+}
+
 export async function generateWithAI(prompt: string, retryCount = 0): Promise<OpenAIResponse> {
-  const maxRetries = 2;
   const cacheKey = hashPrompt(prompt);
   
   // Check cache first
@@ -33,87 +29,28 @@ export async function generateWithAI(prompt: string, retryCount = 0): Promise<Op
   }
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a professional content writer specializing in creating engaging and personalized content.'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.7,
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      const errorMessage = errorData.error?.message || "Failed to generate content";
-      
-      // Handle rate limiting specifically
-      if (response.status === 429 && retryCount < maxRetries) {
-        toast({
-          title: "Rate limited",
-          description: "Waiting and trying again...",
-          variant: "default",
-        });
-        
-        // Exponential backoff
-        const waitTime = Math.pow(2, retryCount) * 1000;
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        
-        return generateWithAI(prompt, retryCount + 1);
-      }
-      
+    const response = await generateAI(prompt);
+    
+    if (response.error) {
       toast({
-        title: "API Error",
-        description: errorMessage,
+        title: "Error",
+        description: response.error,
         variant: "destructive",
       });
-      
-      return { content: "", error: errorMessage };
+      return { content: "", error: response.error };
     }
-
-    const data = await response.json();
-    const generatedContent = data.choices[0].message.content;
     
     // Store in cache
-    contentCache[cacheKey] = generatedContent;
+    contentCache[cacheKey] = response.content;
     
-    return { content: generatedContent };
-
+    return response;
   } catch (error) {
-    // If network error and retries available, retry
-    if (retryCount < maxRetries && error instanceof Error && error.message.includes('network')) {
-      toast({
-        title: "Network issue",
-        description: "Retrying connection...",
-        variant: "default",
-      });
-      
-      const waitTime = Math.pow(2, retryCount) * 1000;
-      await new Promise(resolve => setTimeout(resolve, waitTime));
-      
-      return generateWithAI(prompt, retryCount + 1);
-    }
-    
     toast({
       title: "Error",
-      description: error instanceof Error ? error.message : "Failed to connect to OpenAI",
+      description: error instanceof Error ? error.message : "Failed to generate content",
       variant: "destructive",
     });
-    
-    return { content: "", error: error instanceof Error ? error.message : "Connection error" };
+    return { content: "", error: error instanceof Error ? error.message : "Error generating content" };
   }
 }
 
