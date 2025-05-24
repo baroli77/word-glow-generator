@@ -6,45 +6,67 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 
-// Import new components
+// Import components
 import PlatformSelector from './bio-generator/PlatformSelector';
 import FormFieldsRenderer from './bio-generator/FormFieldsRenderer';
 import ToneSelector from './bio-generator/ToneSelector';
 import CharacterLimitSettings from './bio-generator/CharacterLimitSettings';
 import BioPreview from './bio-generator/BioPreview';
 import BioEditor from './bio-generator/BioEditor';
+import TemplateSelector from './bio-generator/TemplateSelector';
 import { useBioForm } from './bio-generator/hooks/useBioForm';
 import { generateBio, simulateBioGeneration } from '../services/bioService';
+import { validateBioForm, ValidationError } from './bio-generator/utils/validation';
 
 const BioGeneratorForm: React.FC = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [generatedBio, setGeneratedBio] = useState('');
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
+  const [showTemplates, setShowTemplates] = useState(false);
   const { formData, updateField, updatePlatform, resetForm } = useBioForm();
   
   const handleNext = () => {
+    if (step === 2) {
+      // Validate form before proceeding
+      const validation = validateBioForm(formData);
+      setValidationErrors(validation.errors);
+      
+      if (!validation.isValid) {
+        toast({
+          title: "Please fix the errors",
+          description: "Some fields need your attention before continuing.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     setStep(prev => prev + 1);
   };
   
   const handleBack = () => {
     setStep(prev => prev - 1);
+    setValidationErrors([]); // Clear errors when going back
+  };
+  
+  const handleTemplateUse = (bio: string) => {
+    setGeneratedBio(bio);
+    setStep(4); // Go directly to preview
+  };
+
+  const handleSkipTemplates = () => {
+    setShowTemplates(false);
+    // Continue to tone/settings step
   };
   
   const handleGenerate = async () => {
-    // Validation
-    if (!formData.name.trim()) {
+    // Final validation
+    const validation = validateBioForm(formData);
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
       toast({
-        title: "Name Required",
-        description: "Please enter your name to generate a bio.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!formData.profession.trim()) {
-      toast({
-        title: "Profession Required",
-        description: "Please enter your profession or what you do.",
+        title: "Please fix the errors",
+        description: "Some fields need your attention before generating.",
         variant: "destructive",
       });
       return;
@@ -56,7 +78,6 @@ const BioGeneratorForm: React.FC = () => {
       const response = await generateBio(formData);
       
       if (response.error) {
-        // Fallback to simulation if AI generation fails
         const fallbackBio = simulateBioGeneration(formData);
         setGeneratedBio(fallbackBio);
         toast({
@@ -82,10 +103,8 @@ const BioGeneratorForm: React.FC = () => {
     setLoading(true);
     
     try {
-      // Add variation prompt for regeneration
       const response = await generateBio({
         ...formData,
-        // Add some randomness for variation
         tone: formData.tone
       });
       
@@ -107,7 +126,15 @@ const BioGeneratorForm: React.FC = () => {
   const handleStartOver = () => {
     setStep(1);
     setGeneratedBio('');
+    setValidationErrors([]);
+    setShowTemplates(false);
     resetForm();
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    updateField(field, value);
+    // Clear validation error for this field when user starts typing
+    setValidationErrors(prev => prev.filter(error => error.field !== field));
   };
 
   return (
@@ -146,9 +173,10 @@ const BioGeneratorForm: React.FC = () => {
         <div>
           <FormFieldsRenderer
             formData={formData}
-            onFieldChange={updateField}
+            onFieldChange={handleFieldChange}
+            errors={validationErrors}
           />
-          <div className="pt-4 flex justify-between">
+          <div className="pt-6 flex justify-between">
             <Button variant="outline" onClick={handleBack}>
               Back
             </Button>
@@ -159,10 +187,25 @@ const BioGeneratorForm: React.FC = () => {
         </div>
       )}
       
-      {step === 3 && (
+      {step === 3 && !showTemplates && (
         <div className="animate-fade-in">
           <h3 className="text-lg font-medium mb-4">Customize your bio</h3>
           <div className="space-y-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-medium text-blue-900 mb-2">💡 Quick Start Option</h4>
+              <p className="text-blue-700 text-sm mb-3">
+                Want to get started quickly? Try our pre-made templates!
+              </p>
+              <Button 
+                onClick={() => setShowTemplates(true)}
+                variant="outline"
+                size="sm"
+                className="border-blue-300 text-blue-700 hover:bg-blue-100"
+              >
+                Browse Templates
+              </Button>
+            </div>
+            
             <ToneSelector
               selectedTone={formData.tone}
               onToneChange={(tone) => updateField('tone', tone)}
@@ -195,6 +238,14 @@ const BioGeneratorForm: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {step === 3 && showTemplates && (
+        <TemplateSelector
+          formData={formData}
+          onTemplateSelect={handleTemplateUse}
+          onSkip={handleSkipTemplates}
+        />
       )}
       
       {step === 4 && (

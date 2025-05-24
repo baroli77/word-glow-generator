@@ -1,46 +1,53 @@
 
 import React from 'react';
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { BioFormData, platformOptions } from './types';
+import { ValidationError } from './utils/validation';
+import ValidatedFormField from './ValidatedFormField';
 
 interface FormFieldsRendererProps {
   formData: BioFormData;
   onFieldChange: (field: string, value: string) => void;
+  errors?: ValidationError[];
 }
 
 const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
   formData,
-  onFieldChange
+  onFieldChange,
+  errors = []
 }) => {
   const platformLabel = platformOptions.find(p => p.value === formData.platform)?.label;
 
+  const getFieldError = (fieldName: string): string | undefined => {
+    return errors.find(error => error.field === fieldName)?.message;
+  };
+
   const renderCommonFields = () => (
     <>
-      <div>
-        <Label htmlFor="name">Your Name</Label>
-        <Input
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={(e) => onFieldChange('name', e.target.value)}
-          placeholder="John Doe"
-          aria-describedby="name-help"
-        />
-      </div>
+      <ValidatedFormField
+        id="name"
+        name="name"
+        label="Your Name"
+        value={formData.name}
+        onChange={(value) => onFieldChange('name', value)}
+        placeholder="John Doe"
+        maxLength={100}
+        required
+        error={getFieldError('name')}
+        helpText="Your full name as you want it to appear"
+      />
       
-      <div>
-        <Label htmlFor="profession">Profession/Title</Label>
-        <Input
-          id="profession"
-          name="profession"
-          value={formData.profession}
-          onChange={(e) => onFieldChange('profession', e.target.value)}
-          placeholder="What you do"
-          aria-describedby="profession-help"
-        />
-      </div>
+      <ValidatedFormField
+        id="profession"
+        name="profession"
+        label="Profession/Title"
+        value={formData.profession}
+        onChange={(value) => onFieldChange('profession', value)}
+        placeholder="What you do"
+        maxLength={150}
+        required
+        error={getFieldError('profession')}
+        helpText="Your current role, title, or what you do professionally"
+      />
     </>
   );
 
@@ -50,40 +57,45 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
         const linkedInData = formData as any;
         return (
           <>
-            <div>
-              <Label htmlFor="experience">Experience</Label>
-              <Textarea
-                id="experience"
-                name="experience"
-                value={linkedInData.experience || ''}
-                onChange={(e) => onFieldChange('experience', e.target.value)}
-                placeholder="Briefly describe your professional experience..."
-                rows={3}
-                aria-describedby="experience-help"
-              />
-            </div>
-            <div>
-              <Label htmlFor="achievements">Key Achievements</Label>
-              <Textarea
-                id="achievements"
-                name="achievements"
-                value={linkedInData.achievements || ''}
-                onChange={(e) => onFieldChange('achievements', e.target.value)}
-                placeholder="Awards, recognitions, or notable projects..."
-                rows={3}
-              />
-            </div>
-            <div>
-              <Label htmlFor="interests">Personal Interests</Label>
-              <Textarea
-                id="interests"
-                name="interests"
-                value={linkedInData.interests || ''}
-                onChange={(e) => onFieldChange('interests', e.target.value)}
-                placeholder="Hobbies, passions, or activities outside of work..."
-                rows={3}
-              />
-            </div>
+            <ValidatedFormField
+              id="experience"
+              name="experience"
+              label="Experience"
+              value={linkedInData.experience || ''}
+              onChange={(value) => onFieldChange('experience', value)}
+              placeholder="Briefly describe your professional experience..."
+              type="textarea"
+              rows={3}
+              maxLength={500}
+              error={getFieldError('experience')}
+              helpText="Key experience, skills, or background relevant to your profession"
+            />
+            <ValidatedFormField
+              id="achievements"
+              name="achievements"
+              label="Key Achievements"
+              value={linkedInData.achievements || ''}
+              onChange={(value) => onFieldChange('achievements', value)}
+              placeholder="Awards, recognitions, or notable projects..."
+              type="textarea"
+              rows={3}
+              maxLength={300}
+              error={getFieldError('achievements')}
+              helpText="Notable accomplishments, awards, or standout projects"
+            />
+            <ValidatedFormField
+              id="interests"
+              name="interests"
+              label="Personal Interests"
+              value={linkedInData.interests || ''}
+              onChange={(value) => onFieldChange('interests', value)}
+              placeholder="Hobbies, passions, or activities outside of work..."
+              type="textarea"
+              rows={3}
+              maxLength={200}
+              error={getFieldError('interests')}
+              helpText="Personal interests that show your personality"
+            />
           </>
         );
       
@@ -93,27 +105,30 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
         const socialData = formData as any;
         return (
           <>
-            <div>
-              <Label htmlFor="interests">Interests/Topics</Label>
-              <Input
-                id="interests"
-                name="interests"
-                value={socialData.interests || ''}
-                onChange={(e) => onFieldChange('interests', e.target.value)}
-                placeholder="design, travel, food, technology, etc."
-              />
-            </div>
-            <div>
-              <Label htmlFor="funFacts">Fun Facts/Hashtags</Label>
-              <Textarea
-                id="funFacts"
-                name="funFacts"
-                value={socialData.funFacts || ''}
-                onChange={(e) => onFieldChange('funFacts', e.target.value)}
-                placeholder="Additional facts or hashtags you want to include..."
-                rows={3}
-              />
-            </div>
+            <ValidatedFormField
+              id="interests"
+              name="interests"
+              label="Interests/Topics"
+              value={socialData.interests || ''}
+              onChange={(value) => onFieldChange('interests', value)}
+              placeholder="design, travel, food, technology, etc."
+              maxLength={100}
+              error={getFieldError('interests')}
+              helpText="Topics you're passionate about or frequently discuss"
+            />
+            <ValidatedFormField
+              id="funFacts"
+              name="funFacts"
+              label="Fun Facts/Hashtags"
+              value={socialData.funFacts || ''}
+              onChange={(value) => onFieldChange('funFacts', value)}
+              placeholder="Additional facts or hashtags you want to include..."
+              type="textarea"
+              rows={3}
+              maxLength={150}
+              error={getFieldError('funFacts')}
+              helpText="Quirky facts, emojis, or hashtags that represent you"
+            />
           </>
         );
       
@@ -122,38 +137,43 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
         const datingData = formData as any;
         return (
           <>
-            <div>
-              <Label htmlFor="interests">Interests/Hobbies</Label>
-              <Input
-                id="interests"
-                name="interests"
-                value={datingData.interests || ''}
-                onChange={(e) => onFieldChange('interests', e.target.value)}
-                placeholder="hiking, movies, cooking, etc."
-              />
-            </div>
-            <div>
-              <Label htmlFor="funFacts">Fun Facts About You</Label>
-              <Textarea
-                id="funFacts"
-                name="funFacts"
-                value={datingData.funFacts || ''}
-                onChange={(e) => onFieldChange('funFacts', e.target.value)}
-                placeholder="Something unique or interesting about you..."
-                rows={2}
-              />
-            </div>
-            <div>
-              <Label htmlFor="lookingFor">What You're Looking For</Label>
-              <Textarea
-                id="lookingFor"
-                name="lookingFor"
-                value={datingData.lookingFor || ''}
-                onChange={(e) => onFieldChange('lookingFor', e.target.value)}
-                placeholder="Describe what kind of relationship you're seeking..."
-                rows={2}
-              />
-            </div>
+            <ValidatedFormField
+              id="interests"
+              name="interests"
+              label="Interests/Hobbies"
+              value={datingData.interests || ''}
+              onChange={(value) => onFieldChange('interests', value)}
+              placeholder="hiking, movies, cooking, etc."
+              maxLength={100}
+              error={getFieldError('interests')}
+              helpText="Activities and hobbies you enjoy"
+            />
+            <ValidatedFormField
+              id="funFacts"
+              name="funFacts"
+              label="Fun Facts About You"
+              value={datingData.funFacts || ''}
+              onChange={(value) => onFieldChange('funFacts', value)}
+              placeholder="Something unique or interesting about you..."
+              type="textarea"
+              rows={2}
+              maxLength={150}
+              error={getFieldError('funFacts')}
+              helpText="What makes you unique or interesting?"
+            />
+            <ValidatedFormField
+              id="lookingFor"
+              name="lookingFor"
+              label="What You're Looking For"
+              value={datingData.lookingFor || ''}
+              onChange={(value) => onFieldChange('lookingFor', value)}
+              placeholder="Describe what kind of relationship you're seeking..."
+              type="textarea"
+              rows={2}
+              maxLength={200}
+              error={getFieldError('lookingFor')}
+              helpText="What type of connection or relationship are you hoping to find?"
+            />
           </>
         );
       
@@ -167,7 +187,7 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
       <h3 className="text-lg font-medium mb-4">
         Tell us about yourself for your {platformLabel} bio
       </h3>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {renderCommonFields()}
         {renderPlatformSpecificFields()}
       </div>
