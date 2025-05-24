@@ -32,15 +32,20 @@ export const useBioForm = () => {
     };
 
     // Preserve relevant fields when switching between similar platforms
-    const preservedData: Partial<BioFormData> = {};
+    const preservedData: Record<string, any> = {};
     
-    if ('interests' in formData) {
+    // Type-safe property access using 'in' operator
+    if ('interests' in formData && formData.interests) {
       preservedData.interests = formData.interests;
     }
     
-    if (['linkedin', 'resume', 'portfolio'].includes(platform) && 'experience' in formData) {
-      preservedData.experience = formData.experience;
-      preservedData.achievements = formData.achievements;
+    if (['linkedin', 'resume', 'portfolio'].includes(platform)) {
+      if ('experience' in formData && formData.experience) {
+        preservedData.experience = formData.experience;
+      }
+      if ('achievements' in formData && formData.achievements) {
+        preservedData.achievements = formData.achievements;
+      }
     }
 
     setFormData({ ...baseData, ...preservedData } as BioFormData);
