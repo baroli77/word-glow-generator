@@ -75,8 +75,8 @@ const BioPreview: React.FC<BioPreviewProps> = ({
     <div className="animate-fade-in">
       <h3 className="text-lg font-medium mb-4">Your generated bio</h3>
       
-      <Card className="border border-border">
-        <CardContent className="p-6 bg-card rounded-md shadow-sm">
+      <Card className="border border-border bg-card">
+        <CardContent className="p-6">
           <p className="whitespace-pre-line text-card-foreground" aria-label="Generated bio content">
             {bio}
           </p>
