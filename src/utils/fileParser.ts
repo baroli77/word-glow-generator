@@ -1,5 +1,6 @@
 
 import { toast } from "@/components/ui/use-toast";
+import JSZip from 'jszip';
 
 interface ParsedFile {
   content: string;
@@ -74,14 +75,20 @@ async function parsePDF(file: File): Promise<ParsedFile> {
     }
     
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ 
-      data: arrayBuffer,
-      useSystemFonts: true,
-      disableFontFace: false,
-      // Disable worker if it fails to load
-      useWorkerFetch: false,
-      isEvalSupported: false
-    }).promise;
+    
+    let pdf;
+    try {
+      pdf = await pdfjsLib.getDocument({ 
+        data: arrayBuffer,
+        useSystemFonts: true,
+        disableFontFace: false,
+        // Disable worker if it fails to load
+        useWorkerFetch: false,
+        isEvalSupported: false
+      }).promise;
+    } catch (error) {
+      throw new Error("Unable to load PDF. The file may be corrupted or encrypted.");
+    }
     
     let fullText = '';
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -94,55 +101,48 @@ async function parsePDF(file: File): Promise<ParsedFile> {
     }
     
     if (!fullText.trim()) {
-      return { content: '', error: 'PDF appears to be empty or contains only images. Please use a text-based PDF.' };
+      throw new Error("PDF parsed but no readable text found. Try a different file or use DOCX.");
     }
     
     return { content: fullText.trim() };
   } catch (error) {
     console.error('PDF parsing error:', error);
+    const errorMessage = (error as Error).message;
     
-    // Provide more specific error messages
-    if ((error as Error).message.includes('worker') || (error as Error).message.includes('fetch')) {
-      return { content: '', error: 'PDF parsing failed due to network issues. Please try again or use a different file format.' };
-    }
+    toast({
+      title: "PDF Parsing Failed",
+      description: errorMessage,
+      variant: "destructive",
+    });
     
-    return { content: '', error: `Failed to parse PDF: ${(error as Error).message}. Please ensure the PDF is not password protected and contains readable text.` };
+    return { content: '', error: errorMessage };
   }
 }
 
 async function parseDOCX(file: File): Promise<ParsedFile> {
   try {
-    // Simple text extraction approach to avoid module loading issues
-    const arrayBuffer = await file.arrayBuffer();
-    const text = new TextDecoder().decode(arrayBuffer);
-    
-    // Try to extract text content using basic string manipulation
-    const textMatch = text.match(/<w:t[^>]*>([^<]*)<\/w:t>/g);
-    if (textMatch) {
-      const extractedText = textMatch.map(match => match.replace(/<[^>]*>/g, '')).join(' ').trim();
-      if (extractedText && extractedText.length > 0) {
-        return { content: extractedText };
-      }
-    }
-    
-    // If no text found with w:t tags, try a broader approach
-    const paragraphMatch = text.match(/<w:p[^>]*>.*?<\/w:p>/gs);
-    if (paragraphMatch) {
-      const paragraphText = paragraphMatch
-        .map(p => p.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim())
-        .filter(p => p.length > 0)
-        .join('\n');
-      
-      if (paragraphText && paragraphText.length > 0) {
-        return { content: paragraphText };
-      }
-    }
-    
-    return { content: '', error: 'This DOCX file couldn\'t be parsed. The document may be empty, corrupted, or in an unsupported format. Please try saving it as a PDF or plain text file.' };
-    
+    const zip = await JSZip.loadAsync(file);
+    const xml = await zip.file("word/document.xml")?.async("string");
+
+    if (!xml) throw new Error("word/document.xml not found");
+
+    const rawText = xml
+      .replace(/<w:.*?>/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!rawText) throw new Error("DOCX parsed but no content found");
+
+    return { content: rawText };
   } catch (error) {
-    console.error('DOCX parsing error:', error);
-    
-    return { content: '', error: 'Document parsing failed. Please try uploading a PDF version of your document instead.' };
+    console.error("DOCX parsing error:", error);
+    const errorMessage = "Failed to parse DOCX file. Try re-saving or upload a PDF.";
+    toast({
+      title: "DOCX Parsing Failed",
+      description: errorMessage,
+      variant: "destructive"
+    });
+    return { content: '', error: errorMessage };
   }
 }
