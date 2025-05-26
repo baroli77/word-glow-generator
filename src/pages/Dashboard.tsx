@@ -12,6 +12,7 @@ import { getUserBios, getUserCoverLetters } from '@/services/supabaseService';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "@/components/ui/use-toast";
+import { getDailyQuote } from '@/utils/dailyQuotes';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -145,6 +146,7 @@ const Dashboard = () => {
 
   const bioLimit = getUsageLimit('bio_generator');
   const coverLetterLimit = getUsageLimit('cover_letter');
+  const dailyQuote = getDailyQuote();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -203,13 +205,13 @@ const Dashboard = () => {
                   <h3 className="text-sm font-medium text-muted-foreground mb-4 uppercase">Quick Actions</h3>
                   
                   <div className="grid grid-cols-2 gap-4">
-                    <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/bio-generator')}>
-                      <UserCircle className="w-4 h-4 mr-2" />
-                      New Bio
+                    <Button variant="outline" size="sm" className="w-full h-auto py-2 px-2 text-xs" onClick={() => navigate('/bio-generator')}>
+                      <UserCircle className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">New Bio</span>
                     </Button>
-                    <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/cover-letter')}>
-                      <FileText className="w-4 h-4 mr-2" />
-                      New Letter
+                    <Button variant="outline" size="sm" className="w-full h-auto py-2 px-2 text-xs" onClick={() => navigate('/cover-letter')}>
+                      <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">New Letter</span>
                     </Button>
                   </div>
                 </div>
@@ -217,9 +219,9 @@ const Dashboard = () => {
                 <div className="mt-8 pt-6 border-t">
                   <h3 className="text-sm font-medium text-muted-foreground mb-4 uppercase">Daily Quote</h3>
                   <p className="text-sm italic">
-                    "The best way to predict your future is to create it."
+                    "{dailyQuote.text}"
                   </p>
-                  <p className="text-xs text-muted-foreground mt-2">— Abraham Lincoln</p>
+                  <p className="text-xs text-muted-foreground mt-2">— {dailyQuote.author}</p>
                 </div>
               </div>
             </div>
