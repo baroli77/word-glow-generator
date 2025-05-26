@@ -60,16 +60,27 @@ async function parsePDF(file: File): Promise<ParsedFile> {
     // Dynamic import with proper error handling
     const pdfjsLib = await import('pdfjs-dist');
     
-    // Set up worker with fallback
+    // Set up worker with multiple fallback options
     if (typeof window !== 'undefined') {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+      // Try multiple CDN sources for the worker
+      const workerSources = [
+        `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`,
+        `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`,
+        `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+      ];
+      
+      // Use the first available worker source
+      pdfjsLib.GlobalWorkerOptions.workerSrc = workerSources[0];
     }
     
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ 
       data: arrayBuffer,
       useSystemFonts: true,
-      disableFontFace: false
+      disableFontFace: false,
+      // Disable worker if it fails to load
+      useWorkerFetch: false,
+      isEvalSupported: false
     }).promise;
     
     let fullText = '';
@@ -89,6 +100,12 @@ async function parsePDF(file: File): Promise<ParsedFile> {
     return { content: fullText.trim() };
   } catch (error) {
     console.error('PDF parsing error:', error);
+    
+    // Provide more specific error messages
+    if ((error as Error).message.includes('worker') || (error as Error).message.includes('fetch')) {
+      return { content: '', error: 'PDF parsing failed due to network issues. Please try again or use a different file format.' };
+    }
+    
     return { content: '', error: `Failed to parse PDF: ${(error as Error).message}. Please ensure the PDF is not password protected and contains readable text.` };
   }
 }
