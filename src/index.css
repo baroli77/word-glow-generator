@@ -89,7 +89,7 @@
 
 @layer base {
   * {
-    @apply border-border selection:bg-wordcraft-purple/20 selection:text-wordcraft-purple-dark;
+    @apply border-border selection:bg-brand-purple/20 selection:text-brand-purple-dark;
   }
 
   body {
@@ -116,15 +116,15 @@
   }
   
   .text-gradient {
-    @apply bg-gradient-to-br from-wordcraft-purple to-wordcraft-pink bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-brand-purple to-brand-pink bg-clip-text text-transparent;
   }
   
-  .wordcraft-card {
+  .brand-card {
     @apply bg-card border border-border rounded-2xl shadow-lg p-4 sm:p-6 transition-colors;
   }
   
-  .wordcraft-card-hover {
-    @apply transition-all duration-300 hover:shadow-xl hover:shadow-wordcraft-purple/10 hover:-translate-y-1;
+  .brand-card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:shadow-brand-purple/10 hover:-translate-y-1;
   }
 
   /* Enhanced animations for mobile */
@@ -150,7 +150,7 @@
   }
 
   /* Dark mode specific utilities */
-  .dark .shadow-wordcraft {
+  .dark .shadow-brand {
     box-shadow: 0 10px 25px -5px rgba(155, 135, 245, 0.1), 0 10px 10px -5px rgba(155, 135, 245, 0.04);
   }
 }
@@ -171,5 +171,5 @@
 button:focus-visible,
 a:focus-visible,
 [tabindex]:focus-visible {
-  @apply outline-2 outline-offset-2 outline-wordcraft-purple;
+  @apply outline-2 outline-offset-2 outline-brand-purple;
 }

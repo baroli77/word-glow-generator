@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -155,8 +156,8 @@ const Dashboard = () => {
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="lg:w-1/4">
-              <div className="wordcraft-card mb-8 text-center">
-                <div className="h-24 w-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-wordcraft-purple to-wordcraft-pink flex items-center justify-center text-white text-4xl font-bold">
+              <div className="brand-card mb-8 text-center">
+                <div className="h-24 w-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-brand-purple to-brand-pink flex items-center justify-center text-white text-4xl font-bold">
                   {initials}
                 </div>
                 <h2 className="text-xl font-semibold">{displayName}</h2>
@@ -166,7 +167,7 @@ const Dashboard = () => {
                 </Button>
               </div>
               
-              <div className="wordcraft-card">
+              <div className="brand-card">
                 <h3 className="text-sm font-medium text-muted-foreground mb-4 uppercase">Usage Stats</h3>
                 
                 <div className="space-y-4">
@@ -179,7 +180,7 @@ const Dashboard = () => {
                     </div>
                     <div className="w-full bg-muted h-2 rounded-full">
                       <div 
-                        className="bg-wordcraft-purple h-2 rounded-full" 
+                        className="bg-brand-purple h-2 rounded-full" 
                         style={{ width: `${bioLimit === 'Unlimited' ? 0 : getUsagePercentage(bioUsageCount, bioLimit)}%` }}
                       ></div>
                     </div>
@@ -194,7 +195,7 @@ const Dashboard = () => {
                     </div>
                     <div className="w-full bg-muted h-2 rounded-full">
                       <div 
-                        className="bg-wordcraft-pink h-2 rounded-full" 
+                        className="bg-brand-pink h-2 rounded-full" 
                         style={{ width: `${coverLetterLimit === 'Unlimited' ? 0 : getUsagePercentage(coverLetterUsageCount, coverLetterLimit)}%` }}
                       ></div>
                     </div>
@@ -204,14 +205,24 @@ const Dashboard = () => {
                 <div className="mt-8 pt-6 border-t">
                   <h3 className="text-sm font-medium text-muted-foreground mb-4 uppercase">Quick Actions</h3>
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button variant="outline" size="sm" className="w-full h-auto py-2 px-2 text-xs" onClick={() => navigate('/bio-generator')}>
-                      <UserCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className="truncate">New Bio</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full h-auto py-3 px-2 text-xs flex flex-col items-center gap-1" 
+                      onClick={() => navigate('/bio-generator')}
+                    >
+                      <UserCircle className="w-4 h-4 flex-shrink-0" />
+                      <span className="whitespace-nowrap">New Bio</span>
                     </Button>
-                    <Button variant="outline" size="sm" className="w-full h-auto py-2 px-2 text-xs" onClick={() => navigate('/cover-letter')}>
-                      <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className="truncate">New Letter</span>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full h-auto py-3 px-2 text-xs flex flex-col items-center gap-1" 
+                      onClick={() => navigate('/cover-letter')}
+                    >
+                      <FileText className="w-4 h-4 flex-shrink-0" />
+                      <span className="whitespace-nowrap">New Letter</span>
                     </Button>
                   </div>
                 </div>
@@ -227,7 +238,7 @@ const Dashboard = () => {
             </div>
             
             <div className="lg:w-3/4">
-              <div className="wordcraft-card mb-8">
+              <div className="brand-card mb-8">
                 <Tabs defaultValue="bios">
                   <TabsList className="mb-4 grid w-full grid-cols-2">
                     <TabsTrigger value="bios">My Bios</TabsTrigger>
@@ -260,14 +271,14 @@ const Dashboard = () => {
                                   className="flex items-center flex-1 cursor-pointer"
                                   onClick={() => handleViewBio(displayBio)}
                                 >
-                                  <div className="h-10 w-10 rounded-full bg-wordcraft-purple/20 flex items-center justify-center mr-4">
-                                    <UserCircle className="h-6 w-6 text-wordcraft-purple" />
+                                  <div className="h-10 w-10 rounded-full bg-brand-purple/20 flex items-center justify-center mr-4">
+                                    <UserCircle className="h-6 w-6 text-brand-purple" />
                                   </div>
                                   <div>
                                     <div className="flex items-center">
                                       <h3 className="font-medium">{displayBio.name}</h3>
                                       {displayBio.favorite && (
-                                        <Star className="h-4 w-4 text-wordcraft-purple ml-2 fill-current" />
+                                        <Star className="h-4 w-4 text-brand-purple ml-2 fill-current" />
                                       )}
                                     </div>
                                     <p className="text-xs text-muted-foreground">
@@ -328,14 +339,14 @@ const Dashboard = () => {
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center">
-                                  <div className="h-10 w-10 rounded-full bg-wordcraft-pink/20 flex items-center justify-center mr-4">
-                                    <FileText className="h-6 w-6 text-wordcraft-pink" />
+                                  <div className="h-10 w-10 rounded-full bg-brand-pink/20 flex items-center justify-center mr-4">
+                                    <FileText className="h-6 w-6 text-brand-pink" />
                                   </div>
                                   <div>
                                     <div className="flex items-center">
                                       <h3 className="font-medium">{displayLetter.name}</h3>
                                       {displayLetter.favorite && (
-                                        <Star className="h-4 w-4 text-wordcraft-pink ml-2 fill-current" />
+                                        <Star className="h-4 w-4 text-brand-pink ml-2 fill-current" />
                                       )}
                                     </div>
                                     <p className="text-xs text-muted-foreground">
@@ -406,7 +417,7 @@ const Dashboard = () => {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <UserCircle className="h-5 w-5 text-wordcraft-purple" />
+              <UserCircle className="h-5 w-5 text-brand-purple" />
               {selectedBio?.name}
             </DialogTitle>
           </DialogHeader>

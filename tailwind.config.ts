@@ -53,8 +53,8 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// WordCraft custom colors
-				wordcraft: {
+				// MakeMy.Bio brand colors - standardized naming
+				brand: {
 					purple: '#9b87f5',
 					'purple-dark': '#7E69AB',
 					pink: '#D946EF',
