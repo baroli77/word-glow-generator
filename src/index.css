@@ -48,14 +48,14 @@
   }
 
   .dark {
-    --background: 260 25% 10%;
-    --foreground: 260 15% 90%;
+    --background: 260 25% 6%;
+    --foreground: 260 15% 92%;
 
-    --card: 260 25% 12%;
-    --card-foreground: 260 15% 90%;
+    --card: 260 25% 8%;
+    --card-foreground: 260 15% 92%;
 
-    --popover: 260 25% 12%;
-    --popover-foreground: 260 15% 90%;
+    --popover: 260 25% 8%;
+    --popover-foreground: 260 15% 92%;
 
     --primary: 258 74% 75%;
     --primary-foreground: 260 0% 100%;
@@ -63,26 +63,26 @@
     --secondary: 290 85% 60%;
     --secondary-foreground: 260 0% 100%;
 
-    --muted: 260 20% 20%;
-    --muted-foreground: 260 15% 65%;
+    --muted: 260 20% 15%;
+    --muted-foreground: 260 15% 70%;
 
-    --accent: 260 20% 20%;
-    --accent-foreground: 260 15% 90%;
+    --accent: 260 20% 15%;
+    --accent-foreground: 260 15% 92%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 260 15% 90%;
+    --destructive: 0 62.8% 45%;
+    --destructive-foreground: 260 15% 92%;
 
-    --border: 260 20% 20%;
-    --input: 260 20% 20%;
+    --border: 260 20% 18%;
+    --input: 260 20% 18%;
     --ring: 258 74% 75%;
     
-    --sidebar-background: 240 5.9% 10%;
+    --sidebar-background: 240 5.9% 6%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent: 240 3.7% 12%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-border: 240 3.7% 12%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -100,6 +100,14 @@
   html {
     @apply scroll-smooth;
   }
+
+  /* Improved mobile touch targets */
+  @media (max-width: 768px) {
+    button, a[role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
 }
 
 @layer utilities {
@@ -112,10 +120,56 @@
   }
   
   .wordcraft-card {
-    @apply bg-white rounded-2xl shadow-lg shadow-wordcraft-purple/5 border border-wordcraft-soft-gray p-6;
+    @apply bg-card border border-border rounded-2xl shadow-lg p-4 sm:p-6 transition-colors;
   }
   
   .wordcraft-card-hover {
     @apply transition-all duration-300 hover:shadow-xl hover:shadow-wordcraft-purple/10 hover:-translate-y-1;
   }
+
+  /* Enhanced animations for mobile */
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+  
+  .animation-delay-1000 {
+    animation-delay: 1000ms;
+  }
+
+  /* Responsive text utilities */
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl;
+  }
+
+  /* Dark mode specific utilities */
+  .dark .shadow-wordcraft {
+    box-shadow: 0 10px 25px -5px rgba(155, 135, 245, 0.1), 0 10px 10px -5px rgba(155, 135, 245, 0.04);
+  }
+}
+
+/* Smooth transitions for theme switching */
+* {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
+  }
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  @apply outline-2 outline-offset-2 outline-wordcraft-purple;
 }

@@ -1,19 +1,27 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Menu, X } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
   return (
-    <header className="w-full py-4 px-6 flex items-center justify-between">
+    <header className="w-full py-4 px-4 sm:px-6 flex items-center justify-between border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="flex items-center">
         <Link to="/" className="flex items-center gap-2">
-          <span className="font-serif text-2xl font-bold text-gradient">WordCraft</span>
+          <span className="font-serif text-xl sm:text-2xl font-bold text-gradient">WordCraft</span>
         </Link>
       </div>
       
-      <nav className="hidden md:flex items-center gap-6">
+      {/* Desktop Navigation */}
+      <nav className="hidden lg:flex items-center gap-6">
         <Link to="/" className="text-foreground/80 hover:text-foreground transition-colors">
           Home
         </Link>
@@ -31,17 +39,86 @@ const Header: React.FC = () => {
         </Link>
       </nav>
       
-      <div className="flex items-center gap-3">
+      {/* Desktop Actions */}
+      <div className="hidden lg:flex items-center gap-3">
+        <ThemeToggle />
         <Link to="/login">
-          <Button variant="outline">Login</Button>
+          <Button variant="outline" size="sm">Login</Button>
         </Link>
         <Link to="/signup">
-          <Button className="bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90">
+          <Button size="sm" className="bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90">
             <Sparkles className="w-4 h-4 mr-2" />
             Sign Up
           </Button>
         </Link>
       </div>
+
+      {/* Mobile Menu Button */}
+      <div className="flex lg:hidden items-center gap-2">
+        <ThemeToggle />
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={toggleMenu}
+          className="w-9 h-9"
+        >
+          {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      {/* Mobile Navigation */}
+      {isMenuOpen && (
+        <div className="absolute top-full left-0 right-0 bg-background border-b border-border/40 lg:hidden">
+          <nav className="flex flex-col p-4 space-y-4">
+            <Link 
+              to="/" 
+              className="text-foreground/80 hover:text-foreground transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/bio-generator" 
+              className="text-foreground/80 hover:text-foreground transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Bio Generator
+            </Link>
+            <Link 
+              to="/cover-letter" 
+              className="text-foreground/80 hover:text-foreground transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Cover Letter
+            </Link>
+            <Link 
+              to="/dashboard" 
+              className="text-foreground/80 hover:text-foreground transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Dashboard
+            </Link>
+            <Link 
+              to="/pricing" 
+              className="text-foreground/80 hover:text-foreground transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Pricing
+            </Link>
+            <div className="flex flex-col gap-3 pt-4 border-t border-border/40">
+              <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                <Button variant="outline" className="w-full">Login</Button>
+              </Link>
+              <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                <Button className="w-full bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 };
