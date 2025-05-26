@@ -1,4 +1,3 @@
-
 import { toast } from "@/components/ui/use-toast";
 
 interface ParsedFile {
@@ -93,8 +92,17 @@ async function parsePDF(file: File): Promise<ParsedFile> {
   }
 }
 
+async function fallbackParseDOCX(file: File): Promise<string> {
+  const JSZip = await import('jszip');
+  const zip = await JSZip.default.loadAsync(file);
+  const xml = await zip.file("word/document.xml")?.async("string");
+  if (!xml) throw new Error("DOCX structure missing word/document.xml");
+  return xml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
 async function parseDOCX(file: File): Promise<ParsedFile> {
   try {
+    // First attempt: Use mammoth library
     const mammoth = await import('mammoth');
     const arrayBuffer = await file.arrayBuffer();
     
@@ -115,20 +123,36 @@ async function parseDOCX(file: File): Promise<ParsedFile> {
       }
     }
     
-    return { content: '', error: 'Document appears to be empty or corrupted. Please try saving as a new DOCX file or convert to PDF.' };
+    // If mammoth returns no content, try fallback method
+    console.log('Mammoth parsing returned no content, trying fallback method...');
+    const fallbackContent = await fallbackParseDOCX(file);
+    if (fallbackContent && fallbackContent.trim()) {
+      return { content: fallbackContent };
+    }
+    
+    return { content: '', error: 'This DOCX file couldn\'t be parsed. Try re-saving it in Word or upload a PDF version instead.' };
     
   } catch (error) {
-    console.error('DOCX parsing error:', error);
+    console.error('Mammoth parsing error:', error);
+    
+    // Try fallback method if mammoth fails
+    try {
+      console.log('Mammoth failed, trying fallback JSZip method...');
+      const fallbackContent = await fallbackParseDOCX(file);
+      if (fallbackContent && fallbackContent.trim()) {
+        return { content: fallbackContent };
+      }
+    } catch (fallbackError) {
+      console.error('Fallback parsing also failed:', fallbackError);
+    }
     
     // Provide specific error messages for common issues
-    let errorMessage = 'Failed to parse document';
+    let errorMessage = 'This DOCX file couldn\'t be parsed. Try re-saving it in Word or upload a PDF version instead.';
     
     if ((error as Error).message.includes('body element')) {
       errorMessage = 'Document format not recognized. Please save as a standard DOCX file or try converting to PDF.';
     } else if ((error as Error).message.includes('zip')) {
       errorMessage = 'Document appears to be corrupted. Please try re-saving the document.';
-    } else {
-      errorMessage = `Document parsing failed: ${(error as Error).message}. Try converting to PDF format.`;
     }
     
     return { content: '', error: errorMessage };
