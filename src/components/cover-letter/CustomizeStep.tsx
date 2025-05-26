@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sparkles, AlertCircle } from 'lucide-react';
 
@@ -41,6 +43,10 @@ const CustomizeStep: React.FC<CustomizeStepProps> = ({
   handleGenerate,
   canGenerate
 }) => {
+  const handleToneChange = (value: string) => {
+    setFormData(prev => ({ ...prev, tone: value }));
+  };
+
   return (
     <div className="animate-fade-in">
       <h3 className="text-lg font-medium mb-4">Customize Your Cover Letter</h3>
@@ -60,38 +66,42 @@ const CustomizeStep: React.FC<CustomizeStepProps> = ({
         
         <div>
           <Label className="mb-3 block">Tone *</Label>
-          <div className="flex flex-wrap gap-3">
-            {toneOptions.map((option) => (
-              <Tooltip key={option.value}>
-                <TooltipTrigger asChild>
-                  <label
-                    className={`px-4 py-2 rounded-full border cursor-pointer hover:bg-muted transition-colors ${
-                      formData.tone === option.value ? 'bg-makemybio-purple text-white' : 'bg-background'
-                    } ${isFieldDisabled('tone') ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <input
-                      type="radio"
-                      name="tone"
-                      value={option.value}
-                      checked={formData.tone === option.value}
-                      onChange={() => setFormData(prev => ({ ...prev, tone: option.value }))}
-                      className="sr-only"
-                      disabled={isFieldDisabled('tone')}
-                    />
-                    {option.label}
-                  </label>
-                </TooltipTrigger>
-                {getTooltipContent('tone') && (
-                  <TooltipContent>
-                    <div className="flex items-center">
-                      <AlertCircle className="w-4 h-4 mr-1" />
-                      {getTooltipContent('tone')}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <RadioGroup 
+                  value={formData.tone} 
+                  onValueChange={handleToneChange}
+                  disabled={isFieldDisabled('tone')}
+                  className="flex flex-wrap gap-4"
+                >
+                  {toneOptions.map((option) => (
+                    <div key={option.value} className="flex items-center">
+                      <RadioGroupItem 
+                        value={option.value} 
+                        id={`tone-${option.value}`} 
+                        className="peer sr-only" 
+                      />
+                      <Label
+                        htmlFor={`tone-${option.value}`}
+                        className="px-4 py-2 rounded-full border cursor-pointer bg-background hover:bg-muted peer-data-[state=checked]:bg-makemybio-purple peer-data-[state=checked]:text-white transition-colors"
+                      >
+                        {option.label}
+                      </Label>
                     </div>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-            ))}
-          </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            </TooltipTrigger>
+            {getTooltipContent('tone') && (
+              <TooltipContent>
+                <div className="flex items-center">
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {getTooltipContent('tone')}
+                </div>
+              </TooltipContent>
+            )}
+          </Tooltip>
           {validationErrors.tone && (
             <p className="text-sm text-red-600 mt-1">{validationErrors.tone}</p>
           )}
