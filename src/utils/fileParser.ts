@@ -44,7 +44,14 @@ export async function parseFile(file: File): Promise<ParsedFile> {
         return { content: '', error: errorMessage };
     }
   } catch (error) {
-    return { content: '', error: `Failed to parse file: ${(error as Error).message}` };
+    console.error('File parsing error:', error);
+    const errorMessage = `Failed to parse file: ${(error as Error).message}`;
+    toast({
+      title: "File parsing error",
+      description: "There was an issue parsing your file. Please try a different file or format.",
+      variant: "destructive",
+    });
+    return { content: '', error: errorMessage };
   }
 }
 
@@ -75,10 +82,14 @@ async function parsePDF(file: File): Promise<ParsedFile> {
       fullText += pageText + '\n';
     }
     
+    if (!fullText.trim()) {
+      return { content: '', error: 'PDF appears to be empty or contains only images. Please use a text-based PDF.' };
+    }
+    
     return { content: fullText.trim() };
   } catch (error) {
     console.error('PDF parsing error:', error);
-    return { content: '', error: `Failed to parse PDF: ${(error as Error).message}` };
+    return { content: '', error: `Failed to parse PDF: ${(error as Error).message}. Please ensure the PDF is not password protected and contains readable text.` };
   }
 }
 
@@ -86,10 +97,40 @@ async function parseDOCX(file: File): Promise<ParsedFile> {
   try {
     const mammoth = await import('mammoth');
     const arrayBuffer = await file.arrayBuffer();
+    
+    // First try to extract raw text
     const result = await mammoth.extractRawText({ arrayBuffer });
-    return { content: result.value };
+    
+    if (result.value && result.value.trim()) {
+      return { content: result.value.trim() };
+    }
+    
+    // If raw text extraction fails or returns empty, try HTML extraction
+    const htmlResult = await mammoth.convertToHtml({ arrayBuffer });
+    if (htmlResult.value) {
+      // Strip HTML tags to get plain text
+      const textContent = htmlResult.value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (textContent) {
+        return { content: textContent };
+      }
+    }
+    
+    return { content: '', error: 'Document appears to be empty or corrupted. Please try saving as a new DOCX file or convert to PDF.' };
+    
   } catch (error) {
     console.error('DOCX parsing error:', error);
-    return { content: '', error: `Failed to parse DOCX: ${(error as Error).message}` };
+    
+    // Provide specific error messages for common issues
+    let errorMessage = 'Failed to parse document';
+    
+    if ((error as Error).message.includes('body element')) {
+      errorMessage = 'Document format not recognized. Please save as a standard DOCX file or try converting to PDF.';
+    } else if ((error as Error).message.includes('zip')) {
+      errorMessage = 'Document appears to be corrupted. Please try re-saving the document.';
+    } else {
+      errorMessage = `Document parsing failed: ${(error as Error).message}. Try converting to PDF format.`;
+    }
+    
+    return { content: '', error: errorMessage };
   }
 }
