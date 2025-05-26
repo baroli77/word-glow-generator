@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -221,32 +220,6 @@ const Dashboard = () => {
                     "The best way to predict your future is to create it."
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">— Abraham Lincoln</p>
-                </div>
-              </div>
-              
-              <div className="wordcraft-card mt-8">
-                <div className="flex items-center mb-4">
-                  <Award className="h-5 w-5 text-wordcraft-purple mr-2" />
-                  <h3 className="font-medium">Achievements</h3>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-3">
-                  {bioUsageCount > 0 && (
-                    <div className="border rounded-md p-2 flex flex-col items-center justify-center text-center">
-                      <PieChart className="h-6 w-6 text-wordcraft-purple mb-1" />
-                      <span className="text-xs">First Bio</span>
-                    </div>
-                  )}
-                  {coverLetterUsageCount > 0 && (
-                    <div className="border rounded-md p-2 flex flex-col items-center justify-center text-center">
-                      <FileText className="h-6 w-6 text-wordcraft-purple mb-1" />
-                      <span className="text-xs">First Letter</span>
-                    </div>
-                  )}
-                  <div className="border border-dashed rounded-md p-2 flex flex-col items-center justify-center text-center text-muted-foreground">
-                    <Plus className="h-6 w-6 mb-1" />
-                    <span className="text-xs">Keep using WordCraft!</span>
-                  </div>
                 </div>
               </div>
             </div>
