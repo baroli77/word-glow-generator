@@ -1,63 +1,85 @@
 
 import React from 'react';
-import { Sparkles, FileText, PenLine, LayoutDashboard, Clock, Award } from 'lucide-react';
+import { Sparkles, Zap, Shield, Target } from 'lucide-react';
 
 const features = [
   {
-    icon: <Sparkles className="h-6 w-6 text-wordcraft-purple" />,
-    title: "Bio Generator",
-    description: "Create professional, personal, or social media bios with emotional intelligence that truly represent you."
+    icon: <Sparkles className="h-8 w-8 text-wordcraft-purple" />,
+    title: "AI-Powered Generation",
+    description: "Advanced AI creates personalized, authentic content that reflects your unique professional voice and achievements."
   },
   {
-    icon: <FileText className="h-6 w-6 text-wordcraft-purple" />,
-    title: "Cover Letter Creator",
-    description: "Generate customized cover letters that highlight your strengths and stand out to employers."
+    icon: <Zap className="h-8 w-8 text-wordcraft-pink" />,
+    title: "Lightning Fast",
+    description: "Generate professional bios and cover letters in under 30 seconds. No more staring at blank pages."
   },
   {
-    icon: <PenLine className="h-6 w-6 text-wordcraft-purple" />,
-    title: "Tone Adjustment",
-    description: "Adjust the tone of your writing from professional to casual, enthusiastic to reflective."
+    icon: <Target className="h-8 w-8 text-wordcraft-purple" />,
+    title: "Industry Specific",
+    description: "Tailored templates and language for different industries, roles, and professional contexts."
   },
   {
-    icon: <LayoutDashboard className="h-6 w-6 text-wordcraft-purple" />,
-    title: "Personal Dashboard",
-    description: "Save and organize all your generated content in one convenient place."
-  },
-  {
-    icon: <Clock className="h-6 w-6 text-wordcraft-purple" />,
-    title: "Time-Saving",
-    description: "Create compelling written content in minutes instead of hours."
-  },
-  {
-    icon: <Award className="h-6 w-6 text-wordcraft-purple" />,
-    title: "Premium Templates",
-    description: "Access industry-specific templates designed to help you stand out."
+    icon: <Shield className="h-8 w-8 text-wordcraft-pink" />,
+    title: "Professional Quality",
+    description: "Enterprise-grade AI ensures your content is polished, error-free, and ready for any professional setting."
   }
 ];
 
 const Features: React.FC = () => {
   return (
-    <section className="py-16 md:py-24 px-6 bg-accent/50">
-      <div className="container mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-            Features that make writing <span className="text-gradient">effortless</span>
+    <section className="py-20 px-6 bg-gradient-to-b from-background to-accent/30">
+      <div className="container mx-auto max-w-6xl">
+        {/* Header */}
+        <div className="text-center mb-16 space-y-4">
+          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+            Why choose <span className="text-gradient">WordCraft</span>?
           </h2>
-          <p className="text-muted-foreground md:text-lg max-w-2xl mx-auto">
-            WordCraft combines AI technology with emotional intelligence to help you create authentic, engaging content.
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Powerful features designed to help you create compelling content that gets results.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           {features.map((feature, index) => (
-            <div key={index} className="wordcraft-card wordcraft-card-hover animate-enter" style={{ animationDelay: `${index * 100}ms` }}>
-              <div className="h-12 w-12 rounded-lg bg-wordcraft-purple/10 flex items-center justify-center mb-6">
+            <div 
+              key={index} 
+              className="group bg-card border border-border rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 animate-enter"
+              style={{ animationDelay: `${index * 150}ms` }}
+            >
+              {/* Icon container */}
+              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-wordcraft-purple/10 to-wordcraft-pink/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 {feature.icon}
               </div>
-              <h3 className="font-semibold text-xl mb-3">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.description}</p>
+              
+              {/* Content */}
+              <h3 className="font-bold text-xl mb-4 text-foreground group-hover:text-wordcraft-purple transition-colors">
+                {feature.title}
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {feature.description}
+              </p>
             </div>
           ))}
+        </div>
+        
+        {/* Bottom CTA */}
+        <div className="text-center mt-16">
+          <p className="text-muted-foreground mb-6">
+            Ready to see the difference AI can make?
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/bio-generator" className="inline-block">
+              <button className="bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90 text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
+                Try Bio Generator
+              </button>
+            </a>
+            <a href="/cover-letter" className="inline-block">
+              <button className="border-2 border-border hover:bg-accent text-foreground px-8 py-4 rounded-xl font-semibold transition-all duration-300">
+                Try Cover Letters
+              </button>
+            </a>
+          </div>
         </div>
       </div>
     </section>
