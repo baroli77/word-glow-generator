@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,26 +29,82 @@ const ResultStep: React.FC<ResultStepProps> = ({
     if (!hasValidContent) return;
     
     try {
-      const blob = new Blob([generatedLetter], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `cover-letter-${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // Create a new window for PDF generation
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Could not open print window');
+      }
+
+      // Generate HTML content for PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Cover Letter</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 40px 20px;
+                color: #333;
+              }
+              .cover-letter {
+                white-space: pre-wrap;
+                font-size: 12pt;
+              }
+              @media print {
+                body { margin: 0; padding: 20px; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="cover-letter">${generatedLetter.replace(/\n/g, '<br>')}</div>
+          </body>
+        </html>
+      `;
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Wait for content to load, then trigger print
+      printWindow.onload = () => {
+        printWindow.print();
+        printWindow.onafterprint = () => {
+          printWindow.close();
+        };
+      };
       
       toast({
-        title: "Downloaded Successfully",
-        description: "Your cover letter has been downloaded.",
+        title: "PDF Download Ready",
+        description: "Your cover letter is ready to download as PDF. Please use the print dialog to save as PDF.",
       });
     } catch (error) {
-      toast({
-        title: "Download Failed",
-        description: "Could not download the cover letter. Please try copying the text instead.",
-        variant: "destructive",
-      });
+      console.error('PDF generation error:', error);
+      // Fallback to text download
+      try {
+        const blob = new Blob([generatedLetter], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cover-letter-${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        toast({
+          title: "Downloaded as Text",
+          description: "PDF generation failed, downloaded as text file instead.",
+        });
+      } catch (fallbackError) {
+        toast({
+          title: "Download Failed",
+          description: "Could not download the cover letter. Please try copying the text instead.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -90,7 +145,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
             </Button>
             <Button variant="outline" onClick={handleDownload} disabled={!hasValidContent}>
               <Download className="w-4 h-4 mr-2" />
-              Download
+              Download PDF
             </Button>
           </div>
           
