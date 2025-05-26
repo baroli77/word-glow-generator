@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -293,6 +292,7 @@ const BioGeneratorForm: React.FC = () => {
                 customCharCount={formData.customCharCount}
                 loading={loading}
                 onRegenerate={handleRegenerate}
+                formData={formData}
               />
             </TabsContent>
             
@@ -305,14 +305,6 @@ const BioGeneratorForm: React.FC = () => {
               />
             </TabsContent>
           </Tabs>
-          
-          <div className="mt-8 pt-6 border-t">
-            <h4 className="font-medium mb-4">Save this bio</h4>
-            <div className="flex items-center gap-4">
-              <Input placeholder="Give this bio a name (e.g. LinkedIn Professional)" />
-              <Button>Save</Button>
-            </div>
-          </div>
           
           <div className="pt-8 flex justify-between">
             <Button variant="outline" onClick={() => setStep(3)}>

@@ -1,9 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Copy, Download, Sparkles } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { Copy, Download, Sparkles, Save } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import { saveBio } from "@/services/supabaseService";
 
 interface BioPreviewProps {
   bio: string;
@@ -11,6 +13,7 @@ interface BioPreviewProps {
   customCharCount: number;
   loading: boolean;
   onRegenerate: () => void;
+  formData?: any;
 }
 
 const BioPreview: React.FC<BioPreviewProps> = ({
@@ -18,8 +21,12 @@ const BioPreview: React.FC<BioPreviewProps> = ({
   charLimit,
   customCharCount,
   loading,
-  onRegenerate
+  onRegenerate,
+  formData
 }) => {
+  const [bioName, setBioName] = useState('');
+  const [saving, setSaving] = useState(false);
+
   const handleCopy = () => {
     if (!bio) return;
     
@@ -49,6 +56,39 @@ const BioPreview: React.FC<BioPreviewProps> = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleSave = async () => {
+    if (!bio || !bioName.trim()) {
+      toast({
+        title: "Please provide a name",
+        description: "Give your bio a name before saving.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSaving(true);
+    
+    try {
+      const platform = formData?.platform || 'general';
+      const success = await saveBio(platform, bio, {
+        ...formData,
+        bioName: bioName.trim()
+      });
+      
+      if (success) {
+        setBioName(''); // Clear the input after successful save
+        toast({
+          title: "Bio saved successfully",
+          description: "Your bio has been saved and can be found in your dashboard."
+        });
+      }
+    } catch (error) {
+      console.error('Error saving bio:', error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const isOverLimit = charLimit && customCharCount > 0 && bio.length > customCharCount;
@@ -85,6 +125,31 @@ const BioPreview: React.FC<BioPreviewProps> = ({
           <Download className="w-4 h-4 mr-2" />
           Download
         </Button>
+      </div>
+
+      <div className="mt-8 bg-muted/50 border border-border rounded-lg p-4">
+        <h4 className="font-medium mb-4">Save this bio</h4>
+        <div className="flex items-center gap-4">
+          <Input 
+            placeholder="Give this bio a name (e.g. LinkedIn Professional)" 
+            value={bioName}
+            onChange={(e) => setBioName(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={handleSave} disabled={saving || !bio || !bioName.trim()}>
+            {saving ? (
+              <div className="flex items-center">
+                <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-2"></div>
+                Saving...
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <Save className="w-4 h-4 mr-2" />
+                Save
+              </div>
+            )}
+          </Button>
+        </div>
       </div>
       
       <div className="mt-8 text-center">
