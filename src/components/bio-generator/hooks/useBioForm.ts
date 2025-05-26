@@ -27,7 +27,7 @@ export const useBioForm = () => {
     
     const baseData: Partial<BioFormData> = {
       name: formData.name,
-      profession: config.requiresProfession ? formData.profession : 'Content Creator',
+      profession: config.requiresProfession ? formData.profession : '',
       tone: formData.tone,
       charLimit: formData.charLimit,
       customCharCount: formData.customCharCount || config.defaultCharLimit,

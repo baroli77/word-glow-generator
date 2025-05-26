@@ -66,11 +66,12 @@ Be clever, human, and memorable.`;
   }
 
   private extractQuirk(): string {
-    if ('interests' in this.formData && this.formData.interests) {
-      return this.formData.interests;
-    }
+    // Prioritize fun facts if available
     if ('funFacts' in this.formData && this.formData.funFacts) {
       return this.formData.funFacts;
+    }
+    if ('interests' in this.formData && this.formData.interests) {
+      return this.formData.interests;
     }
     if ('achievements' in this.formData && this.formData.achievements) {
       return this.formData.achievements;
