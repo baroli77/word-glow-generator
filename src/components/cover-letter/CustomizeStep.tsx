@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sparkles, AlertCircle } from 'lucide-react';
 
@@ -43,7 +44,9 @@ const CustomizeStep: React.FC<CustomizeStepProps> = ({
   canGenerate
 }) => {
   const handleToneChange = (value: string) => {
-    setFormData(prev => ({ ...prev, tone: value }));
+    if (value) {
+      setFormData(prev => ({ ...prev, tone: value }));
+    }
   };
 
   return (
@@ -68,27 +71,23 @@ const CustomizeStep: React.FC<CustomizeStepProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <div>
-                <RadioGroup 
+                <ToggleGroup 
+                  type="single"
                   value={formData.tone} 
                   onValueChange={handleToneChange}
                   disabled={isFieldDisabled('tone')}
-                  className="flex flex-wrap gap-4"
+                  className="flex flex-wrap gap-2"
                 >
                   {toneOptions.map((option) => (
-                    <div key={option.value} className="flex items-center space-x-2">
-                      <RadioGroupItem 
-                        value={option.value} 
-                        id={`tone-${option.value}`}
-                      />
-                      <Label
-                        htmlFor={`tone-${option.value}`}
-                        className="cursor-pointer"
-                      >
-                        {option.label}
-                      </Label>
-                    </div>
+                    <ToggleGroupItem 
+                      key={option.value}
+                      value={option.value}
+                      className="px-4 py-2 rounded-full border border-input bg-background hover:bg-accent hover:text-accent-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground transition-colors"
+                    >
+                      {option.label}
+                    </ToggleGroupItem>
                   ))}
-                </RadioGroup>
+                </ToggleGroup>
               </div>
             </TooltipTrigger>
             {getTooltipContent('tone') && (
