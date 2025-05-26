@@ -107,6 +107,7 @@ const CoverLetterForm: React.FC = () => {
             handleRegenerate={handleRegenerate}
             setGeneratedLetter={setGeneratedLetter}
             setStep={setStep}
+            formData={formData}
           />
         )}
 

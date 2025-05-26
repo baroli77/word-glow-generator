@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -5,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Copy, Download, Sparkles, Save } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
+import { saveCoverLetter } from '@/services/supabaseService';
+import { useAuth } from '@/context/AuthContext';
 
 interface ResultStepProps {
   generatedLetter: string;
@@ -13,6 +16,12 @@ interface ResultStepProps {
   handleRegenerate: () => void;
   setGeneratedLetter: (value: string) => void;
   setStep: (step: number) => void;
+  formData?: {
+    jobTitle: string;
+    companyName: string;
+    additionalInfo?: string;
+    tone: string;
+  };
 }
 
 const ResultStep: React.FC<ResultStepProps> = ({
@@ -21,9 +30,36 @@ const ResultStep: React.FC<ResultStepProps> = ({
   handleCopy,
   handleRegenerate,
   setGeneratedLetter,
-  setStep
+  setStep,
+  formData
 }) => {
+  const { user } = useAuth();
   const hasValidContent = generatedLetter && typeof generatedLetter === 'string' && generatedLetter.trim().length > 0;
+
+  const handleSave = async () => {
+    if (!hasValidContent || !formData || !user) {
+      toast({
+        title: "Cannot Save",
+        description: "Please ensure you're logged in and have a valid cover letter to save.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const success = await saveCoverLetter(
+      formData.jobTitle,
+      formData.companyName,
+      generatedLetter,
+      formData
+    );
+
+    if (success) {
+      toast({
+        title: "Cover Letter Saved",
+        description: "Your cover letter has been saved to your dashboard.",
+      });
+    }
+  };
 
   const handleDownload = () => {
     if (!hasValidContent) return;
@@ -146,6 +182,10 @@ const ResultStep: React.FC<ResultStepProps> = ({
             <Button variant="outline" onClick={handleDownload} disabled={!hasValidContent}>
               <Download className="w-4 h-4 mr-2" />
               Download PDF
+            </Button>
+            <Button variant="outline" onClick={handleSave} disabled={!hasValidContent || !user}>
+              <Save className="w-4 h-4 mr-2" />
+              Save to Dashboard
             </Button>
           </div>
           
