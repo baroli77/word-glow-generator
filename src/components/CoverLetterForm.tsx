@@ -80,7 +80,7 @@ const CoverLetterForm: React.FC = () => {
             handleFileChange={handleFileChange}
             handleChange={handleChange}
             handleNext={handleNext}
-            canProceedToStep2={canProceedToStep2}
+            canProceedToStep2={() => !!parsedCV && parsedCV.trim().length > 50}
           />
         )}
         
@@ -95,7 +95,7 @@ const CoverLetterForm: React.FC = () => {
             setFormData={setFormData}
             handleBack={handleBack}
             handleGenerate={handleGenerate}
-            canGenerate={canGenerate}
+            canGenerate={() => !!user}
           />
         )}
         
