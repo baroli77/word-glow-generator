@@ -62,14 +62,27 @@ const CoverLetterForm: React.FC = () => {
           // Toast is already shown in parseFile function
           setFileName(null);
           setParsedCV('');
-        } else {
-          setParsedCV(result.content);
+          console.error('CV parsing failed:', result.error);
+        } else if (result.content && result.content.trim()) {
+          // Ensure we store only the content string
+          setParsedCV(result.content.trim());
+          console.log('CV parsed successfully, content length:', result.content.trim().length);
           toast({
             title: "CV Uploaded Successfully",
             description: `${file.name} was parsed and is ready to use.`,
           });
+        } else {
+          // Handle case where content is empty
+          setFileName(null);
+          setParsedCV('');
+          toast({
+            title: "CV Parsing Failed",
+            description: "The file appears to be empty or couldn't be read properly.",
+            variant: "destructive",
+          });
         }
       } catch (error) {
+        console.error('File upload error:', error);
         toast({
           title: "Upload Error",
           description: "Failed to process the file. Please try again.",
@@ -94,7 +107,7 @@ const CoverLetterForm: React.FC = () => {
       errors.companyName = 'Company name is required';
     }
     
-    if (!fileName || !parsedCV) {
+    if (!fileName || !parsedCV || !parsedCV.trim()) {
       errors.cv = 'Please upload and parse a CV file';
     }
     
@@ -134,7 +147,7 @@ const CoverLetterForm: React.FC = () => {
     if (step === 1) {
       // Validate step 1 fields
       const stepErrors: Record<string, string> = {};
-      if (!fileName || !parsedCV) stepErrors.cv = 'Please upload and parse a CV file';
+      if (!fileName || !parsedCV || !parsedCV.trim()) stepErrors.cv = 'Please upload and parse a CV file';
       if (!formData.jobTitle.trim()) stepErrors.jobTitle = 'Job title is required';
       if (!formData.companyName.trim()) stepErrors.companyName = 'Company name is required';
       
@@ -156,6 +169,16 @@ const CoverLetterForm: React.FC = () => {
       return;
     }
 
+    // Additional check for parsedCV content
+    if (!parsedCV || !parsedCV.trim()) {
+      toast({
+        title: "CV Required",
+        description: "Please upload your CV before generating a cover letter.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const hasAccess = await checkAccess();
     if (!hasAccess) {
       return;
@@ -164,6 +187,7 @@ const CoverLetterForm: React.FC = () => {
     setLoading(true);
     
     try {
+      console.log('Generating cover letter with CV content length:', parsedCV.length);
       const response = await generateCoverLetter(formData, parsedCV);
       
       if (response.error) {
@@ -251,7 +275,7 @@ const CoverLetterForm: React.FC = () => {
   };
 
   const canProceedToStep2 = () => {
-    return fileName && parsedCV && formData.jobTitle.trim() && formData.companyName.trim();
+    return fileName && parsedCV && parsedCV.trim() && formData.jobTitle.trim() && formData.companyName.trim();
   };
 
   const canGenerate = () => {
