@@ -222,6 +222,35 @@ export async function saveCoverLetter(jobTitle: string, companyName: string, con
       return false;
     }
 
+    // First, ensure the user profile exists
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profileError || !profile) {
+      // Create the profile if it doesn't exist
+      const { error: createProfileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: session.user.id,
+          email: session.user.email || '',
+          full_name: session.user.user_metadata?.full_name || null
+        });
+
+      if (createProfileError) {
+        console.error('Error creating profile:', createProfileError);
+        toast({
+          title: "Profile Error",
+          description: "Unable to create user profile. Please try again.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    }
+
+    // Now save the cover letter
     const { error } = await supabase
       .from('cover_letters')
       .insert({
@@ -232,7 +261,10 @@ export async function saveCoverLetter(jobTitle: string, companyName: string, con
         user_id: session.user.id
       });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error saving cover letter:', error);
+      throw error;
+    }
     
     toast({
       title: "Cover letter saved",
@@ -241,9 +273,10 @@ export async function saveCoverLetter(jobTitle: string, companyName: string, con
     
     return true;
   } catch (error) {
+    console.error('saveCoverLetter error:', error);
     toast({
       title: "Error saving cover letter",
-      description: error.message,
+      description: "Failed to save cover letter. Please try again.",
       variant: "destructive"
     });
     return false;
