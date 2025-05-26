@@ -59,12 +59,17 @@ const CoverLetterForm: React.FC = () => {
         const result = await parseFile(file);
         
         if (result.error) {
-          // Toast is already shown in parseFile function
-          setFileName(null);
+          // Keep the filename but clear the parsed content
           setParsedCV('');
           console.error('CV parsing failed:', result.error);
+          // Don't clear fileName here - let user see what file they tried to upload
+          toast({
+            title: "CV Parsing Failed",
+            description: `${result.error} The file "${file.name}" couldn't be processed.`,
+            variant: "destructive",
+          });
         } else if (result.content && result.content.trim()) {
-          // Ensure we store only the content string
+          // Successfully parsed
           setParsedCV(result.content.trim());
           console.log('CV parsed successfully, content length:', result.content.trim().length);
           toast({
@@ -73,11 +78,10 @@ const CoverLetterForm: React.FC = () => {
           });
         } else {
           // Handle case where content is empty
-          setFileName(null);
           setParsedCV('');
           toast({
             title: "CV Parsing Failed",
-            description: "The file appears to be empty or couldn't be read properly.",
+            description: `The file "${file.name}" appears to be empty or couldn't be read properly.`,
             variant: "destructive",
           });
         }
@@ -85,10 +89,9 @@ const CoverLetterForm: React.FC = () => {
         console.error('File upload error:', error);
         toast({
           title: "Upload Error",
-          description: "Failed to process the file. Please try again.",
+          description: `Failed to process "${file.name}". Please try again.`,
           variant: "destructive",
         });
-        setFileName(null);
         setParsedCV('');
       } finally {
         setParsingFile(false);
@@ -336,13 +339,20 @@ const CoverLetterForm: React.FC = () => {
                           {parsingFile ? (
                             <>
                               <div className="animate-spin h-6 w-6 border-2 border-makemybio-purple border-t-transparent rounded-full mb-2"></div>
-                              <p className="text-sm text-muted-foreground">Parsing file...</p>
+                              <p className="text-sm text-muted-foreground">Parsing {fileName}...</p>
                             </>
                           ) : fileName ? (
                             <>
                               <FileText className="w-8 h-8 mb-2 text-makemybio-purple" />
                               <p className="text-sm text-muted-foreground">{fileName}</p>
-                              <p className="text-xs text-green-600">✓ Parsed successfully</p>
+                              {parsedCV && parsedCV.trim() ? (
+                                <p className="text-xs text-green-600">✓ Parsed successfully</p>
+                              ) : (
+                                <div className="text-center">
+                                  <p className="text-xs text-red-600">✗ Parsing failed</p>
+                                  <p className="text-xs text-muted-foreground mt-1">Try a different format (PDF recommended)</p>
+                                </div>
+                              )}
                             </>
                           ) : (
                             <>
