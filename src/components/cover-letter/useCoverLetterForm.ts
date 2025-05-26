@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { generateCoverLetter } from '../../services/coverLetterService';
@@ -47,14 +47,9 @@ export const useCoverLetterForm = () => {
       try {
         const result = await parseFile(file);
         
-        if (result.error) {
+        if (result.error || !result.content) {
           setParsedCV('');
           console.error('CV parsing failed:', result.error);
-          toast({
-            title: "CV Parsing Failed",
-            description: `${result.error} The file "${file.name}" couldn't be processed.`,
-            variant: "destructive",
-          });
         } else if (result.content && result.content.trim()) {
           setParsedCV(result.content.trim());
           console.log('CV parsed successfully, content length:', result.content.trim().length);
@@ -175,25 +170,11 @@ export const useCoverLetterForm = () => {
       console.log('Generating cover letter with CV content length:', parsedCV.length);
       const response = await generateCoverLetter(formData, parsedCV);
       
-      if (response.error) {
-        toast({
-          title: "Generation failed",
-          description: response.error,
-          variant: "destructive",
-        });
-        return;
+      if (response.error || !response.content) {
+        return; // Error handling is done in generateCoverLetter
       }
       
-      if (!response.content || typeof response.content !== 'string' || !response.content.trim()) {
-        toast({
-          title: "Generation failed",
-          description: "No content was returned. Try again or upload a different file.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      setGeneratedLetter(response.content.trim());
+      setGeneratedLetter(response.content);
       await recordUsage('cover_letter');
       setStep(3);
     } catch (error) {
@@ -219,25 +200,11 @@ export const useCoverLetterForm = () => {
     try {
       const response = await generateCoverLetter(formData, parsedCV);
       
-      if (response.error) {
-        toast({
-          title: "Regeneration failed",
-          description: response.error,
-          variant: "destructive",
-        });
-        return;
+      if (response.error || !response.content) {
+        return; // Error handling is done in generateCoverLetter
       }
       
-      if (!response.content || typeof response.content !== 'string' || !response.content.trim()) {
-        toast({
-          title: "Regeneration failed",
-          description: "No content was returned. Try again or upload a different file.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      setGeneratedLetter(response.content.trim());
+      setGeneratedLetter(response.content);
       await recordUsage('cover_letter');
     } catch (error) {
       console.error("Error regenerating cover letter:", error);
@@ -252,11 +219,13 @@ export const useCoverLetterForm = () => {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(generatedLetter);
-    toast({
-      title: "Copied to clipboard",
-      description: "Your cover letter has been copied to clipboard."
-    });
+    if (generatedLetter && typeof generatedLetter === 'string') {
+      navigator.clipboard.writeText(generatedLetter);
+      toast({
+        title: "Copied to clipboard",
+        description: "Your cover letter has been copied to clipboard."
+      });
+    }
   };
 
   const isFieldDisabled = (field: string) => {

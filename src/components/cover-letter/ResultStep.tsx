@@ -23,6 +23,8 @@ const ResultStep: React.FC<ResultStepProps> = ({
   setGeneratedLetter,
   setStep
 }) => {
+  const hasValidContent = generatedLetter && typeof generatedLetter === 'string' && generatedLetter.trim().length > 0;
+
   return (
     <div className="animate-fade-in">
       <h3 className="text-lg font-medium mb-4">Your Generated Cover Letter</h3>
@@ -36,7 +38,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
         <TabsContent value="preview">
           <Card>
             <CardContent className="p-6 bg-white rounded-md shadow-sm">
-              {generatedLetter && typeof generatedLetter === 'string' && generatedLetter.trim() ? (
+              {hasValidContent ? (
                 <div className="whitespace-pre-wrap font-sans">{generatedLetter}</div>
               ) : (
                 <div className="text-muted-foreground text-center py-8">
@@ -47,11 +49,11 @@ const ResultStep: React.FC<ResultStepProps> = ({
           </Card>
           
           <div className="mt-6 flex flex-wrap gap-4">
-            <Button onClick={handleCopy} disabled={!generatedLetter || !generatedLetter.trim()}>
+            <Button onClick={handleCopy} disabled={!hasValidContent}>
               <Copy className="w-4 h-4 mr-2" />
               Copy to Clipboard
             </Button>
-            <Button variant="outline" disabled={!generatedLetter || !generatedLetter.trim()}>
+            <Button variant="outline" disabled={!hasValidContent}>
               <Download className="w-4 h-4 mr-2" />
               Download
             </Button>
@@ -80,7 +82,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
         </TabsContent>
         
         <TabsContent value="edit">
-          {generatedLetter && typeof generatedLetter === 'string' && generatedLetter.trim() ? (
+          {hasValidContent ? (
             <>
               <Textarea
                 value={generatedLetter}

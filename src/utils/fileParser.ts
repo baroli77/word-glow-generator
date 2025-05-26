@@ -1,6 +1,6 @@
 
-import { toast } from "@/components/ui/use-toast";
-import JSZip from 'jszip';
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ParsedFile {
   content: string;
@@ -24,26 +24,79 @@ export async function parseFile(file: File): Promise<ParsedFile> {
   try {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     
-    switch (fileExtension) {
-      case 'txt':
-        return { content: await file.text() };
-      
-      case 'pdf':
-        return await parsePDF(file);
-      
-      case 'docx':
-      case 'doc':
-        return await parseDOCX(file);
-      
-      default:
-        const errorMessage = 'Unsupported file format';
-        toast({
-          title: "Unsupported file format",
-          description: "Please upload a PDF, DOCX, DOC, or TXT file.",
-          variant: "destructive",
-        });
-        return { content: '', error: errorMessage };
+    if (!['txt', 'pdf', 'docx', 'doc'].includes(fileExtension || '')) {
+      const errorMessage = 'Unsupported file format';
+      toast({
+        title: "Unsupported file format",
+        description: "Please upload a PDF, DOCX, DOC, or TXT file.",
+        variant: "destructive",
+      });
+      return { content: '', error: errorMessage };
     }
+
+    // Convert file to base64
+    const base64Data = await fileToBase64(file);
+    
+    console.log('Sending file to parse-cv Edge Function...');
+    
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      const errorMessage = 'Authentication required';
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to parse CV files.",
+        variant: "destructive",
+      });
+      return { content: '', error: errorMessage };
+    }
+
+    // Call the Supabase Edge Function
+    const response = await fetch(`https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/parse-cv`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({
+        fileData: base64Data,
+        fileName: file.name,
+        fileType: file.type
+      })
+    });
+
+    console.log('Parse CV Edge Function response status:', response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Parse CV Edge Function error:', errorData);
+      const errorMessage = errorData.error || "Failed to parse CV file";
+      
+      toast({
+        title: "CV Parsing Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
+      return { content: '', error: errorMessage };
+    }
+
+    const data = await response.json();
+    console.log('Successfully parsed CV, content length:', data.content?.length || 0);
+    
+    if (!data.content || typeof data.content !== 'string' || data.content.trim().length === 0) {
+      const errorMessage = "No readable text found in the file";
+      toast({
+        title: "CV Parsing Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return { content: '', error: errorMessage };
+    }
+
+    return { content: data.content.trim() };
+
   } catch (error) {
     console.error('File parsing error:', error);
     const errorMessage = `Failed to parse file: ${(error as Error).message}`;
@@ -56,98 +109,16 @@ export async function parseFile(file: File): Promise<ParsedFile> {
   }
 }
 
-async function parsePDF(file: File): Promise<ParsedFile> {
-  try {
-    // Dynamic import with proper error handling
-    const pdfjsLib = await import('pdfjs-dist');
-    
-    // Set up worker with multiple fallback options
-    if (typeof window !== 'undefined') {
-      // Try multiple CDN sources for the worker
-      const workerSources = [
-        `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`,
-        `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`,
-        `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
-      ];
-      
-      // Use the first available worker source
-      pdfjsLib.GlobalWorkerOptions.workerSrc = workerSources[0];
-    }
-    
-    const arrayBuffer = await file.arrayBuffer();
-    
-    let pdf;
-    try {
-      pdf = await pdfjsLib.getDocument({ 
-        data: arrayBuffer,
-        useSystemFonts: true,
-        disableFontFace: false,
-        useWorkerFetch: false,
-        isEvalSupported: false
-      }).promise;
-    } catch (error) {
-      const errorMessage = "Failed to load PDF. The file may be encrypted or incompatible.";
-      toast({
-        title: "PDF Loading Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      return { content: '', error: errorMessage };
-    }
-    
-    let fullText = '';
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const pageText = textContent.items
-        .map((item: any) => item.str)
-        .join(' ');
-      fullText += pageText + '\n';
-    }
-    
-    if (!fullText.trim()) {
-      throw new Error("PDF parsed but no readable text found.");
-    }
-    
-    return { content: fullText.trim() };
-  } catch (error) {
-    console.error('PDF parsing error:', error);
-    const errorMessage = (error as Error).message;
-    
-    toast({
-      title: "PDF Parsing Failed",
-      description: errorMessage,
-      variant: "destructive",
-    });
-    
-    return { content: '', error: errorMessage };
-  }
-}
-
-async function parseDOCX(file: File): Promise<ParsedFile> {
-  try {
-    const zip = await JSZip.loadAsync(file);
-    const xml = await zip.file("word/document.xml")?.async("string");
-
-    if (!xml) throw new Error("word/document.xml not found");
-
-    const rawText = xml
-      .replace(/<w:.*?>/g, ' ')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    if (!rawText) throw new Error("DOCX parsed but no content found");
-
-    return { content: rawText };
-  } catch (error) {
-    console.error("DOCX parsing error:", error);
-    const errorMessage = "Failed to parse DOCX file. Try re-saving or upload a PDF.";
-    toast({
-      title: "DOCX Parsing Failed",
-      description: errorMessage,
-      variant: "destructive"
-    });
-    return { content: '', error: errorMessage };
-  }
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
+      const base64Data = result.split(',')[1];
+      resolve(base64Data);
+    };
+    reader.onerror = (error) => reject(error);
+  });
 }
