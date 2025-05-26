@@ -41,6 +41,11 @@ const Header = () => {
           <Link to="/cover-letter" className="text-muted-foreground hover:text-foreground transition-colors">
             Cover Letter
           </Link>
+          {user && (
+            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+              Dashboard
+            </Link>
+          )}
           <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
             About
           </Link>
