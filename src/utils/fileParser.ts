@@ -1,5 +1,4 @@
 
-
 import { toast } from "@/components/ui/use-toast";
 
 interface ParsedFile {
@@ -94,88 +93,39 @@ async function parsePDF(file: File): Promise<ParsedFile> {
   }
 }
 
-async function fallbackParseDOCX(file: File): Promise<string> {
+async function parseDOCX(file: File): Promise<ParsedFile> {
   try {
-    // Use a simpler approach without external libraries for fallback
+    // Simple text extraction approach to avoid module loading issues
     const arrayBuffer = await file.arrayBuffer();
     const text = new TextDecoder().decode(arrayBuffer);
     
     // Try to extract text content using basic string manipulation
     const textMatch = text.match(/<w:t[^>]*>([^<]*)<\/w:t>/g);
     if (textMatch) {
-      return textMatch.map(match => match.replace(/<[^>]*>/g, '')).join(' ').trim();
-    }
-    
-    throw new Error("Could not extract text from DOCX");
-  } catch (error) {
-    console.error('Fallback DOCX parsing failed:', error);
-    throw error;
-  }
-}
-
-async function parseDOCX(file: File): Promise<ParsedFile> {
-  try {
-    // Try mammoth first with better error handling
-    let mammoth;
-    try {
-      mammoth = await import('mammoth');
-    } catch (importError) {
-      console.error('Failed to load mammoth:', importError);
-      throw new Error('Document parsing library failed to load');
-    }
-    
-    const arrayBuffer = await file.arrayBuffer();
-    
-    // First try to extract raw text
-    const result = await mammoth.extractRawText({ arrayBuffer });
-    
-    if (result.value && result.value.trim()) {
-      return { content: result.value.trim() };
-    }
-    
-    // If raw text extraction fails or returns empty, try HTML extraction
-    const htmlResult = await mammoth.convertToHtml({ arrayBuffer });
-    if (htmlResult.value) {
-      // Strip HTML tags to get plain text
-      const textContent = htmlResult.value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-      if (textContent) {
-        return { content: textContent };
+      const extractedText = textMatch.map(match => match.replace(/<[^>]*>/g, '')).join(' ').trim();
+      if (extractedText && extractedText.length > 0) {
+        return { content: extractedText };
       }
     }
     
-    // If mammoth returns no content, try fallback method
-    console.log('Mammoth parsing returned no content, trying fallback method...');
-    const fallbackContent = await fallbackParseDOCX(file);
-    if (fallbackContent && fallbackContent.trim()) {
-      return { content: fallbackContent };
+    // If no text found with w:t tags, try a broader approach
+    const paragraphMatch = text.match(/<w:p[^>]*>.*?<\/w:p>/gs);
+    if (paragraphMatch) {
+      const paragraphText = paragraphMatch
+        .map(p => p.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim())
+        .filter(p => p.length > 0)
+        .join('\n');
+      
+      if (paragraphText && paragraphText.length > 0) {
+        return { content: paragraphText };
+      }
     }
     
-    return { content: '', error: 'This DOCX file couldn\'t be parsed. Try re-saving it in Word or upload a PDF version instead.' };
+    return { content: '', error: 'This DOCX file couldn\'t be parsed. The document may be empty, corrupted, or in an unsupported format. Please try saving it as a PDF or plain text file.' };
     
   } catch (error) {
     console.error('DOCX parsing error:', error);
     
-    // Try simple fallback method if mammoth fails
-    try {
-      console.log('Mammoth failed, trying simple fallback method...');
-      const fallbackContent = await fallbackParseDOCX(file);
-      if (fallbackContent && fallbackContent.trim()) {
-        return { content: fallbackContent };
-      }
-    } catch (fallbackError) {
-      console.error('Fallback parsing also failed:', fallbackError);
-    }
-    
-    // Provide specific error messages for common issues
-    let errorMessage = 'This DOCX file couldn\'t be parsed. Try re-saving it in Word or upload a PDF version instead.';
-    
-    if ((error as Error).message.includes('body element')) {
-      errorMessage = 'Document format not recognized. Please save as a standard DOCX file or try converting to PDF.';
-    } else if ((error as Error).message.includes('zip') || (error as Error).message.includes('library failed to load')) {
-      errorMessage = 'Document parsing failed. Please try uploading a PDF version of your document.';
-    }
-    
-    return { content: '', error: errorMessage };
+    return { content: '', error: 'Document parsing failed. Please try uploading a PDF version of your document instead.' };
   }
 }
-
