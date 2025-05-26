@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -6,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FileText, UserCircle, Star, Copy, Trash2, Plus, PieChart, Award } from 'lucide-react';
+import { Textarea } from "@/components/ui/textarea";
+import { FileText, UserCircle, Star, Copy, Trash2, Plus, Edit } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { getUserBios, getUserCoverLetters } from '@/services/supabaseService';
@@ -23,7 +23,11 @@ const Dashboard = () => {
   const [bioUsageCount, setBioUsageCount] = useState(0);
   const [coverLetterUsageCount, setCoverLetterUsageCount] = useState(0);
   const [selectedBio, setSelectedBio] = useState(null);
+  const [selectedCoverLetter, setSelectedCoverLetter] = useState(null);
   const [isViewBioOpen, setIsViewBioOpen] = useState(false);
+  const [isViewCoverLetterOpen, setIsViewCoverLetterOpen] = useState(false);
+  const [editedCoverLetterContent, setEditedCoverLetterContent] = useState('');
+  const [isEditingCoverLetter, setIsEditingCoverLetter] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -89,6 +93,7 @@ const Dashboard = () => {
     id: letter.id,
     name: `${letter.job_title} Application`,
     company: letter.company_name,
+    jobTitle: letter.job_title,
     content: letter.content,
     date: new Date(letter.created_at).toLocaleDateString(),
     favorite: false
@@ -97,6 +102,13 @@ const Dashboard = () => {
   const handleViewBio = (bio: any) => {
     setSelectedBio(bio);
     setIsViewBioOpen(true);
+  };
+
+  const handleViewCoverLetter = (letter: any) => {
+    setSelectedCoverLetter(letter);
+    setEditedCoverLetterContent(letter.content);
+    setIsEditingCoverLetter(false);
+    setIsViewCoverLetterOpen(true);
   };
 
   const handleCopyBio = (content: string) => {
@@ -109,6 +121,21 @@ const Dashboard = () => {
       toast({
         title: "Failed to copy",
         description: "Could not copy bio to clipboard.",
+        variant: "destructive"
+      });
+    });
+  };
+
+  const handleCopyCoverLetter = (content: string) => {
+    navigator.clipboard.writeText(content).then(() => {
+      toast({
+        title: "Copied to clipboard",
+        description: "Cover letter content has been copied to clipboard."
+      });
+    }).catch(() => {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy cover letter to clipboard.",
         variant: "destructive"
       });
     });
@@ -135,6 +162,69 @@ const Dashboard = () => {
       toast({
         title: "Error deleting bio",
         description: "Could not delete bio.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteCoverLetter = async (letterId: string) => {
+    try {
+      const { error } = await supabase
+        .from('cover_letters')
+        .delete()
+        .eq('id', letterId);
+      
+      if (error) throw error;
+      
+      // Reload cover letters
+      const coverLetters = await getUserCoverLetters();
+      setSavedCoverLetters(coverLetters);
+      
+      toast({
+        title: "Cover letter deleted",
+        description: "Cover letter has been deleted successfully."
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting cover letter",
+        description: "Could not delete cover letter.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSaveCoverLetterEdits = async () => {
+    if (!selectedCoverLetter) return;
+
+    try {
+      const { error } = await supabase
+        .from('cover_letters')
+        .update({ 
+          content: editedCoverLetterContent,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedCoverLetter.id);
+      
+      if (error) throw error;
+      
+      // Update the local state
+      const updatedCoverLetter = { ...selectedCoverLetter, content: editedCoverLetterContent };
+      setSelectedCoverLetter(updatedCoverLetter);
+      
+      // Reload cover letters
+      const coverLetters = await getUserCoverLetters();
+      setSavedCoverLetters(coverLetters);
+      
+      setIsEditingCoverLetter(false);
+      
+      toast({
+        title: "Cover letter updated",
+        description: "Your changes have been saved successfully."
+      });
+    } catch (error) {
+      toast({
+        title: "Error saving changes",
+        description: "Could not save your changes.",
         variant: "destructive"
       });
     }
@@ -335,10 +425,13 @@ const Dashboard = () => {
                       savedCoverLetters.map((letter) => {
                         const displayLetter = formatCoverLetterForDisplay(letter);
                         return (
-                          <Card key={displayLetter.id}>
+                          <Card key={displayLetter.id} className="cursor-pointer hover:shadow-md transition-shadow">
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center">
+                                <div 
+                                  className="flex items-center flex-1 cursor-pointer"
+                                  onClick={() => handleViewCoverLetter(displayLetter)}
+                                >
                                   <div className="h-10 w-10 rounded-full bg-brand-pink/20 flex items-center justify-center mr-4">
                                     <FileText className="h-6 w-6 text-brand-pink" />
                                   </div>
@@ -355,10 +448,24 @@ const Dashboard = () => {
                                   </div>
                                 </div>
                                 <div className="flex gap-2">
-                                  <Button variant="ghost" size="icon">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCopyCoverLetter(displayLetter.content);
+                                    }}
+                                  >
                                     <Copy className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="icon">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteCoverLetter(displayLetter.id);
+                                    }}
+                                  >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
@@ -443,6 +550,88 @@ const Dashboard = () => {
                 Close
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cover Letter View Dialog */}
+      <Dialog open={isViewCoverLetterOpen} onOpenChange={setIsViewCoverLetterOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-brand-pink" />
+              {selectedCoverLetter?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              <span className="font-medium">Company:</span> {selectedCoverLetter?.company} • 
+              <span className="font-medium ml-2">Position:</span> {selectedCoverLetter?.jobTitle} • 
+              <span className="font-medium ml-2">Created:</span> {selectedCoverLetter?.date}
+            </div>
+            
+            {isEditingCoverLetter ? (
+              <div className="space-y-4">
+                <Textarea
+                  value={editedCoverLetterContent}
+                  onChange={(e) => setEditedCoverLetterContent(e.target.value)}
+                  rows={15}
+                  className="w-full"
+                />
+                <div className="flex justify-between gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setIsEditingCoverLetter(false);
+                      setEditedCoverLetterContent(selectedCoverLetter?.content || '');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleCopyCoverLetter(editedCoverLetterContent)}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy
+                    </Button>
+                    <Button onClick={handleSaveCoverLetterEdits}>
+                      Save Changes
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                    {selectedCoverLetter?.content}
+                  </p>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <Button onClick={() => setIsViewCoverLetterOpen(false)}>
+                    Close
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => handleCopyCoverLetter(selectedCoverLetter?.content || '')}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setIsEditingCoverLetter(true)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
