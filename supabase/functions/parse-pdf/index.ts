@@ -7,7 +7,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')
 
 serve(async (req) => {
-  console.log('Parse CV function called with method:', req.method)
+  console.log('Parse PDF function called with method:', req.method)
   
   // Handle CORS
   if (req.method === 'OPTIONS') {
@@ -64,26 +64,18 @@ serve(async (req) => {
       throw new Error(`File size exceeds 5MB limit. Current size: ${(fileData.length / (1024 * 1024)).toFixed(1)}MB`)
     }
 
-    let extractedText = ''
-    const fileExtension = fileName.split('.').pop()?.toLowerCase()
-
-    console.log('Processing file type:', fileExtension)
-
-    if (fileExtension === 'docx' || fileExtension === 'doc') {
-      extractedText = await parseDOCX(fileData)
-    } else if (fileExtension === 'txt') {
-      // For text files, decode base64 and return as is
-      const decoder = new TextDecoder()
-      const uint8Array = Uint8Array.from(atob(fileData), c => c.charCodeAt(0))
-      extractedText = decoder.decode(uint8Array)
-    } else {
-      throw new Error('Unsupported file format. This endpoint supports DOCX, DOC, and TXT files. For PDF files, use the parse-pdf endpoint.')
+    // Verify it's a PDF file
+    if (!fileType.includes('pdf')) {
+      throw new Error('Only PDF files are supported by this endpoint')
     }
+
+    console.log('Processing PDF file...')
+    const extractedText = await parsePDF(fileData)
 
     console.log('Text extraction completed, length:', extractedText.length)
 
     if (!extractedText || extractedText.trim().length === 0) {
-      throw new Error('No text could be extracted from the file. Please try a different file or format.')
+      throw new Error('No text could be extracted from the PDF file. Please try a different file or format.')
     }
 
     return new Response(
@@ -94,7 +86,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('CV parsing error:', error)
+    console.error('PDF parsing error:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
       {
@@ -105,32 +97,26 @@ serve(async (req) => {
   }
 })
 
-async function parseDOCX(base64Data: string): Promise<string> {
+async function parsePDF(base64Data: string): Promise<string> {
   try {
-    // For DOCX parsing, we'll use a simple approach with JSZip
-    const JSZip = (await import('https://cdn.skypack.dev/jszip@3.10.1')).default
+    // Use pdf-parse library for PDF text extraction
+    const pdfParse = (await import('https://esm.sh/pdf-parse@1.1.1')).default
     
-    // Convert base64 to Uint8Array
+    // Convert base64 to buffer
     const uint8Array = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))
+    const buffer = new Uint8Array(uint8Array)
     
-    console.log('Loading DOCX document...')
-    const zip = await JSZip.loadAsync(uint8Array)
-    const xml = await zip.file("word/document.xml")?.async("string")
-
-    if (!xml) throw new Error("word/document.xml not found in DOCX file")
-
-    console.log('Extracting text from DOCX...')
-    const rawText = xml
-      .replace(/<w:.*?>/g, ' ')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-
-    if (!rawText) throw new Error("DOCX parsed but no content found")
-
-    return rawText
+    console.log('Parsing PDF with pdf-parse...')
+    const data = await pdfParse(buffer)
+    
+    if (!data.text || data.text.trim().length === 0) {
+      throw new Error('PDF parsed but no readable text found.')
+    }
+    
+    console.log('PDF parsing successful, extracted text length:', data.text.length)
+    return data.text.trim()
   } catch (error) {
-    console.error('DOCX parsing error:', error)
-    throw new Error(`Failed to parse DOCX: ${error.message}`)
+    console.error('PDF parsing error:', error)
+    throw new Error(`Failed to parse PDF: ${error.message}`)
   }
 }

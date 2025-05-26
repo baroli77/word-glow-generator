@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -34,10 +33,56 @@ export async function parseFile(file: File): Promise<ParsedFile> {
       return { content: '', error: errorMessage };
     }
 
+    let extractedText = '';
+
+    if (fileExtension === 'pdf') {
+      // Use Supabase Edge Function for PDF parsing
+      console.log('Processing PDF file with Edge Function...');
+      const result = await parsePDFWithEdgeFunction(file);
+      if (result.error) {
+        return result;
+      }
+      extractedText = result.content;
+    } else if (fileExtension === 'docx' || fileExtension === 'doc') {
+      // Keep existing DOCX parsing logic
+      extractedText = await parseDOCX(file);
+    } else if (fileExtension === 'txt') {
+      // For text files, read as text
+      extractedText = await file.text();
+    }
+
+    console.log('Text extraction completed, length:', extractedText.length);
+
+    if (!extractedText || typeof extractedText !== 'string' || extractedText.trim().length === 0) {
+      const errorMessage = "No readable text found in the file";
+      toast({
+        title: "File parsing failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return { content: '', error: errorMessage };
+    }
+
+    return { content: extractedText.trim() };
+
+  } catch (error) {
+    console.error('File parsing error:', error);
+    const errorMessage = `Failed to parse file: ${(error as Error).message}`;
+    toast({
+      title: "File parsing error",
+      description: "There was an issue parsing your file. Please try a different file or format.",
+      variant: "destructive",
+    });
+    return { content: '', error: errorMessage };
+  }
+}
+
+async function parsePDFWithEdgeFunction(file: File): Promise<ParsedFile> {
+  try {
     // Convert file to base64
     const base64Data = await fileToBase64(file);
     
-    console.log('Sending file to parse-cv Edge Function...');
+    console.log('Sending PDF to parse-pdf Edge Function...');
     
     // Get the current user's session
     const { data: { session } } = await supabase.auth.getSession();
@@ -46,14 +91,14 @@ export async function parseFile(file: File): Promise<ParsedFile> {
       const errorMessage = 'Authentication required';
       toast({
         title: "Authentication required",
-        description: "Please sign in to parse CV files.",
+        description: "Please sign in to parse PDF files.",
         variant: "destructive",
       });
       return { content: '', error: errorMessage };
     }
 
     // Call the Supabase Edge Function
-    const response = await fetch(`https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/parse-cv`, {
+    const response = await fetch(`https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/parse-pdf`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,16 +111,16 @@ export async function parseFile(file: File): Promise<ParsedFile> {
       })
     });
 
-    console.log('Parse CV Edge Function response status:', response.status);
+    console.log('Parse PDF Edge Function response status:', response.status);
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Parse CV Edge Function error:', errorData);
-      const errorMessage = errorData.error || "Failed to parse CV file";
+      console.error('Parse PDF Edge Function error:', errorData);
+      const errorMessage = errorData.error || "Failed to parse PDF file";
       
       toast({
-        title: "CV Parsing Failed",
-        description: errorMessage,
+        title: "PDF Parsing Failed",
+        description: "Please try a different file, or upload your CV as a DOCX file.",
         variant: "destructive",
       });
       
@@ -83,13 +128,13 @@ export async function parseFile(file: File): Promise<ParsedFile> {
     }
 
     const data = await response.json();
-    console.log('Successfully parsed CV, content length:', data.content?.length || 0);
+    console.log('Successfully parsed PDF, content length:', data.content?.length || 0);
     
     if (!data.content || typeof data.content !== 'string' || data.content.trim().length === 0) {
-      const errorMessage = "No readable text found in the file";
+      const errorMessage = "No readable text found in the PDF file";
       toast({
-        title: "CV Parsing Failed",
-        description: errorMessage,
+        title: "PDF Parsing Failed",
+        description: "Please try a different file, or upload your CV as a DOCX file.",
         variant: "destructive",
       });
       return { content: '', error: errorMessage };
@@ -98,14 +143,45 @@ export async function parseFile(file: File): Promise<ParsedFile> {
     return { content: data.content.trim() };
 
   } catch (error) {
-    console.error('File parsing error:', error);
-    const errorMessage = `Failed to parse file: ${(error as Error).message}`;
+    console.error('PDF parsing error:', error);
+    const errorMessage = `Failed to parse PDF: ${(error as Error).message}`;
     toast({
-      title: "File parsing error",
-      description: "There was an issue parsing your file. Please try a different file or format.",
+      title: "PDF Parsing Failed",
+      description: "Please try a different file, or upload your CV as a DOCX file.",
       variant: "destructive",
     });
     return { content: '', error: errorMessage };
+  }
+}
+
+async function parseDOCX(file: File): Promise<string> {
+  try {
+    // Keep existing DOCX parsing logic using JSZip
+    const JSZip = (await import('https://cdn.skypack.dev/jszip@3.10.1')).default;
+    
+    // Convert file to ArrayBuffer
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    
+    console.log('Loading DOCX document...');
+    const zip = await JSZip.loadAsync(uint8Array);
+    const xml = await zip.file("word/document.xml")?.async("string");
+
+    if (!xml) throw new Error("word/document.xml not found in DOCX file");
+
+    console.log('Extracting text from DOCX...');
+    const rawText = xml
+      .replace(/<w:.*?>/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!rawText) throw new Error("DOCX parsed but no content found");
+
+    return rawText;
+  } catch (error) {
+    console.error('DOCX parsing error:', error);
+    throw new Error(`Failed to parse DOCX: ${(error as Error).message}`);
   }
 }
 
