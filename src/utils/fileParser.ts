@@ -1,5 +1,6 @@
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import JSZip from 'jszip';
 
 interface ParsedFile {
   content: string;
@@ -156,9 +157,6 @@ async function parsePDFWithEdgeFunction(file: File): Promise<ParsedFile> {
 
 async function parseDOCX(file: File): Promise<string> {
   try {
-    // Keep existing DOCX parsing logic using JSZip
-    const JSZip = (await import('https://cdn.skypack.dev/jszip@3.10.1')).default;
-    
     // Convert file to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
