@@ -14,7 +14,7 @@ export interface AdminUser {
 
 export async function getAllUsers(): Promise<AdminUser[]> {
   try {
-    const { data, error } = await supabase.rpc('get_all_users_admin' as any);
+    const { data, error } = await supabase.rpc('get_all_users_admin');
     
     if (error) {
       toast({
@@ -43,7 +43,7 @@ export async function updateUserSubscription(
   expiresAt: string | null = null
 ): Promise<boolean> {
   try {
-    const { data, error } = await supabase.rpc('update_user_subscription_admin' as any, {
+    const { data, error } = await supabase.rpc('update_user_subscription_admin', {
       target_user_id: userId,
       new_plan_type: planType,
       new_is_active: isActive,

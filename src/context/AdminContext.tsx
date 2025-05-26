@@ -32,7 +32,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
 
     try {
-      const { data, error } = await supabase.rpc('is_admin' as any);
+      const { data, error } = await supabase.rpc('is_admin');
       
       if (error) {
         console.error('Error checking admin status:', error);

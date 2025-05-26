@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_roles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       bios: {
         Row: {
           content: string
@@ -173,6 +197,31 @@ export type Database = {
     Functions: {
       can_use_tool: {
         Args: { user_id_param: string; tool_type_param: string }
+        Returns: boolean
+      }
+      get_all_users_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          email: string
+          full_name: string
+          created_at: string
+          plan_type: string
+          is_active: boolean
+          expires_at: string
+        }[]
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      update_user_subscription_admin: {
+        Args: {
+          target_user_id: string
+          new_plan_type: string
+          new_is_active?: boolean
+          new_expires_at?: string
+        }
         Returns: boolean
       }
     }
