@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -76,15 +75,14 @@ const CustomizeStep: React.FC<CustomizeStepProps> = ({
                   className="flex flex-wrap gap-4"
                 >
                   {toneOptions.map((option) => (
-                    <div key={option.value} className="flex items-center">
+                    <div key={option.value} className="flex items-center space-x-2">
                       <RadioGroupItem 
                         value={option.value} 
-                        id={`tone-${option.value}`} 
-                        className="peer sr-only" 
+                        id={`tone-${option.value}`}
                       />
                       <Label
                         htmlFor={`tone-${option.value}`}
-                        className="px-4 py-2 rounded-full border cursor-pointer bg-background hover:bg-muted peer-data-[state=checked]:bg-makemybio-purple peer-data-[state=checked]:text-white transition-colors"
+                        className="cursor-pointer"
                       >
                         {option.label}
                       </Label>
