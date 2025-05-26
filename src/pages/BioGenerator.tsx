@@ -9,7 +9,7 @@ const BioGenerator = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow py-12 px-4 bg-gray-50">
+      <main className="flex-grow py-12 px-4 bg-gradient-to-b from-background to-accent/30">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
@@ -20,7 +20,7 @@ const BioGenerator = () => {
                 Create the perfect bio for any platform with our AI-powered generator.
                 Fill in the form below and let us craft a compelling bio for you.
               </p>
-              <div className="mt-4 bg-wordcraft-purple/10 p-3 rounded-lg inline-block">
+              <div className="mt-4 bg-wordcraft-purple/10 border border-wordcraft-purple/20 p-3 rounded-lg inline-block">
                 <p className="text-sm flex items-center">
                   <span className="bg-wordcraft-purple text-white rounded-full p-1 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
