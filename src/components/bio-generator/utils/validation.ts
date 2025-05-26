@@ -1,5 +1,6 @@
 
 import { BioFormData } from '../types';
+import { getPlatformConfig } from '../config/platform-config';
 
 export interface ValidationError {
   field: string;
@@ -13,31 +14,16 @@ export interface ValidationResult {
 
 export const validateBioForm = (formData: BioFormData): ValidationResult => {
   const errors: ValidationError[] = [];
+  const config = getPlatformConfig(formData.platform as any);
 
   // Required fields validation
   if (!formData.name.trim()) {
     errors.push({ field: 'name', message: 'Name is required' });
   }
 
-  // Profession is only required for professional platforms (excluding Twitter)
-  const professionalPlatformsRequiringProfession = ['linkedin', 'resume', 'portfolio'];
-  if (professionalPlatformsRequiringProfession.includes(formData.platform) && !formData.profession.trim()) {
+  // Profession validation based on platform config
+  if (config.requiresProfession && !formData.profession.trim()) {
     errors.push({ field: 'profession', message: 'Profession is required' });
-  }
-
-  // Platform-specific validation
-  switch (formData.platform) {
-    case 'linkedin':
-    case 'resume':
-    case 'portfolio':
-      const professionalData = formData as any;
-      if (!professionalData.experience?.trim()) {
-        errors.push({ 
-          field: 'experience', 
-          message: `Experience is recommended for ${formData.platform} bios` 
-        });
-      }
-      break;
   }
 
   // Character limit validation for individual fields

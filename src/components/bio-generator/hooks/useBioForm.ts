@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from 'react';
 import { BioFormData } from '../types';
+import { getPlatformConfig } from '../config/platform-config';
 
 const createInitialFormData = (): BioFormData => ({
   name: '',
@@ -22,53 +23,42 @@ export const useBioForm = () => {
   }, []);
 
   const updatePlatform = useCallback((platform: BioFormData['platform']) => {
+    const config = getPlatformConfig(platform as any);
+    
     const baseData: Partial<BioFormData> = {
       name: formData.name,
-      profession: formData.profession,
+      profession: config.requiresProfession ? formData.profession : 'Content Creator',
       tone: formData.tone,
       charLimit: formData.charLimit,
-      customCharCount: formData.customCharCount,
+      customCharCount: formData.customCharCount || config.defaultCharLimit,
       platform
     };
-
-    // Only include profession for professional platforms
-    const isProfessionalPlatform = ['linkedin', 'resume', 'portfolio', 'twitter'].includes(platform);
-    if (isProfessionalPlatform) {
-      baseData.profession = formData.profession;
-    } else {
-      baseData.profession = 'Content Creator'; // Default for non-professional platforms
-    }
 
     // Preserve relevant fields when switching between similar platforms
     const preservedData: Record<string, any> = {};
     
-    // Type-safe property access using 'in' operator
     if ('interests' in formData && formData.interests) {
       preservedData.interests = formData.interests;
     }
     
-    if (['linkedin', 'resume', 'portfolio'].includes(platform)) {
-      if ('experience' in formData && formData.experience) {
-        preservedData.experience = formData.experience;
-      }
-      if ('achievements' in formData && formData.achievements) {
-        preservedData.achievements = formData.achievements;
-      }
+    if (config.fields.includes('experience') && 'experience' in formData && formData.experience) {
+      preservedData.experience = formData.experience;
+    }
+    
+    if (config.fields.includes('achievements') && 'achievements' in formData && formData.achievements) {
+      preservedData.achievements = formData.achievements;
     }
 
-    if (['tinder', 'pof'].includes(platform)) {
-      if ('funFacts' in formData && formData.funFacts) {
-        preservedData.funFacts = formData.funFacts;
-      }
-      if ('lookingFor' in formData && formData.lookingFor) {
-        preservedData.lookingFor = formData.lookingFor;
-      }
+    if (config.fields.includes('funFacts') && 'funFacts' in formData && formData.funFacts) {
+      preservedData.funFacts = formData.funFacts;
+    }
+    
+    if (config.fields.includes('lookingFor') && 'lookingFor' in formData && formData.lookingFor) {
+      preservedData.lookingFor = formData.lookingFor;
     }
 
-    if (['youtube', 'tiktok', 'twitch'].includes(platform)) {
-      if ('content' in formData && formData.content) {
-        preservedData.content = formData.content;
-      }
+    if (config.fields.includes('content') && 'content' in formData && formData.content) {
+      preservedData.content = formData.content;
     }
 
     setFormData({ ...baseData, ...preservedData } as BioFormData);
