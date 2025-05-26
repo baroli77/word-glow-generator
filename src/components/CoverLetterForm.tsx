@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -314,7 +315,7 @@ const CoverLetterForm: React.FC = () => {
           
           <div className="w-full bg-muted h-2 rounded-full mb-4">
             <div 
-              className="bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink h-2 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-makemybio-purple to-makemybio-pink h-2 rounded-full transition-all duration-300"
               style={{ width: `${(step / 3) * 100}%` }}
             ></div>
           </div>
@@ -335,18 +336,18 @@ const CoverLetterForm: React.FC = () => {
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                           {parsingFile ? (
                             <>
-                              <div className="animate-spin h-6 w-6 border-2 border-wordcraft-purple border-t-transparent rounded-full mb-2"></div>
+                              <div className="animate-spin h-6 w-6 border-2 border-makemybio-purple border-t-transparent rounded-full mb-2"></div>
                               <p className="text-sm text-muted-foreground">Parsing file...</p>
                             </>
                           ) : fileName ? (
                             <>
-                              <FileText className="w-8 h-8 mb-2 text-wordcraft-purple" />
+                              <FileText className="w-8 h-8 mb-2 text-makemybio-purple" />
                               <p className="text-sm text-muted-foreground">{fileName}</p>
                               <p className="text-xs text-green-600">✓ Parsed successfully</p>
                             </>
                           ) : (
                             <>
-                              <Upload className="w-8 h-8 mb-2 text-wordcraft-purple" />
+                              <Upload className="w-8 h-8 mb-2 text-makemybio-purple" />
                               <p className="mb-2 text-sm font-semibold">Click to upload your CV</p>
                               <p className="text-xs text-muted-foreground">PDF, DOCX or TXT (max 5MB)</p>
                             </>
@@ -479,7 +480,7 @@ const CoverLetterForm: React.FC = () => {
                       <TooltipTrigger asChild>
                         <label
                           className={`px-4 py-2 rounded-full border cursor-pointer hover:bg-muted transition-colors ${
-                            formData.tone === option.value ? 'bg-wordcraft-purple text-white' : 'bg-background'
+                            formData.tone === option.value ? 'bg-makemybio-purple text-white' : 'bg-background'
                           } ${isFieldDisabled('tone') ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                           <input

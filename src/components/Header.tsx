@@ -31,7 +31,7 @@ const Header = () => {
     <header className="bg-background border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <h1 className="font-serif text-2xl font-bold text-gradient">WordCraft</h1>
+          <h1 className="font-serif text-2xl font-bold text-gradient">MakeMy.Bio</h1>
         </Link>
         
         <nav className="hidden md:flex items-center space-x-6">
@@ -64,7 +64,7 @@ const Header = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-wordcraft-purple to-wordcraft-pink flex items-center justify-center text-white text-sm font-bold">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-makemybio-purple to-makemybio-pink flex items-center justify-center text-white text-sm font-bold">
                     {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                   </div>
                   <span className="hidden sm:inline">{user.user_metadata?.full_name || user.email}</span>

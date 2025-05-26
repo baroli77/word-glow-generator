@@ -12,11 +12,11 @@ const CoverLetter = () => {
     "@type": "WebPage",
     "name": "AI Cover Letter Generator",
     "description": "Create personalized, professional cover letters that help you stand out from the crowd using AI technology",
-    "url": "https://wordcraft.ai/cover-letter",
+    "url": "https://makemy.bio/cover-letter",
     "isPartOf": {
       "@type": "WebSite",
-      "name": "WordCraft",
-      "url": "https://wordcraft.ai"
+      "name": "MakeMy.Bio",
+      "url": "https://makemy.bio"
     },
     "mainEntity": {
       "@type": "SoftwareApplication",
@@ -39,7 +39,7 @@ const CoverLetter = () => {
         title="AI Cover Letter Generator - Create Professional Cover Letters"
         description="Create personalized, professional cover letters that help you stand out from the crowd. Simply upload your CV and let our AI craft the perfect cover letter for any job application."
         keywords="AI cover letter generator, cover letter writer, job application, CV upload, personalized cover letter, professional cover letter, job search tool"
-        canonicalUrl="https://wordcraft.ai/cover-letter"
+        canonicalUrl="https://makemy.bio/cover-letter"
         structuredData={structuredData}
       />
       <Header />
@@ -54,9 +54,9 @@ const CoverLetter = () => {
                 Create personalized, impressive cover letters that help you stand out from the crowd. 
                 Simply upload your CV and we'll do the rest.
               </p>
-              <div className="mt-4 bg-wordcraft-purple/10 p-3 rounded-lg inline-block">
+              <div className="mt-4 bg-makemybio-purple/10 p-3 rounded-lg inline-block">
                 <p className="text-sm flex items-center">
-                  <span className="bg-wordcraft-purple text-white rounded-full p-1 mr-2" aria-hidden="true">
+                  <span className="bg-makemybio-purple text-white rounded-full p-1 mr-2" aria-hidden="true">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
                     </svg>

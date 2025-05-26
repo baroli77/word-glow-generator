@@ -15,13 +15,13 @@ interface SEOHeadProps {
 const SEOHead = ({ 
   title, 
   description, 
-  canonicalUrl = 'https://wordcraft.ai',
-  ogImage = 'https://wordcraft.ai/og-wordcraft.jpg',
+  canonicalUrl = 'https://makemy.bio',
+  ogImage = 'https://makemy.bio/og-makemybio.jpg',
   keywords,
   structuredData,
   noIndex = false
 }: SEOHeadProps) => {
-  const fullTitle = title.includes('WordCraft') ? title : `${title} | WordCraft`;
+  const fullTitle = title.includes('MakeMy.Bio') ? title : `${title} | MakeMy.Bio`;
   
   return (
     <Helmet>
@@ -37,14 +37,14 @@ const SEOHead = ({
       <meta property="og:image" content={ogImage} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:type" content="website" />
-      <meta property="og:site_name" content="WordCraft" />
+      <meta property="og:site_name" content="MakeMy.Bio" />
       
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
-      <meta name="twitter:creator" content="@wordcraft_ai" />
+      <meta name="twitter:creator" content="@makemybio_ai" />
       
       {/* Structured Data */}
       {structuredData && (

@@ -15,7 +15,7 @@ const Hero: React.FC = () => {
           {/* Left Column - Content */}
           <div className="text-center lg:text-left space-y-8 animate-fade-in">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-wordcraft-purple/10 dark:bg-wordcraft-purple/20 text-wordcraft-purple px-4 py-2 rounded-full text-sm font-medium border border-wordcraft-purple/20">
+            <div className="inline-flex items-center gap-2 bg-makemybio-purple/10 dark:bg-makemybio-purple/20 text-makemybio-purple px-4 py-2 rounded-full text-sm font-medium border border-makemybio-purple/20">
               <Sparkles className="w-4 h-4" />
               AI-Powered Writing Assistant
             </div>
@@ -35,7 +35,7 @@ const Hero: React.FC = () => {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link to="/bio-generator">
-                <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90 text-lg px-8 py-6 shadow-lg">
+                <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-makemybio-purple to-makemybio-pink hover:opacity-90 text-lg px-8 py-6 shadow-lg">
                   <Sparkles className="w-5 h-5 mr-2" />
                   Start Creating Free
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -78,7 +78,7 @@ const Hero: React.FC = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-wordcraft-purple to-wordcraft-pink flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-makemybio-purple to-makemybio-pink flex items-center justify-center">
                       <PenTool className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -104,7 +104,7 @@ const Hero: React.FC = () => {
                       <Zap className="w-3 h-3" />
                       Generated in 2.1s
                     </div>
-                    <Button size="sm" className="bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink">
+                    <Button size="sm" className="bg-gradient-to-r from-makemybio-purple to-makemybio-pink">
                       Copy
                     </Button>
                   </div>
@@ -114,7 +114,7 @@ const Hero: React.FC = () => {
               {/* Floating elements */}
               <div className="absolute -top-6 -right-6 bg-card border border-border rounded-2xl shadow-lg p-4 animate-float">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-wordcraft-pink" />
+                  <FileText className="w-5 h-5 text-makemybio-pink" />
                   <div>
                     <p className="text-xs text-muted-foreground">Cover Letters</p>
                     <p className="font-semibold text-sm">Available</p>
@@ -124,7 +124,7 @@ const Hero: React.FC = () => {
               
               <div className="absolute -bottom-6 -left-6 bg-card border border-border rounded-2xl shadow-lg p-4 animate-float animation-delay-500">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-wordcraft-purple" />
+                  <Sparkles className="w-5 h-5 text-makemybio-purple" />
                   <div>
                     <p className="text-xs text-muted-foreground">AI Quality</p>
                     <p className="font-semibold text-sm">Premium</p>

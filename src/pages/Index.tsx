@@ -43,8 +43,8 @@ const Index = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "WordCraft",
-    "url": "https://wordcraft.ai",
+    "name": "MakeMy.Bio",
+    "url": "https://makemy.bio",
     "description": "AI-powered bio and cover letter generator for professional content creation",
     "applicationCategory": "ProductivityApplication",
     "operatingSystem": "Web Browser",
@@ -67,8 +67,8 @@ const Index = () => {
     ],
     "creator": {
       "@type": "Organization",
-      "name": "WordCraft",
-      "url": "https://wordcraft.ai"
+      "name": "MakeMy.Bio",
+      "url": "https://makemy.bio"
     },
     "featureList": [
       "AI-powered bio generation",
@@ -82,10 +82,10 @@ const Index = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <SEOHead
-        title="WordCraft - AI-Powered Bio & Cover Letter Generator"
-        description="Create compelling bios and cover letters with WordCraft's AI-powered generator. Professional content for LinkedIn, resumes, social media, and more. Free templates and premium features available."
+        title="MakeMy.Bio - AI-Powered Bio & Cover Letter Generator"
+        description="Create compelling bios and cover letters with MakeMy.Bio's AI-powered generator. Professional content for LinkedIn, resumes, social media, and more. Free templates and premium features available."
         keywords="AI bio generator, cover letter generator, LinkedIn bio, professional bio, resume writing, AI content creation, social media bio, dating profile, professional writing"
-        canonicalUrl="https://wordcraft.ai/"
+        canonicalUrl="https://makemy.bio/"
         structuredData={structuredData}
       />
       <Header />

@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-serif text-lg font-semibold mb-4">WordCraft</h3>
+            <h3 className="font-serif text-lg font-semibold mb-4">MakeMy.Bio</h3>
             <p className="text-sm text-muted-foreground">
               AI-powered writing assistant that helps you craft perfect bios and cover letters with emotional intelligence.
             </p>
@@ -74,7 +74,7 @@ const Footer: React.FC = () => {
         </div>
         
         <div className="mt-8 pt-4 border-t flex flex-col md:flex-row md:items-center justify-between text-sm text-muted-foreground">
-          <p>© 2025 WordCraft. All rights reserved.</p>
+          <p>© 2025 MakeMy.Bio. All rights reserved.</p>
           <div className="flex gap-4 mt-4 md:mt-0">
             <a href="#" className="hover:text-foreground transition-colors">Twitter</a>
             <a href="#" className="hover:text-foreground transition-colors">LinkedIn</a>

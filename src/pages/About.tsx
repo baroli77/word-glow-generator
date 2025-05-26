@@ -8,23 +8,23 @@ const About = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "AboutPage",
-    "name": "About WordCraft",
-    "description": "Learn about WordCraft's mission to help people express themselves professionally across all digital platforms",
-    "url": "https://wordcraft.ai/about",
+    "name": "About MakeMy.Bio",
+    "description": "Learn about MakeMy.Bio's mission to help people express themselves professionally across all digital platforms",
+    "url": "https://makemy.bio/about",
     "isPartOf": {
       "@type": "WebSite",
-      "name": "WordCraft",
-      "url": "https://wordcraft.ai"
+      "name": "MakeMy.Bio",
+      "url": "https://makemy.bio"
     },
     "mainEntity": {
       "@type": "Organization",
-      "name": "WordCraft",
+      "name": "MakeMy.Bio",
       "foundingDate": "2025",
       "description": "AI-powered content creation platform specializing in professional bios and cover letters",
-      "url": "https://wordcraft.ai",
+      "url": "https://makemy.bio",
       "sameAs": [
-        "https://twitter.com/wordcraft_ai",
-        "https://linkedin.com/company/wordcraft-ai"
+        "https://twitter.com/makemybio_ai",
+        "https://linkedin.com/company/makemybio-ai"
       ]
     }
   };
@@ -32,10 +32,10 @@ const About = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <SEOHead
-        title="About WordCraft - Your AI Content Creation Assistant"
-        description="Learn about WordCraft's mission to help people express themselves professionally across all digital platforms. Founded in 2025, we use AI to create compelling bios and cover letters."
-        keywords="WordCraft company, AI content creation, professional writing service, bio generator company, cover letter generator"
-        canonicalUrl="https://wordcraft.ai/about"
+        title="About MakeMy.Bio - Your AI Content Creation Assistant"
+        description="Learn about MakeMy.Bio's mission to help people express themselves professionally across all digital platforms. Founded in 2025, we use AI to create compelling bios and cover letters."
+        keywords="MakeMy.Bio company, AI content creation, professional writing service, bio generator company, cover letter generator"
+        canonicalUrl="https://makemy.bio/about"
         structuredData={structuredData}
       />
       <Header />
@@ -44,7 +44,7 @@ const About = () => {
           <div className="max-w-4xl mx-auto">
             <header className="text-center mb-12">
               <h1 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-                About WordCraft
+                About MakeMy.Bio
               </h1>
               <p className="text-muted-foreground md:text-lg">
                 Your AI-powered content creation assistant
@@ -53,13 +53,13 @@ const About = () => {
             
             <article className="prose prose-lg mx-auto dark:prose-invert">
               <p>
-                WordCraft was created with a simple mission: to help people express themselves professionally
+                MakeMy.Bio was created with a simple mission: to help people express themselves professionally
                 and effectively across all digital platforms.
               </p>
               
               <h2>Our Story</h2>
               <p>
-                Founded in 2025, WordCraft emerged from a simple observation: writing professional content 
+                Founded in 2025, MakeMy.Bio emerged from a simple observation: writing professional content 
                 for different platforms is challenging and time-consuming. Whether you're crafting the perfect 
                 social media bio, a compelling resume summary, or a personalized cover letter, finding the right words 
                 can be difficult.
@@ -67,7 +67,7 @@ const About = () => {
               
               <h2>How It Works</h2>
               <p>
-                WordCraft leverages the latest advancements in artificial intelligence to generate
+                MakeMy.Bio leverages the latest advancements in artificial intelligence to generate
                 high-quality, personalized content based on information you provide. Our AI models have been
                 trained on millions of professional profiles, bios, and documents to understand what makes
                 content effective across different platforms.
@@ -89,7 +89,7 @@ const About = () => {
               
               <h2>Join Us</h2>
               <p>
-                Try WordCraft today and experience the power of AI-assisted content creation. We're constantly
+                Try MakeMy.Bio today and experience the power of AI-assisted content creation. We're constantly
                 adding new features and improving our existing ones based on user feedback. Have a suggestion?
                 We'd love to hear from you!
               </p>

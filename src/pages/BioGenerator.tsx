@@ -43,11 +43,11 @@ const BioGenerator = () => {
     "@type": "WebPage",
     "name": "AI Bio Generator",
     "description": "Create professional bios for LinkedIn, social media, dating profiles, and more with our AI-powered bio generator",
-    "url": "https://wordcraft.ai/bio-generator",
+    "url": "https://makemy.bio/bio-generator",
     "isPartOf": {
       "@type": "WebSite",
-      "name": "WordCraft",
-      "url": "https://wordcraft.ai"
+      "name": "MakeMy.Bio",
+      "url": "https://makemy.bio"
     },
     "mainEntity": {
       "@type": "SoftwareApplication",
@@ -71,7 +71,7 @@ const BioGenerator = () => {
         title="AI Bio Generator - Create Professional Bios for Any Platform"
         description="Generate compelling bios for LinkedIn, social media, dating profiles, and more. Our AI-powered bio generator creates personalized, professional content in seconds. Try it free!"
         keywords="AI bio generator, LinkedIn bio generator, social media bio, dating profile bio, professional bio writer, bio creation tool, personal bio generator"
-        canonicalUrl="https://wordcraft.ai/bio-generator"
+        canonicalUrl="https://makemy.bio/bio-generator"
         structuredData={structuredData}
       />
       <Header />
@@ -86,11 +86,11 @@ const BioGenerator = () => {
                 Create the perfect bio for any platform with our AI-powered generator.
                 Fill in the form below and let us craft a compelling bio for you.
               </p>
-              <div className="mt-4 bg-wordcraft-purple/10 border border-wordcraft-purple/20 p-3 rounded-lg inline-block">
+              <div className="mt-4 bg-makemybio-purple/10 border border-makemybio-purple/20 p-3 rounded-lg inline-block">
                 <p className="text-sm flex items-center">
-                  <span className="bg-wordcraft-purple text-white rounded-full p-1 mr-2" aria-hidden="true">
+                  <span className="bg-makemybio-purple text-white rounded-full p-1 mr-2" aria-hidden="true">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09-3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
                     </svg>
                   </span>
                   Powered by OpenAI's advanced GPT-4o-mini model
