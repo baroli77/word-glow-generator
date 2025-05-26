@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FileText, UserCircle, Star, Copy, Trash2, Plus, PieChart, Award } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -20,6 +21,8 @@ const Dashboard = () => {
   const [savedCoverLetters, setSavedCoverLetters] = useState([]);
   const [bioUsageCount, setBioUsageCount] = useState(0);
   const [coverLetterUsageCount, setCoverLetterUsageCount] = useState(0);
+  const [selectedBio, setSelectedBio] = useState(null);
+  const [isViewBioOpen, setIsViewBioOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -89,6 +92,11 @@ const Dashboard = () => {
     date: new Date(letter.created_at).toLocaleDateString(),
     favorite: false
   });
+
+  const handleViewBio = (bio: any) => {
+    setSelectedBio(bio);
+    setIsViewBioOpen(true);
+  };
 
   const handleCopyBio = (content: string) => {
     navigator.clipboard.writeText(content).then(() => {
@@ -270,10 +278,13 @@ const Dashboard = () => {
                       savedBios.map((bio) => {
                         const displayBio = formatBioForDisplay(bio);
                         return (
-                          <Card key={displayBio.id}>
+                          <Card key={displayBio.id} className="cursor-pointer hover:shadow-md transition-shadow">
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center">
+                                <div 
+                                  className="flex items-center flex-1 cursor-pointer"
+                                  onClick={() => handleViewBio(displayBio)}
+                                >
                                   <div className="h-10 w-10 rounded-full bg-wordcraft-purple/20 flex items-center justify-center mr-4">
                                     <UserCircle className="h-6 w-6 text-wordcraft-purple" />
                                   </div>
@@ -293,14 +304,20 @@ const Dashboard = () => {
                                   <Button 
                                     variant="ghost" 
                                     size="icon"
-                                    onClick={() => handleCopyBio(displayBio.content)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleCopyBio(displayBio.content);
+                                    }}
                                   >
                                     <Copy className="h-4 w-4" />
                                   </Button>
                                   <Button 
                                     variant="ghost" 
                                     size="icon"
-                                    onClick={() => handleDeleteBio(displayBio.id)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteBio(displayBio.id);
+                                    }}
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
@@ -408,6 +425,41 @@ const Dashboard = () => {
         </div>
       </main>
       <Footer />
+
+      {/* Bio View Dialog */}
+      <Dialog open={isViewBioOpen} onOpenChange={setIsViewBioOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCircle className="h-5 w-5 text-wordcraft-purple" />
+              {selectedBio?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              <span className="font-medium">Platform:</span> {selectedBio?.platform} • 
+              <span className="font-medium ml-2">Created:</span> {selectedBio?.date}
+            </div>
+            <div className="p-4 bg-muted/30 rounded-lg">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                {selectedBio?.content}
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => handleCopyBio(selectedBio?.content || '')}
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Bio
+              </Button>
+              <Button onClick={() => setIsViewBioOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
