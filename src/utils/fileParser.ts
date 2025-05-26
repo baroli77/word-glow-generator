@@ -82,12 +82,17 @@ async function parsePDF(file: File): Promise<ParsedFile> {
         data: arrayBuffer,
         useSystemFonts: true,
         disableFontFace: false,
-        // Disable worker if it fails to load
         useWorkerFetch: false,
         isEvalSupported: false
       }).promise;
     } catch (error) {
-      throw new Error("Unable to load PDF. The file may be corrupted or encrypted.");
+      const errorMessage = "Failed to load PDF. The file may be encrypted or incompatible.";
+      toast({
+        title: "PDF Loading Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return { content: '', error: errorMessage };
     }
     
     let fullText = '';
@@ -101,7 +106,7 @@ async function parsePDF(file: File): Promise<ParsedFile> {
     }
     
     if (!fullText.trim()) {
-      throw new Error("PDF parsed but no readable text found. Try a different file or use DOCX.");
+      throw new Error("PDF parsed but no readable text found.");
     }
     
     return { content: fullText.trim() };

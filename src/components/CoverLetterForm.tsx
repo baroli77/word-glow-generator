@@ -202,6 +202,16 @@ const CoverLetterForm: React.FC = () => {
         return;
       }
       
+      // Check if content is valid
+      if (!response.content || typeof response.content !== 'string' || !response.content.trim()) {
+        toast({
+          title: "Generation failed",
+          description: "No content was returned. Try again or upload a different file.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       setGeneratedLetter(response.content.trim());
       await recordUsage('cover_letter');
       setStep(3);
@@ -232,6 +242,16 @@ const CoverLetterForm: React.FC = () => {
         toast({
           title: "Regeneration failed",
           description: response.error,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Check if content is valid
+      if (!response.content || typeof response.content !== 'string' || !response.content.trim()) {
+        toast({
+          title: "Regeneration failed",
+          description: "No content was returned. Try again or upload a different file.",
           variant: "destructive",
         });
         return;
@@ -564,16 +584,22 @@ const CoverLetterForm: React.FC = () => {
               <TabsContent value="preview">
                 <Card>
                   <CardContent className="p-6 bg-white rounded-md shadow-sm">
-                    <pre className="whitespace-pre-line font-sans">{generatedLetter}</pre>
+                    {generatedLetter && typeof generatedLetter === 'string' && generatedLetter.trim() ? (
+                      <div className="whitespace-pre-wrap font-sans">{generatedLetter}</div>
+                    ) : (
+                      <div className="text-muted-foreground text-center py-8">
+                        No content available. Please try generating again.
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
                 
                 <div className="mt-6 flex flex-wrap gap-4">
-                  <Button onClick={handleCopy}>
+                  <Button onClick={handleCopy} disabled={!generatedLetter || !generatedLetter.trim()}>
                     <Copy className="w-4 h-4 mr-2" />
                     Copy to Clipboard
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" disabled={!generatedLetter || !generatedLetter.trim()}>
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>
@@ -602,19 +628,27 @@ const CoverLetterForm: React.FC = () => {
               </TabsContent>
               
               <TabsContent value="edit">
-                <Textarea
-                  value={generatedLetter}
-                  onChange={(e) => setGeneratedLetter(e.target.value)}
-                  rows={12}
-                  className="mb-4"
-                />
-                
-                <div className="flex justify-end">
-                  <Button onClick={handleCopy}>
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copy to Clipboard
-                  </Button>
-                </div>
+                {generatedLetter && typeof generatedLetter === 'string' && generatedLetter.trim() ? (
+                  <>
+                    <Textarea
+                      value={generatedLetter}
+                      onChange={(e) => setGeneratedLetter(e.target.value)}
+                      rows={12}
+                      className="mb-4"
+                    />
+                    
+                    <div className="flex justify-end">
+                      <Button onClick={handleCopy}>
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copy to Clipboard
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-muted-foreground text-center py-8">
+                    No content available to edit. Please try generating again.
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
             
