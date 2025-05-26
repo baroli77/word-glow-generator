@@ -11,6 +11,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { getUserBios, getUserCoverLetters } from '@/services/supabaseService';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { toast } from "@/components/ui/use-toast";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -73,8 +74,9 @@ const Dashboard = () => {
 
   const formatBioForDisplay = (bio: any) => ({
     id: bio.id,
-    name: `${bio.platform} Bio`,
+    name: bio.form_data?.bioName || `${bio.platform} Bio`,
     platform: bio.platform,
+    content: bio.content,
     date: new Date(bio.created_at).toLocaleDateString(),
     favorite: false
   });
@@ -83,9 +85,51 @@ const Dashboard = () => {
     id: letter.id,
     name: `${letter.job_title} Application`,
     company: letter.company_name,
+    content: letter.content,
     date: new Date(letter.created_at).toLocaleDateString(),
     favorite: false
   });
+
+  const handleCopyBio = (content: string) => {
+    navigator.clipboard.writeText(content).then(() => {
+      toast({
+        title: "Copied to clipboard",
+        description: "Bio content has been copied to clipboard."
+      });
+    }).catch(() => {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy bio to clipboard.",
+        variant: "destructive"
+      });
+    });
+  };
+
+  const handleDeleteBio = async (bioId: string) => {
+    try {
+      const { error } = await supabase
+        .from('bios')
+        .delete()
+        .eq('id', bioId);
+      
+      if (error) throw error;
+      
+      // Reload bios
+      const bios = await getUserBios();
+      setSavedBios(bios);
+      
+      toast({
+        title: "Bio deleted",
+        description: "Bio has been deleted successfully."
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting bio",
+        description: "Could not delete bio.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const initials = user?.user_metadata?.full_name
@@ -246,10 +290,18 @@ const Dashboard = () => {
                                   </div>
                                 </div>
                                 <div className="flex gap-2">
-                                  <Button variant="ghost" size="icon">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={() => handleCopyBio(displayBio.content)}
+                                  >
                                     <Copy className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="icon">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={() => handleDeleteBio(displayBio.id)}
+                                  >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
                                 </div>
