@@ -60,7 +60,7 @@ const Signup = () => {
     }
   };
 
-  const isFormInvalid = loading || (password !== confirmPassword && password && confirmPassword);
+  const isFormInvalid = loading || Boolean(password !== confirmPassword && password && confirmPassword);
 
   return (
     <div className="flex flex-col min-h-screen">
