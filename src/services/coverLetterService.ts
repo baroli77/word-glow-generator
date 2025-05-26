@@ -1,13 +1,18 @@
-
 import { generateWithAI } from "./supabaseService";
 import { toast } from "@/hooks/use-toast";
 
 export function createCoverLetterPrompt(formData: any, parsedCV: string): string {
-  return `Write a cover letter for a ${formData.jobTitle} role at ${formData.companyName} using a ${formData.tone} tone. Base it on this CV text: ${parsedCV}. Include strong intro, 2-3 paragraphs on relevant experience, and a confident closing.
+  const basePrompt = `Write a cover letter for a ${formData.jobTitle} role at ${formData.companyName} using a ${formData.tone} tone. Base it on this CV text: ${parsedCV}. Include strong intro, 2-3 paragraphs on relevant experience, and a confident closing.`;
 
-${formData.additionalInfo ? `Additional context: ${formData.additionalInfo}` : ''}
+  const additionalInfoSection = formData.additionalInfo && formData.additionalInfo.trim() 
+    ? `\n\nAdditional context to incorporate: ${formData.additionalInfo.trim()}`
+    : '';
 
-Make the cover letter professional, engaging, and tailored to the specific role and company. Ensure it highlights the most relevant experience from the CV.`;
+  const finalPrompt = `${basePrompt}${additionalInfoSection}
+
+Make the cover letter professional, engaging, and tailored to the specific role and company. Ensure it highlights the most relevant experience from the CV.${additionalInfoSection ? ' Make sure to incorporate the additional context provided naturally into the cover letter.' : ''}`;
+
+  return finalPrompt;
 }
 
 export async function generateCoverLetter(formData: any, parsedCV: string) {

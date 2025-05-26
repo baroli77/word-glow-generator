@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Copy, Download, Sparkles } from 'lucide-react';
+import { Copy, Download, Sparkles, Save } from 'lucide-react';
+import { toast } from "@/hooks/use-toast";
 
 interface ResultStepProps {
   generatedLetter: string;
@@ -24,6 +25,40 @@ const ResultStep: React.FC<ResultStepProps> = ({
   setStep
 }) => {
   const hasValidContent = generatedLetter && typeof generatedLetter === 'string' && generatedLetter.trim().length > 0;
+
+  const handleDownload = () => {
+    if (!hasValidContent) return;
+    
+    try {
+      const blob = new Blob([generatedLetter], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cover-letter-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Downloaded Successfully",
+        description: "Your cover letter has been downloaded.",
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Could not download the cover letter. Please try copying the text instead.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveEdits = () => {
+    toast({
+      title: "Changes Saved",
+      description: "Your edits have been saved to the cover letter.",
+    });
+  };
 
   return (
     <div className="animate-fade-in">
@@ -53,7 +88,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
               <Copy className="w-4 h-4 mr-2" />
               Copy to Clipboard
             </Button>
-            <Button variant="outline" disabled={!hasValidContent}>
+            <Button variant="outline" onClick={handleDownload} disabled={!hasValidContent}>
               <Download className="w-4 h-4 mr-2" />
               Download
             </Button>
@@ -91,7 +126,11 @@ const ResultStep: React.FC<ResultStepProps> = ({
                 className="mb-4"
               />
               
-              <div className="flex justify-end">
+              <div className="flex justify-between gap-4">
+                <Button variant="outline" onClick={handleSaveEdits}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Changes
+                </Button>
                 <Button onClick={handleCopy}>
                   <Copy className="w-4 h-4 mr-2" />
                   Copy to Clipboard
