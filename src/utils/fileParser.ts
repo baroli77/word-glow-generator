@@ -94,11 +94,17 @@ async function parsePDF(file: File): Promise<ParsedFile> {
 }
 
 async function fallbackParseDOCX(file: File): Promise<string> {
-  const JSZip = await import('jszip');
-  const zip = await JSZip.default.loadAsync(file);
-  const xml = await zip.file("word/document.xml")?.async("string");
-  if (!xml) throw new Error("DOCX structure missing word/document.xml");
-  return xml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  try {
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+    const loadedZip = await zip.loadAsync(file);
+    const xml = await loadedZip.file("word/document.xml")?.async("string");
+    if (!xml) throw new Error("DOCX structure missing word/document.xml");
+    return xml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  } catch (error) {
+    console.error('Fallback DOCX parsing failed:', error);
+    throw error;
+  }
 }
 
 async function parseDOCX(file: File): Promise<ParsedFile> {
