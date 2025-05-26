@@ -37,9 +37,9 @@ const ResultStep: React.FC<ResultStepProps> = ({
         
         <TabsContent value="preview">
           <Card>
-            <CardContent className="p-6 bg-white rounded-md shadow-sm">
+            <CardContent className="p-6 bg-card rounded-md shadow-sm">
               {hasValidContent ? (
-                <div className="whitespace-pre-wrap font-sans">{generatedLetter}</div>
+                <div className="whitespace-pre-wrap font-sans text-card-foreground">{generatedLetter}</div>
               ) : (
                 <div className="text-muted-foreground text-center py-8">
                   No content available. Please try generating again.
