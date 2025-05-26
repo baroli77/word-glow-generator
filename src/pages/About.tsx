@@ -2,24 +2,56 @@
 import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import SEOHead from '../components/SEOHead';
 
 const About = () => {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "About WordCraft",
+    "description": "Learn about WordCraft's mission to help people express themselves professionally across all digital platforms",
+    "url": "https://wordcraft.ai/about",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "WordCraft",
+      "url": "https://wordcraft.ai"
+    },
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "WordCraft",
+      "foundingDate": "2025",
+      "description": "AI-powered content creation platform specializing in professional bios and cover letters",
+      "url": "https://wordcraft.ai",
+      "sameAs": [
+        "https://twitter.com/wordcraft_ai",
+        "https://linkedin.com/company/wordcraft-ai"
+      ]
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <SEOHead
+        title="About WordCraft - Your AI Content Creation Assistant"
+        description="Learn about WordCraft's mission to help people express themselves professionally across all digital platforms. Founded in 2025, we use AI to create compelling bios and cover letters."
+        keywords="WordCraft company, AI content creation, professional writing service, bio generator company, cover letter generator"
+        canonicalUrl="https://wordcraft.ai/about"
+        structuredData={structuredData}
+      />
       <Header />
       <main className="flex-grow py-12 px-4">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
+            <header className="text-center mb-12">
               <h1 className="font-serif text-3xl md:text-4xl font-bold mb-4">
                 About WordCraft
               </h1>
               <p className="text-muted-foreground md:text-lg">
                 Your AI-powered content creation assistant
               </p>
-            </div>
+            </header>
             
-            <div className="prose prose-lg mx-auto dark:prose-invert">
+            <article className="prose prose-lg mx-auto dark:prose-invert">
               <p>
                 WordCraft was created with a simple mission: to help people express themselves professionally
                 and effectively across all digital platforms.
@@ -61,7 +93,7 @@ const About = () => {
                 adding new features and improving our existing ones based on user feedback. Have a suggestion?
                 We'd love to hear from you!
               </p>
-            </div>
+            </article>
           </div>
         </div>
       </main>

@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import BioGeneratorForm from '../components/BioGeneratorForm';
 import UsageCounter from '../components/UsageCounter';
 import InfoBadge from '../components/InfoBadge';
+import SEOHead from '../components/SEOHead';
 import { useAuth } from '@/context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -37,13 +38,47 @@ const BioGenerator = () => {
     return null;
   }
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "AI Bio Generator",
+    "description": "Create professional bios for LinkedIn, social media, dating profiles, and more with our AI-powered bio generator",
+    "url": "https://wordcraft.ai/bio-generator",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "WordCraft",
+      "url": "https://wordcraft.ai"
+    },
+    "mainEntity": {
+      "@type": "SoftwareApplication",
+      "name": "Bio Generator",
+      "applicationCategory": "ProductivityApplication",
+      "description": "AI-powered bio generation tool for multiple platforms",
+      "featureList": [
+        "LinkedIn bio generation",
+        "Social media bio creation",
+        "Dating profile optimization",
+        "Professional bio writing",
+        "Multiple tone options",
+        "Character limit customization"
+      ]
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <SEOHead
+        title="AI Bio Generator - Create Professional Bios for Any Platform"
+        description="Generate compelling bios for LinkedIn, social media, dating profiles, and more. Our AI-powered bio generator creates personalized, professional content in seconds. Try it free!"
+        keywords="AI bio generator, LinkedIn bio generator, social media bio, dating profile bio, professional bio writer, bio creation tool, personal bio generator"
+        canonicalUrl="https://wordcraft.ai/bio-generator"
+        structuredData={structuredData}
+      />
       <Header />
       <main className="flex-grow py-12 px-4 bg-gradient-to-b from-background to-accent/30">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
+            <header className="text-center mb-12">
               <h1 className="font-serif text-3xl md:text-4xl font-bold mb-4">
                 AI-Powered Bio Generator
               </h1>
@@ -53,9 +88,9 @@ const BioGenerator = () => {
               </p>
               <div className="mt-4 bg-wordcraft-purple/10 border border-wordcraft-purple/20 p-3 rounded-lg inline-block">
                 <p className="text-sm flex items-center">
-                  <span className="bg-wordcraft-purple text-white rounded-full p-1 mr-2">
+                  <span className="bg-wordcraft-purple text-white rounded-full p-1 mr-2" aria-hidden="true">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09-3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09-3.09Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09-3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
                     </svg>
                   </span>
                   Powered by OpenAI's advanced GPT-4o-mini model
@@ -64,7 +99,7 @@ const BioGenerator = () => {
                   </span>
                 </p>
               </div>
-            </div>
+            </header>
             
             <UsageCounter 
               toolType="bio_generator" 

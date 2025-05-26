@@ -2,6 +2,7 @@
 import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import SEOHead from '../components/SEOHead';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const FAQ = () => {
@@ -40,20 +41,43 @@ const FAQ = () => {
     }
   ];
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "name": "WordCraft FAQ",
+    "description": "Frequently asked questions about WordCraft's AI-powered bio and cover letter generator",
+    "url": "https://wordcraft.ai/faq",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <SEOHead
+        title="Frequently Asked Questions - WordCraft Help Center"
+        description="Find answers to common questions about WordCraft's AI-powered bio and cover letter generator. Learn about pricing, features, security, and more."
+        keywords="WordCraft FAQ, bio generator help, cover letter generator questions, AI writing tool FAQ, WordCraft support"
+        canonicalUrl="https://wordcraft.ai/faq"
+        structuredData={structuredData}
+      />
       <Header />
       <main className="flex-grow py-12 px-4">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
+            <header className="text-center mb-12">
               <h1 className="font-serif text-3xl md:text-4xl font-bold mb-4">
                 Frequently Asked Questions
               </h1>
               <p className="text-muted-foreground md:text-lg max-w-2xl mx-auto">
                 Find answers to common questions about WordCraft and our services.
               </p>
-            </div>
+            </header>
             
             <div className="bg-card rounded-xl p-6 shadow-sm">
               <Accordion type="single" collapsible className="w-full">
@@ -70,12 +94,12 @@ const FAQ = () => {
               </Accordion>
             </div>
             
-            <div className="mt-12 text-center">
+            <section className="mt-12 text-center">
               <h2 className="text-xl font-semibold mb-4">Still have questions?</h2>
               <p className="text-muted-foreground mb-4">
                 Contact us at support@wordcraft.ai and we'll get back to you as soon as possible.
               </p>
-            </div>
+            </section>
           </div>
         </div>
       </main>

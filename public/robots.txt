@@ -1,14 +1,22 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
 
 User-agent: *
 Allow: /
+
+# Main pages
+Allow: /bio-generator
+Allow: /cover-letter
+Allow: /about
+Allow: /faq
+Allow: /pricing
+
+# Disallow admin and private pages
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /login
+Disallow: /signup
+
+# Sitemap
+Sitemap: https://wordcraft.ai/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1
