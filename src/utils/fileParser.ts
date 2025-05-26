@@ -23,17 +23,26 @@ export async function parseFile(file: File): Promise<ParsedFile> {
         return { content: '', error: 'Unsupported file format' };
     }
   } catch (error) {
-    return { content: '', error: `Failed to parse file: ${error.message}` };
+    return { content: '', error: `Failed to parse file: ${(error as Error).message}` };
   }
 }
 
 async function parsePDF(file: File): Promise<ParsedFile> {
   try {
+    // Dynamic import with proper error handling
     const pdfjsLib = await import('pdfjs-dist');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    
+    // Set up worker with fallback
+    if (typeof window !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    }
     
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pdf = await pdfjsLib.getDocument({ 
+      data: arrayBuffer,
+      useSystemFonts: true,
+      disableFontFace: false
+    }).promise;
     
     let fullText = '';
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -47,7 +56,8 @@ async function parsePDF(file: File): Promise<ParsedFile> {
     
     return { content: fullText.trim() };
   } catch (error) {
-    return { content: '', error: `Failed to parse PDF: ${error.message}` };
+    console.error('PDF parsing error:', error);
+    return { content: '', error: `Failed to parse PDF: ${(error as Error).message}` };
   }
 }
 
@@ -58,6 +68,7 @@ async function parseDOCX(file: File): Promise<ParsedFile> {
     const result = await mammoth.extractRawText({ arrayBuffer });
     return { content: result.value };
   } catch (error) {
-    return { content: '', error: `Failed to parse DOCX: ${error.message}` };
+    console.error('DOCX parsing error:', error);
+    return { content: '', error: `Failed to parse DOCX: ${(error as Error).message}` };
   }
 }
