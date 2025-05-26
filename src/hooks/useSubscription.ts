@@ -15,12 +15,15 @@ export const useSubscription = () => {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [usageCount, setUsageCount] = useState(0);
 
   useEffect(() => {
     if (user) {
       fetchSubscription();
+      fetchUsageCount();
     } else {
       setSubscription(null);
+      setUsageCount(0);
       setLoading(false);
     }
   }, [user]);
@@ -38,7 +41,23 @@ export const useSubscription = () => {
 
       if (error && error.code !== 'PGRST116') throw error;
       
-      // Type-safe assignment with proper casting
+      // Check if subscription has expired
+      if (data && data.expires_at) {
+        const expiresAt = new Date(data.expires_at);
+        const now = new Date();
+        
+        if (now > expiresAt) {
+          // Deactivate expired subscription
+          await supabase
+            .from('user_subscriptions')
+            .update({ is_active: false })
+            .eq('id', data.id);
+          
+          setSubscription(null);
+          return;
+        }
+      }
+      
       if (data) {
         setSubscription({
           id: data.id,
@@ -56,21 +75,37 @@ export const useSubscription = () => {
     }
   };
 
+  const fetchUsageCount = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('tool_usage')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('tool_type', 'bio_generator');
+
+      if (error) throw error;
+      setUsageCount(data?.length || 0);
+    } catch (error) {
+      console.error('Error fetching usage count:', error);
+    }
+  };
+
   const canUseTool = async (toolType: 'cover_letter' | 'bio_generator'): Promise<boolean> => {
     if (!user) return false;
 
-    try {
-      const { data, error } = await supabase.rpc('can_use_tool', {
-        user_id_param: user.id,
-        tool_type_param: toolType
-      });
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error checking tool usage:', error);
-      return false;
+    // If user has an active paid subscription, they can use the tool
+    if (subscription && subscription.plan_type !== 'free') {
+      return true;
     }
+
+    // For free users, check if they've used their allocation
+    if (toolType === 'bio_generator') {
+      return usageCount < 1;
+    }
+
+    return false;
   };
 
   const recordUsage = async (toolType: 'cover_letter' | 'bio_generator') => {
@@ -86,8 +121,8 @@ export const useSubscription = () => {
 
       if (error) throw error;
       
-      // Refresh subscription data after recording usage
-      await fetchSubscription();
+      // Refresh usage count
+      await fetchUsageCount();
     } catch (error) {
       console.error('Error recording usage:', error);
     }
@@ -106,6 +141,7 @@ export const useSubscription = () => {
         expiresAt = new Date();
         expiresAt.setMonth(expiresAt.getMonth() + 1);
       }
+      // lifetime has no expiration (null)
 
       // Deactivate current subscription
       await supabase
@@ -126,9 +162,16 @@ export const useSubscription = () => {
       if (error) throw error;
 
       await fetchSubscription();
+      
+      const planNames = {
+        daily: '24-hour access',
+        monthly: 'monthly plan',
+        lifetime: 'lifetime access'
+      };
+      
       toast({
-        title: "Subscription upgraded",
-        description: `You now have ${planType} access!`
+        title: "Subscription upgraded!",
+        description: `You now have ${planNames[planType]}. Enjoy unlimited bio generation!`
       });
       
       return true;
@@ -143,12 +186,48 @@ export const useSubscription = () => {
     }
   };
 
+  const getRemainingTime = () => {
+    if (!subscription || !subscription.expires_at) return null;
+    
+    const expiresAt = new Date(subscription.expires_at);
+    const now = new Date();
+    const timeLeft = expiresAt.getTime() - now.getTime();
+    
+    if (timeLeft <= 0) return null;
+    
+    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      return `${days} day${days !== 1 ? 's' : ''} remaining`;
+    }
+    
+    return `${hours}h ${minutes}m remaining`;
+  };
+
+  const getPlanDisplayName = () => {
+    if (!subscription) return 'Free';
+    
+    const names = {
+      free: 'Free',
+      daily: '24-Hour Access',
+      monthly: 'Monthly Plan',
+      lifetime: 'Lifetime Access'
+    };
+    
+    return names[subscription.plan_type];
+  };
+
   return {
     subscription,
     loading,
+    usageCount,
     canUseTool,
     recordUsage,
     upgradeSubscription,
-    refetch: fetchSubscription
+    refetch: fetchSubscription,
+    getRemainingTime,
+    getPlanDisplayName
   };
 };
