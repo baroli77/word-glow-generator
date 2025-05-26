@@ -57,7 +57,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                     {template.name}
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {template.description}
+                    {template.category} - {template.platform}
                   </p>
                   <div className="mt-3 p-3 bg-muted/50 rounded-md">
                     <p className="text-sm italic">
