@@ -1,8 +1,7 @@
-
 export interface BaseBioFormData {
   name: string;
   profession: string;
-  tone: 'professional' | 'casual' | 'enthusiastic' | 'friendly' | 'confident';
+  tone: 'professional' | 'casual' | 'enthusiastic' | 'friendly' | 'confident' | 'funny';
   platform: string;
   charLimit: boolean;
   customCharCount: number;
@@ -82,7 +81,8 @@ export const toneOptions = [
   { value: 'casual' as const, label: 'Casual' },
   { value: 'enthusiastic' as const, label: 'Enthusiastic' },
   { value: 'friendly' as const, label: 'Friendly' },
-  { value: 'confident' as const, label: 'Confident' }
+  { value: 'confident' as const, label: 'Confident' },
+  { value: 'funny' as const, label: 'Funny' }
 ];
 
 export const platformOptions = [

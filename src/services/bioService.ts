@@ -1,4 +1,3 @@
-
 import { generateWithAI } from "./supabaseService";
 import { toast } from "@/components/ui/use-toast";
 import { BioFormData } from "../components/bio-generator/types";
@@ -157,33 +156,64 @@ export function simulateBioGeneration(formData: BioFormData): string {
   const category = getPlatformCategory(formData.platform);
   let simulatedBio = '';
   
-  switch(category) {
-    case 'professional':
-      simulatedBio = `${formData.profession} with a ${formData.tone} approach to work. 
-      ${('experience' in formData && formData.experience) ? `Experienced in ${formData.experience}. ` : ''}
-      Always looking for new opportunities to grow and make an impact.`;
-      break;
-      
-    case 'social':
-      simulatedBio = `${formData.profession} ✨
-      ${('interests' in formData && formData.interests) ? `${formData.interests} enthusiast` : ''}
-      Living life with a ${formData.tone} vibe 📸`;
-      break;
-      
-    case 'content':
-      simulatedBio = `Creating ${formData.tone} content on ${formData.platform}
-      ${('interests' in formData && formData.interests) ? `${formData.interests} ` : ''}
-      Join the journey! 🎬`;
-      break;
-      
-    case 'dating':
-      simulatedBio = `${formData.profession} with a ${formData.tone} personality.
-      ${('interests' in formData && formData.interests) ? `Love ${formData.interests}. ` : ''}
-      Looking for genuine connections.`;
-      break;
-      
-    default:
-      simulatedBio = `${formData.name} - ${formData.profession}. ${formData.tone} and authentic.`;
+  if (formData.tone === 'funny') {
+    switch(category) {
+      case 'professional':
+        simulatedBio = `${formData.profession} by day, ${('interests' in formData && formData.interests) ? `${formData.interests} enthusiast` : 'human being'} by night. 
+        ${('experience' in formData && formData.experience) ? `${formData.experience} survivor. ` : ''}
+        Still figuring out adulting, but excellent at pretending I know what I'm doing.`;
+        break;
+        
+      case 'social':
+        simulatedBio = `${formData.profession} 😎
+        ${('interests' in formData && formData.interests) ? `${formData.interests} addict` : 'Professional overthinker'} 
+        Warning: May contain traces of sarcasm 🚨`;
+        break;
+        
+      case 'content':
+        simulatedBio = `Making ${formData.tone} content that nobody asked for but everyone needs
+        ${('interests' in formData && formData.interests) ? `${formData.interests} ` : ''}
+        Subscribe for questionable life choices! 😂`;
+        break;
+        
+      case 'dating':
+        simulatedBio = `${formData.profession} with a PhD in overthinking.
+        ${('interests' in formData && formData.interests) ? `Love ${formData.interests} and ` : ''}terrible at writing bios apparently.
+        Swipe right if you appreciate dad jokes and can handle my weirdness.`;
+        break;
+        
+      default:
+        simulatedBio = `${formData.name} - ${formData.profession}. Professionally ${formData.tone}, personally a mess.`;
+    }
+  } else {
+    switch(category) {
+      case 'professional':
+        simulatedBio = `${formData.profession} with a ${formData.tone} approach to work. 
+        ${('experience' in formData && formData.experience) ? `Experienced in ${formData.experience}. ` : ''}
+        Always looking for new opportunities to grow and make an impact.`;
+        break;
+        
+      case 'social':
+        simulatedBio = `${formData.profession} ✨
+        ${('interests' in formData && formData.interests) ? `${formData.interests} enthusiast` : ''}
+        Living life with a ${formData.tone} vibe 📸`;
+        break;
+        
+      case 'content':
+        simulatedBio = `Creating ${formData.tone} content on ${formData.platform}
+        ${('interests' in formData && formData.interests) ? `${formData.interests} ` : ''}
+        Join the journey! 🎬`;
+        break;
+        
+      case 'dating':
+        simulatedBio = `${formData.profession} with a ${formData.tone} personality.
+        ${('interests' in formData && formData.interests) ? `Love ${formData.interests}. ` : ''}
+        Looking for genuine connections.`;
+        break;
+        
+      default:
+        simulatedBio = `${formData.name} - ${formData.profession}. ${formData.tone} and authentic.`;
+    }
   }
   
   // Apply character limit if enabled
