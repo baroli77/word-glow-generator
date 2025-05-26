@@ -1,7 +1,5 @@
 
 import { toast } from "@/components/ui/use-toast";
-import mammoth from 'mammoth';
-import JSZip from 'jszip';
 
 interface ParsedFile {
   content: string;
@@ -97,6 +95,7 @@ async function parsePDF(file: File): Promise<ParsedFile> {
 
 async function fallbackParseDOCX(file: File): Promise<string> {
   try {
+    const JSZip = (await import('jszip')).default;
     const zip = new JSZip();
     const loadedZip = await zip.loadAsync(file);
     const xml = await loadedZip.file("word/document.xml")?.async("string");
@@ -110,7 +109,8 @@ async function fallbackParseDOCX(file: File): Promise<string> {
 
 async function parseDOCX(file: File): Promise<ParsedFile> {
   try {
-    // Use static import for mammoth
+    // Use dynamic import to avoid module loading issues
+    const mammoth = await import('mammoth');
     const arrayBuffer = await file.arrayBuffer();
     
     // First try to extract raw text
