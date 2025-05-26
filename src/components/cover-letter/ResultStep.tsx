@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Copy, Download, Sparkles, Save } from 'lucide-react';
+import { Copy, Download, Sparkles, Save, Printer } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { saveCoverLetter } from '@/services/supabaseService';
 import { useAuth } from '@/context/AuthContext';
@@ -57,6 +57,85 @@ const ResultStep: React.FC<ResultStepProps> = ({
       toast({
         title: "Cover Letter Saved",
         description: "Your cover letter has been saved to your dashboard.",
+      });
+    }
+  };
+
+  const handlePrint = () => {
+    if (!hasValidContent) return;
+    
+    try {
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Could not open print window');
+      }
+
+      // Generate HTML content for printing
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Cover Letter</title>
+            <style>
+              @media print {
+                body {
+                  font-family: 'Times New Roman', serif;
+                  line-height: 1.6;
+                  max-width: 8.5in;
+                  margin: 0;
+                  padding: 1in;
+                  color: #000;
+                  font-size: 12pt;
+                }
+                .cover-letter {
+                  white-space: pre-wrap;
+                }
+                @page {
+                  margin: 1in;
+                }
+              }
+              body {
+                font-family: 'Times New Roman', serif;
+                line-height: 1.6;
+                max-width: 8.5in;
+                margin: 0 auto;
+                padding: 1in;
+                color: #000;
+                font-size: 12pt;
+              }
+              .cover-letter {
+                white-space: pre-wrap;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="cover-letter">${generatedLetter.replace(/\n/g, '<br>')}</div>
+          </body>
+        </html>
+      `;
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Wait for content to load, then trigger print
+      printWindow.onload = () => {
+        printWindow.print();
+        printWindow.onafterprint = () => {
+          printWindow.close();
+        };
+      };
+      
+      toast({
+        title: "Print Dialog Opened",
+        description: "Your cover letter is ready to print.",
+      });
+    } catch (error) {
+      console.error('Print error:', error);
+      toast({
+        title: "Print Failed",
+        description: "Could not open print dialog. Please try copying the text and printing manually.",
+        variant: "destructive",
       });
     }
   };
@@ -179,6 +258,10 @@ const ResultStep: React.FC<ResultStepProps> = ({
               <Copy className="w-4 h-4 mr-2" />
               Copy to Clipboard
             </Button>
+            <Button variant="outline" onClick={handlePrint} disabled={!hasValidContent}>
+              <Printer className="w-4 h-4 mr-2" />
+              Print
+            </Button>
             <Button variant="outline" onClick={handleDownload} disabled={!hasValidContent}>
               <Download className="w-4 h-4 mr-2" />
               Download PDF
@@ -239,15 +322,6 @@ const ResultStep: React.FC<ResultStepProps> = ({
           )}
         </TabsContent>
       </Tabs>
-      
-      <div className="pt-8 flex justify-between">
-        <Button variant="outline" onClick={() => setStep(2)}>
-          Back to Settings
-        </Button>
-        <Button onClick={() => setStep(1)}>
-          Create Another Cover Letter
-        </Button>
-      </div>
     </div>
   );
 };
