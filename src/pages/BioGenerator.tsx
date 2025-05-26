@@ -1,12 +1,42 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BioGeneratorForm from '../components/BioGeneratorForm';
 import UsageCounter from '../components/UsageCounter';
 import InfoBadge from '../components/InfoBadge';
+import { useAuth } from '@/context/AuthContext';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const BioGenerator = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login');
+    }
+  }, [user, loading, navigate]);
+
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow flex items-center justify-center">
+          <LoadingSpinner />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Don't render the page if user is not authenticated
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
