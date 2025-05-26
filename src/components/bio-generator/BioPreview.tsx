@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Copy, Download, Share2, Sparkles } from 'lucide-react';
+import { Copy, Download, Sparkles } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 
 interface BioPreviewProps {
@@ -51,24 +51,6 @@ const BioPreview: React.FC<BioPreviewProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const handleShare = async () => {
-    if (!bio) return;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'My Bio',
-          text: bio,
-        });
-      } catch (error) {
-        // User cancelled or sharing failed
-        handleCopy();
-      }
-    } else {
-      handleCopy();
-    }
-  };
-
   const isOverLimit = charLimit && customCharCount > 0 && bio.length > customCharCount;
 
   return (
@@ -102,10 +84,6 @@ const BioPreview: React.FC<BioPreviewProps> = ({
         <Button variant="outline" onClick={handleDownload} disabled={!bio}>
           <Download className="w-4 h-4 mr-2" />
           Download
-        </Button>
-        <Button variant="outline" onClick={handleShare} disabled={!bio}>
-          <Share2 className="w-4 h-4 mr-2" />
-          Share
         </Button>
       </div>
       
