@@ -7,7 +7,7 @@ import BioGeneratorForm from '../components/BioGeneratorForm';
 import UsageCounter from '../components/UsageCounter';
 import InfoBadge from '../components/InfoBadge';
 import { useAuth } from '@/context/AuthContext';
-import { LoadingSpinner } from '../components/LoadingSpinner';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const BioGenerator = () => {
   const { user, loading } = useAuth();
