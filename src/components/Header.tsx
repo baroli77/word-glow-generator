@@ -1,169 +1,101 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Link } from 'react-router-dom';
-import { Sparkles, Menu, X, Shield } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '@/context/AdminContext';
+import ThemeToggle from './ThemeToggle';
+import { LogOut, Settings, Shield } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-const Header: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isMobile = useIsMobile();
+const Header = () => {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
-    setIsMenuOpen(false);
+    navigate('/');
   };
 
   return (
-    <header className="w-full py-4 px-4 sm:px-6 flex items-center justify-between border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="flex items-center">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="font-serif text-xl sm:text-2xl font-bold text-gradient">WordCraft</span>
+    <header className="bg-background border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <Link to="/" className="flex items-center space-x-2">
+          <h1 className="font-serif text-2xl font-bold text-gradient">WordCraft</h1>
         </Link>
-      </div>
-      
-      {/* Desktop Navigation */}
-      <nav className="hidden lg:flex items-center gap-6">
-        <Link to="/" className="text-foreground/80 hover:text-foreground transition-colors">
-          Home
-        </Link>
-        <Link to="/bio-generator" className="text-foreground/80 hover:text-foreground transition-colors">
-          Bio Generator
-        </Link>
-        <Link to="/cover-letter" className="text-foreground/80 hover:text-foreground transition-colors">
-          Cover Letter
-        </Link>
-        {user && (
-          <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
-            Dashboard
+        
+        <nav className="hidden md:flex items-center space-x-6">
+          <Link to="/bio-generator" className="text-muted-foreground hover:text-foreground transition-colors">
+            Bio Generator
           </Link>
-        )}
-        {isAdmin && (
-          <Link to="/admin" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1">
-            <Shield className="w-4 h-4" />
-            Admin
+          <Link to="/cover-letter" className="text-muted-foreground hover:text-foreground transition-colors">
+            Cover Letter
           </Link>
-        )}
-        <Link to="/pricing" className="text-foreground/80 hover:text-foreground transition-colors">
-          Pricing
-        </Link>
-      </nav>
-      
-      {/* Desktop Actions */}
-      <div className="hidden lg:flex items-center gap-3">
-        <ThemeToggle />
-        {user ? (
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
-            Sign Out
-          </Button>
-        ) : (
-          <>
-            <Link to="/login">
-              <Button variant="outline" size="sm">Login</Button>
-            </Link>
-            <Link to="/signup">
-              <Button size="sm" className="bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Sign Up
-              </Button>
-            </Link>
-          </>
-        )}
-      </div>
-
-      {/* Mobile Menu Button */}
-      <div className="flex lg:hidden items-center gap-2">
-        <ThemeToggle />
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={toggleMenu}
-          className="w-9 h-9"
-        >
-          {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </Button>
-      </div>
-
-      {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="absolute top-full left-0 right-0 bg-background border-b border-border/40 lg:hidden">
-          <nav className="flex flex-col p-4 space-y-4">
-            <Link 
-              to="/" 
-              className="text-foreground/80 hover:text-foreground transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/bio-generator" 
-              className="text-foreground/80 hover:text-foreground transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Bio Generator
-            </Link>
-            <Link 
-              to="/cover-letter" 
-              className="text-foreground/80 hover:text-foreground transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Cover Letter
-            </Link>
-            {user && (
-              <Link 
-                to="/dashboard" 
-                className="text-foreground/80 hover:text-foreground transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-            )}
-            {isAdmin && (
-              <Link 
-                to="/admin" 
-                className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Shield className="w-4 h-4" />
-                Admin Dashboard
-              </Link>
-            )}
-            <Link 
-              to="/pricing" 
-              className="text-foreground/80 hover:text-foreground transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Pricing
-            </Link>
-            <div className="flex flex-col gap-3 pt-4 border-t border-border/40">
-              {user ? (
-                <Button variant="outline" className="w-full" onClick={handleSignOut}>
-                  Sign Out
+          <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+            About
+          </Link>
+          <Link to="/faq" className="text-muted-foreground hover:text-foreground transition-colors">
+            FAQ
+          </Link>
+          <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+            Pricing
+          </Link>
+        </nav>
+        
+        <div className="flex items-center space-x-4">
+          <ThemeToggle />
+          
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center space-x-2">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-wordcraft-purple to-wordcraft-pink flex items-center justify-center text-white text-sm font-bold">
+                    {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                  </div>
+                  <span className="hidden sm:inline">{user.user_metadata?.full_name || user.email}</span>
                 </Button>
-              ) : (
-                <>
-                  <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                    <Button variant="outline" className="w-full">Login</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard" className="flex items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Dashboard
                   </Link>
-                  <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                    <Button className="w-full bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Sign Up
-                    </Button>
-                  </Link>
-                </>
-              )}
+                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="flex items-center">
+                      <Shield className="mr-2 h-4 w-4" />
+                      Admin Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <Link to="/login">
+                <Button variant="ghost">Sign In</Button>
+              </Link>
+              <Link to="/signup">
+                <Button>Sign Up</Button>
+              </Link>
             </div>
-          </nav>
+          )}
         </div>
-      )}
+      </div>
     </header>
   );
 };

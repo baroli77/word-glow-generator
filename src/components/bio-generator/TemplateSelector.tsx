@@ -1,78 +1,70 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sparkles } from 'lucide-react';
-import { BioTemplate, getTemplatesForPlatform, generateFromTemplate } from './utils/templates';
-import { BioFormData } from './types';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { templates } from './utils/templates';
 
 interface TemplateSelectorProps {
-  formData: BioFormData;
-  onTemplateSelect: (bio: string) => void;
-  onSkip: () => void;
+  selectedTemplate: string;
+  onTemplateChange: (template: string) => void;
 }
 
 const TemplateSelector: React.FC<TemplateSelectorProps> = ({
-  formData,
-  onTemplateSelect,
-  onSkip
+  selectedTemplate,
+  onTemplateChange
 }) => {
-  const templates = getTemplatesForPlatform(formData.platform);
-
-  const handleTemplateSelect = (template: BioTemplate) => {
-    const generatedBio = generateFromTemplate(template, formData);
-    onTemplateSelect(generatedBio);
-  };
-
-  if (templates.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground mb-4">No templates available for this platform yet.</p>
-        <Button onClick={onSkip}>Continue with AI Generation</Button>
-      </div>
-    );
-  }
-
   return (
-    <div className="animate-fade-in">
-      <div className="text-center mb-6">
-        <h3 className="text-lg font-medium mb-2">Choose a Starting Template</h3>
-        <p className="text-muted-foreground">
-          Select a template to get started, or skip to use AI generation
+    <div className="space-y-4">
+      <div>
+        <h3 className="text-lg font-medium mb-2">Choose a Template Style</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Select a template that matches your desired tone and style
         </p>
       </div>
 
-      <div className="grid gap-4 mb-6">
-        {templates.map((template) => (
-          <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">{template.name}</CardTitle>
-              <CardDescription className="text-sm">
-                Perfect for {template.category.toLowerCase()} profiles
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="bg-muted p-3 rounded text-sm mb-3 font-mono">
-                {template.example}
+      <RadioGroup value={selectedTemplate} onValueChange={onTemplateChange}>
+        <div className="grid gap-4">
+          {templates.map((template) => (
+            <Card key={template.id} className="p-4">
+              <div className="flex items-start space-x-3">
+                <RadioGroupItem 
+                  value={template.id} 
+                  id={template.id}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <Label 
+                    htmlFor={template.id}
+                    className="text-base font-medium cursor-pointer"
+                  >
+                    {template.name}
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {template.description}
+                  </p>
+                  <div className="mt-3 p-3 bg-muted/50 rounded-md">
+                    <p className="text-sm italic">
+                      "{template.example}"
+                    </p>
+                  </div>
+                </div>
               </div>
-              <Button 
-                onClick={() => handleTemplateSelect(template)}
-                className="w-full"
-                variant="outline"
-              >
-                Use This Template
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      </RadioGroup>
 
-      <div className="text-center">
-        <Button onClick={onSkip} variant="outline">
-          <Sparkles className="w-4 h-4 mr-2" />
-          Skip Templates - Use AI Generation
-        </Button>
-      </div>
+      <Card className="p-4 bg-card border border-border">
+        <div className="flex items-start space-x-3">
+          <div className="flex-1">
+            <h4 className="font-medium text-sm">Quick Start Option</h4>
+            <p className="text-xs text-muted-foreground mt-1">
+              Don't worry about choosing the perfect template now - you can always regenerate your bio with a different style later!
+            </p>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };

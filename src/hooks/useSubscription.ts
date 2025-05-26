@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useAdmin } from '@/context/AdminContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/components/ui/use-toast";
 
@@ -13,6 +14,7 @@ interface Subscription {
 
 export const useSubscription = () => {
   const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [usageCount, setUsageCount] = useState(0);
@@ -94,6 +96,11 @@ export const useSubscription = () => {
 
   const canUseTool = async (toolType: 'cover_letter' | 'bio_generator'): Promise<boolean> => {
     if (!user) return false;
+
+    // Admin users have unlimited access
+    if (isAdmin) {
+      return true;
+    }
 
     // If user has an active paid subscription, they can use the tool
     if (subscription && subscription.plan_type !== 'free') {
@@ -207,6 +214,11 @@ export const useSubscription = () => {
   };
 
   const getPlanDisplayName = () => {
+    // Admin users get special treatment
+    if (isAdmin) {
+      return 'Admin (Unlimited)';
+    }
+    
     if (!subscription) return 'Free';
     
     const names = {
