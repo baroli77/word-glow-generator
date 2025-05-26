@@ -2,15 +2,24 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
-import { Sparkles, Menu, X } from 'lucide-react';
+import { Sparkles, Menu, X, Shield } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/context/AuthContext';
+import { useAdmin } from '@/context/AdminContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsMenuOpen(false);
+  };
 
   return (
     <header className="w-full py-4 px-4 sm:px-6 flex items-center justify-between border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -31,9 +40,17 @@ const Header: React.FC = () => {
         <Link to="/cover-letter" className="text-foreground/80 hover:text-foreground transition-colors">
           Cover Letter
         </Link>
-        <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
-          Dashboard
-        </Link>
+        {user && (
+          <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
+            Dashboard
+          </Link>
+        )}
+        {isAdmin && (
+          <Link to="/admin" className="text-foreground/80 hover:text-foreground transition-colors flex items-center gap-1">
+            <Shield className="w-4 h-4" />
+            Admin
+          </Link>
+        )}
         <Link to="/pricing" className="text-foreground/80 hover:text-foreground transition-colors">
           Pricing
         </Link>
@@ -42,15 +59,23 @@ const Header: React.FC = () => {
       {/* Desktop Actions */}
       <div className="hidden lg:flex items-center gap-3">
         <ThemeToggle />
-        <Link to="/login">
-          <Button variant="outline" size="sm">Login</Button>
-        </Link>
-        <Link to="/signup">
-          <Button size="sm" className="bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Sign Up
+        {user ? (
+          <Button variant="outline" size="sm" onClick={handleSignOut}>
+            Sign Out
           </Button>
-        </Link>
+        ) : (
+          <>
+            <Link to="/login">
+              <Button variant="outline" size="sm">Login</Button>
+            </Link>
+            <Link to="/signup">
+              <Button size="sm" className="bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Sign Up
+              </Button>
+            </Link>
+          </>
+        )}
       </div>
 
       {/* Mobile Menu Button */}
@@ -91,13 +116,25 @@ const Header: React.FC = () => {
             >
               Cover Letter
             </Link>
-            <Link 
-              to="/dashboard" 
-              className="text-foreground/80 hover:text-foreground transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Dashboard
-            </Link>
+            {user && (
+              <Link 
+                to="/dashboard" 
+                className="text-foreground/80 hover:text-foreground transition-colors py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+            )}
+            {isAdmin && (
+              <Link 
+                to="/admin" 
+                className="text-foreground/80 hover:text-foreground transition-colors py-2 flex items-center gap-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Shield className="w-4 h-4" />
+                Admin Dashboard
+              </Link>
+            )}
             <Link 
               to="/pricing" 
               className="text-foreground/80 hover:text-foreground transition-colors py-2"
@@ -106,15 +143,23 @@ const Header: React.FC = () => {
               Pricing
             </Link>
             <div className="flex flex-col gap-3 pt-4 border-t border-border/40">
-              <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="outline" className="w-full">Login</Button>
-              </Link>
-              <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                <Button className="w-full bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Sign Up
+              {user ? (
+                <Button variant="outline" className="w-full" onClick={handleSignOut}>
+                  Sign Out
                 </Button>
-              </Link>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                    <Button variant="outline" className="w-full">Login</Button>
+                  </Link>
+                  <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                    <Button className="w-full bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink hover:opacity-90">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>
