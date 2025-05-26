@@ -11,6 +11,9 @@ interface Subscription {
   is_active: boolean;
 }
 
+const EXPIRATION_CHECK_KEY = 'lastExpirationCheck';
+const CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour in milliseconds
+
 export const useSubscription = () => {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -19,6 +22,51 @@ export const useSubscription = () => {
 
   // Check if user is admin
   const isAdminUser = user?.email === 'obarton77@gmail.com';
+
+  // Client-side expiration cleanup function
+  const runExpirationCleanup = useCallback(async () => {
+    try {
+      // Get current session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log('No session available for expiration cleanup');
+        return;
+      }
+
+      // Check if enough time has passed since last run
+      const lastCheck = localStorage.getItem(EXPIRATION_CHECK_KEY);
+      const now = Date.now();
+      
+      if (lastCheck && (now - parseInt(lastCheck)) < CHECK_INTERVAL_MS) {
+        console.log('Expiration cleanup skipped - not enough time passed');
+        return;
+      }
+
+      // Call the edge function
+      const response = await fetch('https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/expire-daily-subscriptions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        console.log('Expiration cleanup completed successfully');
+        // Update the last check timestamp
+        localStorage.setItem(EXPIRATION_CHECK_KEY, now.toString());
+        
+        // Refresh subscription data after cleanup
+        await fetchSubscription();
+      } else {
+        console.error('Expiration cleanup failed:', response.status, response.statusText);
+      }
+    } catch (error) {
+      // Fail silently as requested
+      console.error('Error during expiration cleanup:', error);
+    }
+  }, []);
 
   const fetchSubscription = useCallback(async () => {
     if (!user) {
@@ -131,12 +179,15 @@ export const useSubscription = () => {
     if (user) {
       fetchSubscription();
       fetchUsageCount();
+      
+      // Run expiration cleanup on user login
+      runExpirationCleanup();
     } else {
       setSubscription(null);
       setUsageCount(0);
       setLoading(false);
     }
-  }, [user, fetchSubscription]);
+  }, [user, fetchSubscription, runExpirationCleanup]);
 
   // Set up automatic revalidation for daily subscriptions
   useEffect(() => {
@@ -155,6 +206,17 @@ export const useSubscription = () => {
 
     return () => clearInterval(interval);
   }, [subscription, fetchSubscription]);
+
+  // Set up periodic expiration cleanup (runs every hour when component is mounted)
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(() => {
+      runExpirationCleanup();
+    }, CHECK_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [user, runExpirationCleanup]);
 
   const canUseTool = async (toolType: 'cover_letter' | 'bio_generator'): Promise<boolean> => {
     if (!user) return false;

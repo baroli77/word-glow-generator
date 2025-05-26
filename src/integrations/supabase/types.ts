@@ -199,6 +199,10 @@ export type Database = {
         Args: { user_id_param: string; tool_type_param: string }
         Returns: boolean
       }
+      expire_old_daily_plans: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_all_users_admin: {
         Args: Record<PropertyKey, never>
         Returns: {
