@@ -21,7 +21,7 @@ export const useBioForm = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  const updatePlatform = useCallback((platform: string) => {
+  const updatePlatform = useCallback((platform: BioFormData['platform']) => {
     const baseData: Partial<BioFormData> = {
       name: formData.name,
       profession: formData.profession,
