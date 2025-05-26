@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import PricingModal from './PricingModal';
 
 // Import components
 import PlatformSelector from './bio-generator/PlatformSelector';
@@ -17,6 +18,8 @@ import TemplateSelector from './bio-generator/TemplateSelector';
 import { useBioForm } from './bio-generator/hooks/useBioForm';
 import { generateBio, simulateBioGeneration } from '../services/bioService';
 import { validateBioForm, ValidationError } from './bio-generator/utils/validation';
+import { useSubscription } from '@/hooks/useSubscription';
+import { useAuth } from '@/context/AuthContext';
 
 const BioGeneratorForm: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -24,7 +27,10 @@ const BioGeneratorForm: React.FC = () => {
   const [generatedBio, setGeneratedBio] = useState('');
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const { formData, updateField, updatePlatform, resetForm } = useBioForm();
+  const { user } = useAuth();
+  const { canUseTool, recordUsage, refetch } = useSubscription();
   
   const handleNext = () => {
     if (step === 2) {
@@ -60,6 +66,13 @@ const BioGeneratorForm: React.FC = () => {
   };
   
   const handleGenerate = async () => {
+    // Check if user can use the tool
+    const hasAccess = await canUseTool('bio_generator');
+    if (!hasAccess) {
+      setShowPricingModal(true);
+      return;
+    }
+
     // Final validation
     const validation = validateBioForm(formData);
     if (!validation.isValid) {
@@ -87,6 +100,9 @@ const BioGeneratorForm: React.FC = () => {
       } else {
         setGeneratedBio(response.content);
       }
+
+      // Record usage after successful generation
+      await recordUsage('bio_generator');
       
       setStep(4);
     } catch (error) {
@@ -100,6 +116,13 @@ const BioGeneratorForm: React.FC = () => {
   };
   
   const handleRegenerate = async () => {
+    // Check if user can use the tool
+    const hasAccess = await canUseTool('bio_generator');
+    if (!hasAccess) {
+      setShowPricingModal(true);
+      return;
+    }
+
     setLoading(true);
     
     try {
@@ -135,6 +158,11 @@ const BioGeneratorForm: React.FC = () => {
     updateField(field, value);
     // Clear validation error for this field when user starts typing
     setValidationErrors(prev => prev.filter(error => error.field !== field));
+  };
+
+  const handleUpgradeComplete = () => {
+    refetch(); // Refresh subscription data
+    setShowPricingModal(false);
   };
 
   return (
@@ -294,6 +322,13 @@ const BioGeneratorForm: React.FC = () => {
           </div>
         </div>
       )}
+
+      <PricingModal
+        isOpen={showPricingModal}
+        onClose={() => setShowPricingModal(false)}
+        toolName="Bio Generator"
+        onUpgradeComplete={handleUpgradeComplete}
+      />
     </div>
   );
 };

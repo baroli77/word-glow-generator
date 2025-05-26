@@ -3,6 +3,7 @@ import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BioGeneratorForm from '../components/BioGeneratorForm';
+import UsageCounter from '../components/UsageCounter';
 import InfoBadge from '../components/InfoBadge';
 
 const BioGenerator = () => {
@@ -24,7 +25,7 @@ const BioGenerator = () => {
                 <p className="text-sm flex items-center">
                   <span className="bg-wordcraft-purple text-white rounded-full p-1 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09-3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09-3.09Z" />
                     </svg>
                   </span>
                   Powered by OpenAI's advanced GPT-4o-mini model
@@ -34,6 +35,11 @@ const BioGenerator = () => {
                 </p>
               </div>
             </div>
+            
+            <UsageCounter 
+              toolType="bio_generator" 
+              toolDisplayName="Bio Generator" 
+            />
             
             <BioGeneratorForm />
           </div>
