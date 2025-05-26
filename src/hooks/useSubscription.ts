@@ -37,7 +37,18 @@ export const useSubscription = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-      setSubscription(data);
+      
+      // Type-safe assignment with proper casting
+      if (data) {
+        setSubscription({
+          id: data.id,
+          plan_type: data.plan_type as 'free' | 'daily' | 'monthly' | 'lifetime',
+          expires_at: data.expires_at,
+          is_active: data.is_active
+        });
+      } else {
+        setSubscription(null);
+      }
     } catch (error) {
       console.error('Error fetching subscription:', error);
     } finally {
