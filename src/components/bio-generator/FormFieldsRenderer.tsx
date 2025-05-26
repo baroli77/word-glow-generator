@@ -21,6 +21,8 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
     return errors.find(error => error.field === fieldName)?.message;
   };
 
+  const isProfessionalPlatform = ['linkedin', 'resume', 'portfolio', 'twitter'].includes(formData.platform);
+
   const renderCommonFields = () => (
     <>
       <ValidatedFormField
@@ -36,18 +38,20 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
         helpText="Your full name as you want it to appear"
       />
       
-      <ValidatedFormField
-        id="profession"
-        name="profession"
-        label="Profession/Title"
-        value={formData.profession}
-        onChange={(value) => onFieldChange('profession', value)}
-        placeholder="What you do"
-        maxLength={150}
-        required
-        error={getFieldError('profession')}
-        helpText="Your current role, title, or what you do professionally"
-      />
+      {isProfessionalPlatform && (
+        <ValidatedFormField
+          id="profession"
+          name="profession"
+          label="Profession/Title"
+          value={formData.profession}
+          onChange={(value) => onFieldChange('profession', value)}
+          placeholder="What you do professionally"
+          maxLength={150}
+          required
+          error={getFieldError('profession')}
+          helpText="Your current role, title, or what you do professionally"
+        />
+      )}
     </>
   );
 
@@ -102,6 +106,8 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
       case 'twitter':
       case 'instagram':
       case 'threads':
+      case 'facebook':
+      case 'snapchat':
         const socialData = formData as any;
         return (
           <>
@@ -119,15 +125,15 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
             <ValidatedFormField
               id="funFacts"
               name="funFacts"
-              label="Fun Facts/Hashtags"
+              label="Fun Facts/Quirks"
               value={socialData.funFacts || ''}
               onChange={(value) => onFieldChange('funFacts', value)}
-              placeholder="Additional facts or hashtags you want to include..."
+              placeholder="Something unique or interesting about you..."
               type="textarea"
               rows={3}
               maxLength={150}
               error={getFieldError('funFacts')}
-              helpText="Quirky facts, emojis, or hashtags that represent you"
+              helpText="Quirky facts, emojis, or personal details that make you memorable"
             />
           </>
         );
@@ -176,9 +182,56 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
             />
           </>
         );
+
+      case 'youtube':
+      case 'tiktok':
+      case 'twitch':
+        const contentData = formData as any;
+        return (
+          <>
+            <ValidatedFormField
+              id="content"
+              name="content"
+              label="Content Type"
+              value={contentData.content || ''}
+              onChange={(value) => onFieldChange('content', value)}
+              placeholder="gaming, tutorials, comedy, lifestyle, etc."
+              maxLength={100}
+              error={getFieldError('content')}
+              helpText="What type of content do you create?"
+            />
+            <ValidatedFormField
+              id="interests"
+              name="interests"
+              label="Topics/Niche"
+              value={contentData.interests || ''}
+              onChange={(value) => onFieldChange('interests', value)}
+              placeholder="Your main topics or niche areas..."
+              type="textarea"
+              rows={2}
+              maxLength={150}
+              error={getFieldError('interests')}
+              helpText="What themes or topics do you focus on?"
+            />
+          </>
+        );
       
       default:
-        return null;
+        return (
+          <ValidatedFormField
+            id="interests"
+            name="interests"
+            label="Interests/About"
+            value={'interests' in formData ? (formData as any).interests || '' : ''}
+            onChange={(value) => onFieldChange('interests', value)}
+            placeholder="Tell us about yourself..."
+            type="textarea"
+            rows={3}
+            maxLength={200}
+            error={getFieldError('interests')}
+            helpText="Share what makes you unique"
+          />
+        );
     }
   };
 

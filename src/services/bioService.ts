@@ -10,7 +10,7 @@ export interface BioGenerationResponse {
 
 export async function generateBio(formData: BioFormData): Promise<BioGenerationResponse> {
   try {
-    const prompt = createBioPrompt(formData);
+    const prompt = createPlatformSpecificPrompt(formData);
     const response = await generateWithAI(prompt);
     
     if (response.error) {
@@ -44,88 +44,146 @@ export async function generateBio(formData: BioFormData): Promise<BioGenerationR
   }
 }
 
+function getPlatformCategory(platform: string): string {
+  const categories = {
+    professional: ['linkedin', 'resume', 'portfolio'],
+    social: ['instagram', 'facebook', 'threads', 'snapchat'],
+    content: ['youtube', 'tiktok', 'twitch', 'pinterest', 'reddit'],
+    dating: ['tinder', 'bumble', 'hinge', 'pof']
+  };
+
+  for (const [category, platforms] of Object.entries(categories)) {
+    if (platforms.includes(platform)) {
+      return category;
+    }
+  }
+  
+  // Twitter is special - treat as professional for now
+  if (platform === 'twitter') return 'professional';
+  
+  return 'professional'; // default fallback
+}
+
+function getQuirkFromFormData(formData: BioFormData): string {
+  // Extract quirk/unique info from form data based on platform
+  if ('interests' in formData && formData.interests) {
+    return formData.interests;
+  }
+  if ('funFacts' in formData && formData.funFacts) {
+    return formData.funFacts;
+  }
+  if ('achievements' in formData && formData.achievements) {
+    return formData.achievements;
+  }
+  if ('experience' in formData && formData.experience) {
+    return formData.experience;
+  }
+  
+  return 'their unique perspective and approach';
+}
+
+function createPlatformSpecificPrompt(formData: BioFormData): string {
+  const category = getPlatformCategory(formData.platform);
+  const tone = formData.tone;
+  const profession = formData.profession;
+  const quirk = getQuirkFromFormData(formData);
+  const platform = formData.platform;
+  
+  let basePrompt = '';
+  
+  switch (category) {
+    case 'professional':
+      basePrompt = `Write a short and punchy professional bio. This person is a ${profession}. 
+Tone: ${tone}. 
+Include something unique about them: ${quirk}. 
+Avoid buzzwords like 'passionate', 'dedicated', 'expert'. 
+No greetings or hashtags.`;
+      break;
+      
+    case 'social':
+      basePrompt = `Write a creative and casual social media bio. 
+Tone: ${tone}. 
+Include this detail: ${quirk}. 
+Use short fragments or emojis if relevant. 
+No intros or full sentences.`;
+      break;
+      
+    case 'content':
+      basePrompt = `Write a creator-style bio for ${platform}. 
+Tone: ${tone}. 
+Include this detail: ${quirk}. 
+Make it edgy, fun, or intriguing — whatever fits the tone.`;
+      break;
+      
+    case 'dating':
+      basePrompt = `Write a dating profile bio. 
+Tone: ${tone}. 
+Include this personal detail or quirk: ${quirk}. 
+Avoid generic statements like 'I love long walks on the beach'. 
+Be clever, human, and memorable.`;
+      break;
+      
+    default:
+      basePrompt = `Write a bio for ${platform}. 
+Tone: ${tone}. 
+Include this detail: ${quirk}.`;
+  }
+  
+  // Add character limit instruction if enabled
+  if (formData.charLimit && formData.customCharCount > 0) {
+    basePrompt += ` Max ${formData.customCharCount} characters.`;
+  }
+  
+  // Add final instructions
+  basePrompt += `
+
+Important: 
+- Do not include any intros like "Hi, I'm..." or endings like "Thanks for reading"
+- Keep it direct and authentic
+- Avoid corporate fluff and generic phrases
+- Make it feel human and genuine
+- Generate exactly one bio, nothing else`;
+
+  return basePrompt;
+}
+
+// Legacy function for backward compatibility
 export function createBioPrompt(formData: BioFormData): string {
-  const platformInfo = `Platform: ${formData.platform}`;
-  const personalInfo = `Name: ${formData.name}, Profession: ${formData.profession}`;
-  
-  let additionalInfo = '';
-  
-  // Type-safe access to platform-specific fields
-  if ('experience' in formData) {
-    additionalInfo += `Experience: ${formData.experience}`;
-  }
-  if ('achievements' in formData) {
-    additionalInfo += `, Achievements: ${formData.achievements}`;
-  }
-  if ('interests' in formData) {
-    additionalInfo += `, Interests: ${formData.interests}`;
-  }
-  if ('funFacts' in formData) {
-    additionalInfo += `, Fun Facts: ${formData.funFacts}`;
-  }
-  if ('lookingFor' in formData) {
-    additionalInfo += `, Looking For: ${formData.lookingFor}`;
-  }
-  if ('games' in formData) {
-    additionalInfo += `, Games: ${formData.games}`;
-  }
-  if ('schedule' in formData) {
-    additionalInfo += `, Schedule: ${formData.schedule}`;
-  }
-  if ('content' in formData) {
-    additionalInfo += `, Content: ${formData.content}`;
-  }
-  if ('communities' in formData) {
-    additionalInfo += `, Communities: ${formData.communities}`;
-  }
-  if ('niche' in formData) {
-    additionalInfo += `, Niche: ${formData.niche}`;
-  }
-  if ('style' in formData) {
-    additionalInfo += `, Style: ${formData.style}`;
-  }
-  
-  const toneInfo = `Tone: ${formData.tone}`;
-  const charLimit = formData.charLimit ? `Character Limit: ${formData.customCharCount}` : 'No character limit';
-  
-  return `
-    Please create a creative and engaging bio for ${formData.name} based on the following information:
-    
-    ${platformInfo}
-    ${personalInfo}
-    ${additionalInfo}
-    ${toneInfo}
-    ${charLimit}
-    
-    Please create a bio specifically for the ${formData.platform} platform, respecting its common formats and conventions.
-    Make it sound natural and authentic, not like an AI-generated template.
-    Do not include any explanations, just provide the bio text.
-  `;
+  return createPlatformSpecificPrompt(formData);
 }
 
 // Fallback simulation for when AI generation fails
 export function simulateBioGeneration(formData: BioFormData): string {
+  const category = getPlatformCategory(formData.platform);
   let simulatedBio = '';
   
-  switch(formData.platform) {
-    case 'linkedin':
-      simulatedBio = `I'm ${formData.name}, a ${formData.tone} ${formData.profession}. 
-      ${('experience' in formData && formData.experience) ? `With experience in ${formData.experience}, ` : ''}
-      I'm passionate about using my skills to make a difference and always looking for new opportunities to grow.`;
+  switch(category) {
+    case 'professional':
+      simulatedBio = `${formData.profession} with a ${formData.tone} approach to work. 
+      ${('experience' in formData && formData.experience) ? `Experienced in ${formData.experience}. ` : ''}
+      Always looking for new opportunities to grow and make an impact.`;
       break;
-    case 'twitter':
-      simulatedBio = `${formData.name} | ${formData.profession}
-      ${('interests' in formData && formData.interests) ? `Interested in ${formData.interests}` : ''}
-      Tweets about tech, insights, and occasional ${formData.tone} thoughts.`;
+      
+    case 'social':
+      simulatedBio = `${formData.profession} ✨
+      ${('interests' in formData && formData.interests) ? `${formData.interests} enthusiast` : ''}
+      Living life with a ${formData.tone} vibe 📸`;
       break;
-    case 'instagram':
-      simulatedBio = `✨ ${formData.name} ✨
-      ${formData.profession}
-      ${('interests' in formData && formData.interests) ? `Passionate about ${formData.interests}` : ''}
-      📸 Sharing moments and adventures`;
+      
+    case 'content':
+      simulatedBio = `Creating ${formData.tone} content on ${formData.platform}
+      ${('interests' in formData && formData.interests) ? `${formData.interests} ` : ''}
+      Join the journey! 🎬`;
       break;
+      
+    case 'dating':
+      simulatedBio = `${formData.profession} with a ${formData.tone} personality.
+      ${('interests' in formData && formData.interests) ? `Love ${formData.interests}. ` : ''}
+      Looking for genuine connections.`;
+      break;
+      
     default:
-      simulatedBio = `${formData.name} - ${formData.profession}. ${formData.tone} and passionate about what I do.`;
+      simulatedBio = `${formData.name} - ${formData.profession}. ${formData.tone} and authentic.`;
   }
   
   // Apply character limit if enabled
