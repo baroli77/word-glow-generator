@@ -1,4 +1,5 @@
 
+
 import { toast } from "@/components/ui/use-toast";
 
 interface ParsedFile {
@@ -95,12 +96,17 @@ async function parsePDF(file: File): Promise<ParsedFile> {
 
 async function fallbackParseDOCX(file: File): Promise<string> {
   try {
-    const JSZip = (await import('jszip')).default;
-    const zip = new JSZip();
-    const loadedZip = await zip.loadAsync(file);
-    const xml = await loadedZip.file("word/document.xml")?.async("string");
-    if (!xml) throw new Error("DOCX structure missing word/document.xml");
-    return xml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    // Use a simpler approach without external libraries for fallback
+    const arrayBuffer = await file.arrayBuffer();
+    const text = new TextDecoder().decode(arrayBuffer);
+    
+    // Try to extract text content using basic string manipulation
+    const textMatch = text.match(/<w:t[^>]*>([^<]*)<\/w:t>/g);
+    if (textMatch) {
+      return textMatch.map(match => match.replace(/<[^>]*>/g, '')).join(' ').trim();
+    }
+    
+    throw new Error("Could not extract text from DOCX");
   } catch (error) {
     console.error('Fallback DOCX parsing failed:', error);
     throw error;
@@ -109,8 +115,15 @@ async function fallbackParseDOCX(file: File): Promise<string> {
 
 async function parseDOCX(file: File): Promise<ParsedFile> {
   try {
-    // Use dynamic import to avoid module loading issues
-    const mammoth = await import('mammoth');
+    // Try mammoth first with better error handling
+    let mammoth;
+    try {
+      mammoth = await import('mammoth');
+    } catch (importError) {
+      console.error('Failed to load mammoth:', importError);
+      throw new Error('Document parsing library failed to load');
+    }
+    
     const arrayBuffer = await file.arrayBuffer();
     
     // First try to extract raw text
@@ -140,11 +153,11 @@ async function parseDOCX(file: File): Promise<ParsedFile> {
     return { content: '', error: 'This DOCX file couldn\'t be parsed. Try re-saving it in Word or upload a PDF version instead.' };
     
   } catch (error) {
-    console.error('Mammoth parsing error:', error);
+    console.error('DOCX parsing error:', error);
     
-    // Try fallback method if mammoth fails
+    // Try simple fallback method if mammoth fails
     try {
-      console.log('Mammoth failed, trying fallback JSZip method...');
+      console.log('Mammoth failed, trying simple fallback method...');
       const fallbackContent = await fallbackParseDOCX(file);
       if (fallbackContent && fallbackContent.trim()) {
         return { content: fallbackContent };
@@ -158,10 +171,11 @@ async function parseDOCX(file: File): Promise<ParsedFile> {
     
     if ((error as Error).message.includes('body element')) {
       errorMessage = 'Document format not recognized. Please save as a standard DOCX file or try converting to PDF.';
-    } else if ((error as Error).message.includes('zip')) {
-      errorMessage = 'Document appears to be corrupted. Please try re-saving the document.';
+    } else if ((error as Error).message.includes('zip') || (error as Error).message.includes('library failed to load')) {
+      errorMessage = 'Document parsing failed. Please try uploading a PDF version of your document.';
     }
     
     return { content: '', error: errorMessage };
   }
 }
+
