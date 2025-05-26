@@ -3,17 +3,33 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { templates } from './utils/templates';
+import { Button } from '@/components/ui/button';
+import { bioTemplates, generateFromTemplate } from './utils/templates';
+import { BioFormData } from './types';
 
 interface TemplateSelectorProps {
   selectedTemplate: string;
   onTemplateChange: (template: string) => void;
+  formData: BioFormData;
+  onTemplateSelect: (bio: string) => void;
+  onSkip: () => void;
 }
 
 const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   selectedTemplate,
-  onTemplateChange
+  onTemplateChange,
+  formData,
+  onTemplateSelect,
+  onSkip
 }) => {
+  const handleUseTemplate = () => {
+    const template = bioTemplates.find(t => t.id === selectedTemplate);
+    if (template) {
+      const generatedBio = generateFromTemplate(template, formData);
+      onTemplateSelect(generatedBio);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -25,7 +41,7 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
 
       <RadioGroup value={selectedTemplate} onValueChange={onTemplateChange}>
         <div className="grid gap-4">
-          {templates.map((template) => (
+          {bioTemplates.map((template) => (
             <Card key={template.id} className="p-4">
               <div className="flex items-start space-x-3">
                 <RadioGroupItem 
@@ -54,6 +70,15 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({
           ))}
         </div>
       </RadioGroup>
+
+      <div className="flex gap-4 pt-4">
+        <Button variant="outline" onClick={onSkip}>
+          Skip Templates
+        </Button>
+        <Button onClick={handleUseTemplate} disabled={!selectedTemplate}>
+          Use This Template
+        </Button>
+      </div>
 
       <Card className="p-4 bg-card border border-border">
         <div className="flex items-start space-x-3">

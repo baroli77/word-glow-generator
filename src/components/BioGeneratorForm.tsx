@@ -28,6 +28,7 @@ const BioGeneratorForm: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
   const { formData, updateField, updatePlatform, resetForm } = useBioForm();
   const { user } = useAuth();
   const { canUseTool, recordUsage, refetch } = useSubscription();
@@ -219,16 +220,15 @@ const BioGeneratorForm: React.FC = () => {
         <div className="animate-fade-in">
           <h3 className="text-lg font-medium mb-4">Customize your bio</h3>
           <div className="space-y-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 className="font-medium text-blue-900 mb-2">💡 Quick Start Option</h4>
-              <p className="text-blue-700 text-sm mb-3">
+            <div className="bg-muted/50 border border-border rounded-lg p-4">
+              <h4 className="font-medium mb-2">💡 Quick Start Option</h4>
+              <p className="text-muted-foreground text-sm mb-3">
                 Want to get started quickly? Try our pre-made templates!
               </p>
               <Button 
                 onClick={() => setShowTemplates(true)}
                 variant="outline"
                 size="sm"
-                className="border-blue-300 text-blue-700 hover:bg-blue-100"
               >
                 Browse Templates
               </Button>
@@ -270,6 +270,8 @@ const BioGeneratorForm: React.FC = () => {
 
       {step === 3 && showTemplates && (
         <TemplateSelector
+          selectedTemplate={selectedTemplate}
+          onTemplateChange={setSelectedTemplate}
           formData={formData}
           onTemplateSelect={handleTemplateUse}
           onSkip={handleSkipTemplates}

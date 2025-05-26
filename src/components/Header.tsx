@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '@/context/AdminContext';
-import ThemeToggle from './ThemeToggle';
+import { ThemeToggle } from './ThemeToggle';
 import { LogOut, Settings, Shield } from 'lucide-react';
 import {
   DropdownMenu,
