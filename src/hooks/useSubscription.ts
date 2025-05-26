@@ -1,7 +1,6 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useAdmin } from '@/context/AdminContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/components/ui/use-toast";
 
@@ -14,42 +13,37 @@ interface Subscription {
 
 export const useSubscription = () => {
   const { user } = useAuth();
-  const { isAdmin } = useAdmin();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [usageCount, setUsageCount] = useState(0);
 
-  useEffect(() => {
-    if (user) {
-      // Check if user is admin first
-      if (user.email === 'obarton77@gmail.com') {
-        // Set admin subscription immediately
-        setSubscription({
-          id: "admin-access",
-          plan_type: "lifetime",
-          expires_at: null,
-          is_active: true
-        });
-        setLoading(false);
-        fetchUsageCount();
-        return;
-      }
-      
-      fetchSubscription();
-      fetchUsageCount();
-    } else {
-      setSubscription(null);
-      setUsageCount(0);
-      setLoading(false);
-    }
-  }, [user]);
+  // Check if user is admin
+  const isAdminUser = user?.email === 'obarton77@gmail.com';
 
-  const fetchSubscription = async () => {
+  const fetchSubscription = useCallback(async () => {
+    if (!user) {
+      setSubscription(null);
+      setLoading(false);
+      return;
+    }
+
+    // Admin users get automatic lifetime access
+    if (isAdminUser) {
+      setSubscription({
+        id: "admin-access",
+        plan_type: "lifetime",
+        expires_at: null,
+        is_active: true
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('user_subscriptions')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -69,7 +63,19 @@ export const useSubscription = () => {
             .update({ is_active: false })
             .eq('id', data.id);
           
-          setSubscription(null);
+          // Set to default free subscription
+          setSubscription({
+            id: "default-free",
+            plan_type: "free",
+            expires_at: null,
+            is_active: true
+          });
+          
+          toast({
+            title: "Subscription expired",
+            description: "Your subscription has expired. You're now on the free tier.",
+            variant: "destructive"
+          });
           return;
         }
       }
@@ -82,14 +88,27 @@ export const useSubscription = () => {
           is_active: data.is_active
         });
       } else {
-        setSubscription(null);
+        // No subscription found - assign default free subscription
+        setSubscription({
+          id: "default-free",
+          plan_type: "free",
+          expires_at: null,
+          is_active: true
+        });
       }
     } catch (error) {
       console.error('Error fetching subscription:', error);
+      // Fallback to free subscription on error
+      setSubscription({
+        id: "default-free",
+        plan_type: "free",
+        expires_at: null,
+        is_active: true
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, isAdminUser]);
 
   const fetchUsageCount = async () => {
     if (!user) return;
@@ -108,11 +127,40 @@ export const useSubscription = () => {
     }
   };
 
+  useEffect(() => {
+    if (user) {
+      fetchSubscription();
+      fetchUsageCount();
+    } else {
+      setSubscription(null);
+      setUsageCount(0);
+      setLoading(false);
+    }
+  }, [user, fetchSubscription]);
+
+  // Set up automatic revalidation for daily subscriptions
+  useEffect(() => {
+    if (!subscription || subscription.plan_type !== 'daily' || !subscription.expires_at) {
+      return;
+    }
+
+    const interval = setInterval(async () => {
+      const expiresAt = new Date(subscription.expires_at!);
+      const now = new Date();
+      
+      if (now > expiresAt) {
+        await fetchSubscription(); // This will handle the expiration
+      }
+    }, 10 * 60 * 1000); // Check every 10 minutes
+
+    return () => clearInterval(interval);
+  }, [subscription, fetchSubscription]);
+
   const canUseTool = async (toolType: 'cover_letter' | 'bio_generator'): Promise<boolean> => {
     if (!user) return false;
 
     // Admin users have unlimited access
-    if (isAdmin || user.email === 'obarton77@gmail.com') {
+    if (isAdminUser) {
       return true;
     }
 
@@ -151,6 +199,21 @@ export const useSubscription = () => {
 
   const upgradeSubscription = async (planType: 'daily' | 'monthly' | 'lifetime') => {
     if (!user) return false;
+
+    // Prevent downgrades
+    if (subscription) {
+      const currentPlan = subscription.plan_type;
+      const planHierarchy = { 'free': 0, 'daily': 1, 'monthly': 2, 'lifetime': 3 };
+      
+      if (planHierarchy[planType] < planHierarchy[currentPlan]) {
+        toast({
+          title: "Downgrade not allowed",
+          description: "You cannot downgrade from your current plan.",
+          variant: "destructive"
+        });
+        return false;
+      }
+    }
 
     try {
       let expiresAt = null;
@@ -229,7 +292,7 @@ export const useSubscription = () => {
 
   const getPlanDisplayName = () => {
     // Admin users get special treatment
-    if (isAdmin || user?.email === 'obarton77@gmail.com') {
+    if (isAdminUser) {
       return 'Admin (Unlimited)';
     }
     
@@ -254,6 +317,7 @@ export const useSubscription = () => {
     upgradeSubscription,
     refetch: fetchSubscription,
     getRemainingTime,
-    getPlanDisplayName
+    getPlanDisplayName,
+    isAdminUser
   };
 };

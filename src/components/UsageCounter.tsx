@@ -13,7 +13,7 @@ interface UsageCounterProps {
 
 const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }) => {
   const { user } = useAuth();
-  const { subscription, usageCount, loading, getRemainingTime, getPlanDisplayName } = useSubscription();
+  const { subscription, usageCount, loading, getRemainingTime, getPlanDisplayName, isAdminUser } = useSubscription();
   const [canUse, setCanUse] = useState(false);
 
   const remainingTime = getRemainingTime();
@@ -24,6 +24,12 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
     const checkAccess = () => {
       if (!user) {
         setCanUse(false);
+        return;
+      }
+
+      // Admin users have unlimited access
+      if (isAdminUser) {
+        setCanUse(true);
         return;
       }
 
@@ -42,7 +48,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
     };
 
     checkAccess();
-  }, [user, subscription, usageCount, toolType]);
+  }, [user, subscription, usageCount, toolType, isAdminUser]);
 
   if (loading || !user) return null;
 
@@ -68,7 +74,28 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
     );
   }
 
-  // Has unlimited access
+  // Admin users get unlimited access
+  if (isAdminUser) {
+    return (
+      <Card className="border-purple-200 bg-purple-50 dark:bg-purple-950 dark:border-purple-800 mb-6">
+        <CardContent className="p-4">
+          <div className="flex items-start space-x-3">
+            <Infinity className="h-5 w-5 text-purple-600 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-medium text-purple-800 dark:text-purple-200">
+                Admin Access - Unlimited
+              </h3>
+              <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
+                You have unlimited access to all features as an administrator.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Has unlimited access (paid subscription)
   if (subscription && subscription.plan_type !== 'free') {
     return (
       <Card className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800 mb-6">

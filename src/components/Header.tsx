@@ -24,6 +24,9 @@ const Header = () => {
     navigate('/');
   };
 
+  // Check if user is admin directly as well for consistent behavior
+  const isAdminUser = user?.email === 'obarton77@gmail.com' || isAdmin;
+
   return (
     <header className="bg-background border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -47,6 +50,11 @@ const Header = () => {
           <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
             Pricing
           </Link>
+          {isAdminUser && (
+            <Link to="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
+              Admin
+            </Link>
+          )}
         </nav>
         
         <div className="flex items-center space-x-4">
@@ -69,7 +77,7 @@ const Header = () => {
                     Dashboard
                   </Link>
                 </DropdownMenuItem>
-                {isAdmin && (
+                {isAdminUser && (
                   <DropdownMenuItem asChild>
                     <Link to="/admin" className="flex items-center">
                       <Shield className="mr-2 h-4 w-4" />

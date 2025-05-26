@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Check } from 'lucide-react';
@@ -72,7 +71,7 @@ const pricingPlans = [
 
 const Pricing: React.FC = () => {
   const { user } = useAuth();
-  const { subscription, upgradeSubscription } = useSubscription();
+  const { subscription, upgradeSubscription, isAdminUser } = useSubscription();
 
   const handleUpgrade = async (planType: 'daily' | 'monthly' | 'lifetime') => {
     if (!user) {
@@ -91,6 +90,11 @@ const Pricing: React.FC = () => {
 
   const currentPlan = getCurrentPlan();
 
+  const isDowngrade = (planType: string) => {
+    const planHierarchy = { 'free': 0, 'daily': 1, 'monthly': 2, 'lifetime': 3 };
+    return planHierarchy[planType as keyof typeof planHierarchy] < planHierarchy[currentPlan as keyof typeof planHierarchy];
+  };
+
   return (
     <section className="py-16 md:py-24 px-6 bg-accent/50">
       <div className="container mx-auto">
@@ -104,7 +108,7 @@ const Pricing: React.FC = () => {
           {user && (
             <div className="mt-4 inline-block bg-wordcraft-purple/10 border border-wordcraft-purple/20 px-4 py-2 rounded-lg">
               <p className="text-sm text-wordcraft-purple font-medium">
-                Current Plan: {currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}
+                Current Plan: {isAdminUser ? 'Admin (Unlimited)' : currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}
               </p>
             </div>
           )}
@@ -113,9 +117,7 @@ const Pricing: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {pricingPlans.map((plan, index) => {
             const isCurrentPlan = currentPlan === plan.planType;
-            const isDowngrade = currentPlan === 'lifetime' || 
-              (currentPlan === 'monthly' && ['daily', 'free'].includes(plan.planType)) ||
-              (currentPlan === 'daily' && plan.planType === 'free');
+            const isPlanDowngrade = isDowngrade(plan.planType);
             
             return (
               <div 
@@ -169,7 +171,7 @@ const Pricing: React.FC = () => {
                       ? 'bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink text-white hover:opacity-90' 
                       : ''
                   } ${isCurrentPlan ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
-                  disabled={isCurrentPlan || isDowngrade}
+                  disabled={isCurrentPlan || isPlanDowngrade || isAdminUser}
                   onClick={() => {
                     if (plan.planType === 'free') {
                       window.location.href = '/signup';
@@ -179,7 +181,8 @@ const Pricing: React.FC = () => {
                   }}
                 >
                   {isCurrentPlan ? 'Current Plan' : 
-                   isDowngrade ? 'Downgrade' : 
+                   isPlanDowngrade ? 'Downgrade Not Allowed' :
+                   isAdminUser ? 'Admin Access' :
                    plan.buttonText}
                 </Button>
               </div>
