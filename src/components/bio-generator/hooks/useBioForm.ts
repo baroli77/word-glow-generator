@@ -22,8 +22,9 @@ export const useBioForm = () => {
   }, []);
 
   const updatePlatform = useCallback((platform: string) => {
-    const baseData = {
+    const baseData: Partial<BioFormData> = {
       name: formData.name,
+      profession: formData.profession,
       tone: formData.tone,
       charLimit: formData.charLimit,
       customCharCount: formData.customCharCount,
