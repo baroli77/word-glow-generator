@@ -14,7 +14,7 @@ export interface AdminUser {
 
 export async function getAllUsers(): Promise<AdminUser[]> {
   try {
-    const { data, error } = await supabase.rpc('get_all_users_admin');
+    const { data, error } = await supabase.rpc('get_all_users_admin' as any);
     
     if (error) {
       toast({
@@ -25,7 +25,7 @@ export async function getAllUsers(): Promise<AdminUser[]> {
       return [];
     }
     
-    return data || [];
+    return (data as AdminUser[]) || [];
   } catch (error) {
     toast({
       title: "Error loading users",
@@ -43,7 +43,7 @@ export async function updateUserSubscription(
   expiresAt: string | null = null
 ): Promise<boolean> {
   try {
-    const { data, error } = await supabase.rpc('update_user_subscription_admin', {
+    const { data, error } = await supabase.rpc('update_user_subscription_admin' as any, {
       target_user_id: userId,
       new_plan_type: planType,
       new_is_active: isActive,
