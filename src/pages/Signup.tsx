@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 const Signup = () => {
   const [firstName, setFirstName] = useState('');
@@ -59,6 +59,8 @@ const Signup = () => {
       setLoading(false);
     }
   };
+
+  const isFormInvalid = loading || (password !== confirmPassword && password && confirmPassword);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -138,7 +140,7 @@ const Signup = () => {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={loading || (password !== confirmPassword && password && confirmPassword)}
+                disabled={isFormInvalid}
               >
                 {loading ? <LoadingSpinner /> : 'Create Account'}
               </Button>
