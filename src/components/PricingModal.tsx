@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ interface PricingModalProps {
   isOpen: boolean;
   onClose: () => void;
   toolName: string;
+  onUpgradeComplete?: () => void;
 }
 
 const pricingPlans = [
@@ -74,12 +74,20 @@ const pricingPlans = [
   }
 ];
 
-const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, toolName }) => {
-  const { upgradeSubscription } = useSubscription();
+const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, toolName, onUpgradeComplete }) => {
+  const { upgradeSubscription, refetch } = useSubscription();
 
   const handleUpgrade = async (planType: 'daily' | 'monthly' | 'lifetime') => {
     const success = await upgradeSubscription(planType);
     if (success) {
+      // Refresh subscription data immediately
+      await refetch();
+      
+      // Notify parent component about successful upgrade
+      if (onUpgradeComplete) {
+        onUpgradeComplete();
+      }
+      
       onClose();
     }
   };

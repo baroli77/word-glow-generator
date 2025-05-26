@@ -85,6 +85,9 @@ export const useSubscription = () => {
         });
 
       if (error) throw error;
+      
+      // Refresh subscription data after recording usage
+      await fetchSubscription();
     } catch (error) {
       console.error('Error recording usage:', error);
     }

@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,10 +13,11 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { generateCoverLetter } from '../services/coverLetterService';
 import { parseFile } from '../utils/fileParser';
 import PricingModal from './PricingModal';
+import UsageCounter from './UsageCounter';
 
 const CoverLetterForm: React.FC = () => {
   const { user } = useAuth();
-  const { canUseTool, recordUsage, subscription } = useSubscription();
+  const { canUseTool, recordUsage, subscription, refetch } = useSubscription();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [generatedLetter, setGeneratedLetter] = useState('');
@@ -59,11 +59,7 @@ const CoverLetterForm: React.FC = () => {
         const result = await parseFile(file);
         
         if (result.error) {
-          toast({
-            title: "File parsing failed",
-            description: result.error,
-            variant: "destructive",
-          });
+          // Toast is already shown in parseFile function
           setFileName(null);
           setParsedCV('');
         } else {
@@ -128,6 +124,11 @@ const CoverLetterForm: React.FC = () => {
 
     return true;
   };
+
+  const handleUpgradeComplete = useCallback(async () => {
+    // Refresh subscription data and re-check access
+    await refetch();
+  }, [refetch]);
   
   const handleNext = () => {
     if (step === 1) {
@@ -294,18 +295,7 @@ const CoverLetterForm: React.FC = () => {
             ></div>
           </div>
 
-          {subscription && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
-              <p className="text-sm text-blue-800">
-                <strong>Current Plan:</strong> {subscription.plan_type === 'free' ? 'Free (1 use per day)' : 
-                  subscription.plan_type === 'daily' ? '24-Hour Pass' :
-                  subscription.plan_type === 'monthly' ? 'Monthly Unlimited' : 'Lifetime Access'}
-                {subscription.expires_at && (
-                  <span> • Expires: {new Date(subscription.expires_at).toLocaleDateString()}</span>
-                )}
-              </p>
-            </div>
-          )}
+          <UsageCounter toolType="cover_letter" toolDisplayName="Cover Letter" />
         </div>
         
         {step === 1 && (
@@ -609,6 +599,7 @@ const CoverLetterForm: React.FC = () => {
           isOpen={showPricingModal}
           onClose={() => setShowPricingModal(false)}
           toolName="Cover Letter Generator"
+          onUpgradeComplete={handleUpgradeComplete}
         />
       </div>
     </TooltipProvider>

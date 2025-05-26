@@ -1,10 +1,25 @@
 
+import { toast } from "@/components/ui/use-toast";
+
 interface ParsedFile {
   content: string;
   error?: string;
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+
 export async function parseFile(file: File): Promise<ParsedFile> {
+  // Check file size first
+  if (file.size > MAX_FILE_SIZE) {
+    const errorMessage = `File size exceeds 5MB limit. Current size: ${(file.size / (1024 * 1024)).toFixed(1)}MB`;
+    toast({
+      title: "File too large",
+      description: errorMessage,
+      variant: "destructive",
+    });
+    return { content: '', error: errorMessage };
+  }
+
   try {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
     
@@ -20,7 +35,13 @@ export async function parseFile(file: File): Promise<ParsedFile> {
         return await parseDOCX(file);
       
       default:
-        return { content: '', error: 'Unsupported file format' };
+        const errorMessage = 'Unsupported file format';
+        toast({
+          title: "Unsupported file format",
+          description: "Please upload a PDF, DOCX, DOC, or TXT file.",
+          variant: "destructive",
+        });
+        return { content: '', error: errorMessage };
     }
   } catch (error) {
     return { content: '', error: `Failed to parse file: ${(error as Error).message}` };

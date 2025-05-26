@@ -1,3 +1,4 @@
+
 import { generateWithAI as generateAI } from "./supabaseService";
 import { toast } from "@/components/ui/use-toast";
 
@@ -52,24 +53,4 @@ export async function generateWithAI(prompt: string, retryCount = 0): Promise<Op
     });
     return { content: "", error: error instanceof Error ? error.message : "Error generating content" };
   }
-}
-
-// Legacy function - keeping for compatibility but using the new service
-export function createCoverLetterPrompt(formData: any, fileName: string): string {
-  // This is now just for backwards compatibility
-  // The real implementation is in coverLetterService.ts
-  return `
-    Please create a professional cover letter for a job application with the following details:
-    
-    Job Title: ${formData.jobTitle}
-    Company: ${formData.companyName}
-    CV File: ${fileName}
-    Additional Information: ${formData.additionalInfo || 'None provided'}
-    Tone: ${formData.tone}
-    
-    Write a complete, professional cover letter that's ready to be sent.
-    Highlight qualifications, relevant experience, and enthusiasm for the role.
-    Use a standard cover letter format with appropriate salutation and closing.
-    Do not include any explanations, just provide the cover letter text.
-  `;
 }
