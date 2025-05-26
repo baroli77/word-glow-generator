@@ -1,7 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 
 type AdminContextType = {
   isAdmin: boolean;
@@ -31,7 +29,17 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       return;
     }
 
+    // Check if the user is the hardcoded admin
+    const adminEmail = 'obarton77@gmail.com';
+    if (user.email === adminEmail) {
+      setIsAdmin(true);
+      setLoading(false);
+      return;
+    }
+
+    // For non-admin users, check database (keeping original logic as fallback)
     try {
+      const { supabase } = await import('@/integrations/supabase/client');
       const { data, error } = await supabase.rpc('is_admin');
       
       if (error) {

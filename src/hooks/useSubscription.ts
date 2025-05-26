@@ -21,6 +21,20 @@ export const useSubscription = () => {
 
   useEffect(() => {
     if (user) {
+      // Check if user is admin first
+      if (user.email === 'obarton77@gmail.com') {
+        // Set admin subscription immediately
+        setSubscription({
+          id: "admin-access",
+          plan_type: "lifetime",
+          expires_at: null,
+          is_active: true
+        });
+        setLoading(false);
+        fetchUsageCount();
+        return;
+      }
+      
       fetchSubscription();
       fetchUsageCount();
     } else {
@@ -98,7 +112,7 @@ export const useSubscription = () => {
     if (!user) return false;
 
     // Admin users have unlimited access
-    if (isAdmin) {
+    if (isAdmin || user.email === 'obarton77@gmail.com') {
       return true;
     }
 
@@ -215,7 +229,7 @@ export const useSubscription = () => {
 
   const getPlanDisplayName = () => {
     // Admin users get special treatment
-    if (isAdmin) {
+    if (isAdmin || user?.email === 'obarton77@gmail.com') {
       return 'Admin (Unlimited)';
     }
     
