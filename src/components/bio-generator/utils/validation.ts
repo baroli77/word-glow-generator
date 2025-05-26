@@ -19,7 +19,9 @@ export const validateBioForm = (formData: BioFormData): ValidationResult => {
     errors.push({ field: 'name', message: 'Name is required' });
   }
 
-  if (!formData.profession.trim()) {
+  // Profession is only required for professional platforms (excluding Twitter)
+  const professionalPlatformsRequiringProfession = ['linkedin', 'resume', 'portfolio'];
+  if (professionalPlatformsRequiringProfession.includes(formData.platform) && !formData.profession.trim()) {
     errors.push({ field: 'profession', message: 'Profession is required' });
   }
 

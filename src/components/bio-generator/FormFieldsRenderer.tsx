@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BioFormData, platformOptions } from './types';
 import { ValidationError } from './utils/validation';
@@ -22,6 +21,7 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
   };
 
   const isProfessionalPlatform = ['linkedin', 'resume', 'portfolio', 'twitter'].includes(formData.platform);
+  const requiresProfession = ['linkedin', 'resume', 'portfolio'].includes(formData.platform);
 
   const renderCommonFields = () => (
     <>
@@ -47,7 +47,7 @@ const FormFieldsRenderer: React.FC<FormFieldsRendererProps> = ({
           onChange={(value) => onFieldChange('profession', value)}
           placeholder="What you do professionally"
           maxLength={150}
-          required
+          required={requiresProfession}
           error={getFieldError('profession')}
           helpText="Your current role, title, or what you do professionally"
         />
