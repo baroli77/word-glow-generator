@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Clock, Infinity, Star } from 'lucide-react';
+import { Clock, Star, Crown, Sparkles } from 'lucide-react';
 import { PRICING_CONFIG, type PlanType } from '@/config/pricing';
 import PlanCard from '@/components/shared/PlanCard';
 
@@ -23,7 +23,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, toolName, 
             Upgrade to Continue Using {toolName}
           </DialogTitle>
           <p className="text-center text-muted-foreground">
-            You've reached your free limit. Choose a plan to continue creating professional bios.
+            You've reached your free limit. Choose a plan to continue creating professional content.
           </p>
         </DialogHeader>
         

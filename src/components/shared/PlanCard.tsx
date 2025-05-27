@@ -25,6 +25,9 @@ const PlanCard: React.FC<PlanCardProps> = ({
   const isCurrentPlan = currentPlan === planType;
   const isPlanDowngrade = isDowngrade(currentPlan, planType);
   const loading = isLoading(planType);
+  
+  // Highlight monthly plan as most popular
+  const isPopular = planType === 'monthly';
 
   const handleClick = () => {
     if (planType === 'free') {
@@ -37,10 +40,10 @@ const PlanCard: React.FC<PlanCardProps> = ({
   return (
     <div 
       className={`relative h-full bg-card border-2 rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col ${
-        plan.popular && showPopularBadge ? 'border-brand-purple shadow-lg shadow-brand-purple/20 scale-105' : 'border-border'
+        isPopular && showPopularBadge ? 'border-brand-purple shadow-lg shadow-brand-purple/20 scale-105' : 'border-border'
       } ${isCurrentPlan ? 'border-green-500 shadow-lg shadow-green-500/10' : ''}`}
     >
-      {plan.popular && showPopularBadge && !isCurrentPlan && (
+      {isPopular && showPopularBadge && !isCurrentPlan && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
           <div className="bg-brand-pink text-white text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap">
             MOST POPULAR
@@ -83,9 +86,9 @@ const PlanCard: React.FC<PlanCardProps> = ({
       
       <div className="mt-auto">
         <Button 
-          variant={plan.popular && !isCurrentPlan ? "default" : "outline"}
+          variant={isPopular && !isCurrentPlan ? "default" : "outline"}
           className={`w-full font-semibold ${
-            plan.popular && !isCurrentPlan 
+            isPopular && !isCurrentPlan 
               ? 'bg-brand-purple hover:bg-brand-purple-dark text-white' 
               : ''
           } ${isCurrentPlan ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}

@@ -1,4 +1,3 @@
-
 export const PRICING_CONFIG = {
   plans: {
     free: {

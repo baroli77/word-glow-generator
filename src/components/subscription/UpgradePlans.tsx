@@ -65,7 +65,7 @@ const UpgradePlans: React.FC<UpgradePlansProps> = ({ toolType, hasUsedFree }) =>
           </Card>
 
           {/* Monthly Plan */}
-          <Card className="border-2 border-brand-purple/20 hover:border-brand-purple/40 transition-all duration-200 hover:shadow-lg relative">
+          <Card className="border-2 border-brand-purple shadow-lg shadow-brand-purple/20 scale-105 relative">
             <CardContent className="p-6 text-center">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <span className="bg-brand-pink text-white px-3 py-1 rounded-full text-xs font-semibold">
