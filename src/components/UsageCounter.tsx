@@ -150,17 +150,15 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
               <div className="flex flex-wrap gap-2">
                 <Button 
                   size="sm" 
-                  variant="outline"
                   onClick={() => window.location.href = '/pricing'}
-                  className="text-xs"
+                  className="text-xs bg-wordcraft-purple hover:bg-wordcraft-purple/90"
                 >
                   £9 - 24h Access
                 </Button>
                 <Button 
                   size="sm" 
-                  variant="outline"
                   onClick={() => window.location.href = '/pricing'}
-                  className="text-xs"
+                  className="text-xs bg-wordcraft-purple hover:bg-wordcraft-purple/90"
                 >
                   £29/mo - Monthly
                 </Button>
