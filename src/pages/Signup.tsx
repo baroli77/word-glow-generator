@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import EmailVerification from '@/components/EmailVerification';
 import { toast } from "@/hooks/use-toast";
 
 const Signup = () => {
@@ -20,6 +20,7 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
   const { signUp, signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
 
@@ -54,7 +55,8 @@ const Signup = () => {
     
     try {
       await signUp(email, password, firstName, lastName);
-      // Success message is handled in the signUp function
+      // Show email verification screen after successful signup
+      setShowEmailVerification(true);
     } catch (error) {
       // Error is handled in the signUp function
     } finally {
@@ -74,6 +76,11 @@ const Signup = () => {
   };
 
   const isFormInvalid = loading || Boolean(password !== confirmPassword && password && confirmPassword);
+
+  // Show email verification screen if signup was successful
+  if (showEmailVerification) {
+    return <EmailVerification email={email} />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
