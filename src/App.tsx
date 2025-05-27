@@ -12,6 +12,7 @@ import Examples from "./pages/Examples";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Verify from "./pages/Verify";
 import AdminDashboard from "./pages/AdminDashboard";
 import PricingPage from "./pages/Pricing";
 import { AuthProvider } from "./context/AuthContext";
@@ -37,6 +38,7 @@ function App() {
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/verify" element={<Verify />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>
