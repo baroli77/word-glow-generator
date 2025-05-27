@@ -14,7 +14,8 @@ export const PRICING_CONFIG = {
       ],
       limitations: ["Must sign up to access", "Limited to 1 bio"],
       buttonText: "Sign Up Free",
-      stripeAmount: 0
+      stripeAmount: 0,
+      popular: false
     },
     daily: {
       name: "24-Hour Access",
