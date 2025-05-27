@@ -6,6 +6,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import PricingModal from './PricingModal';
 import UsageCounter from './UsageCounter';
 import AuthGuard from './cover-letter/AuthGuard';
+import PremiumGuard from './cover-letter/PremiumGuard';
 import CVUploadStep from './cover-letter/CVUploadStep';
 import CustomizeStep from './cover-letter/CustomizeStep';
 import ResultStep from './cover-letter/ResultStep';
@@ -45,6 +46,26 @@ const CoverLetterForm: React.FC = () => {
 
   if (!user) {
     return <AuthGuard />;
+  }
+
+  // Check if user is free tier - cover letter is premium only
+  const isFreeUser = subscription?.plan_type === 'free';
+  
+  if (isFreeUser) {
+    return (
+      <TooltipProvider>
+        <div className="max-w-3xl mx-auto">
+          <PremiumGuard onUpgrade={() => setShowPricingModal(true)} />
+          
+          <PricingModal 
+            isOpen={showPricingModal}
+            onClose={() => setShowPricingModal(false)}
+            toolName="Cover Letter Generator"
+            onUpgradeComplete={handleUpgradeComplete}
+          />
+        </div>
+      </TooltipProvider>
+    );
   }
   
   return (

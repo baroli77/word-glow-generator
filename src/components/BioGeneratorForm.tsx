@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Lock } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 import PricingModal from './PricingModal';
 
@@ -19,6 +20,7 @@ import { generateBio, simulateBioGeneration } from '../services/bioService';
 import { validateBioForm, ValidationError } from './bio-generator/utils/validation';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useAuth } from '@/context/AuthContext';
+import { isPremiumPlatform } from './bio-generator/config/platform-config';
 
 const BioGeneratorForm: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -30,9 +32,19 @@ const BioGeneratorForm: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { formData, updateField, updatePlatform, resetForm } = useBioForm();
   const { user } = useAuth();
-  const { canUseTool, recordUsage, refetch } = useSubscription();
+  const { canUseTool, recordUsage, refetch, subscription } = useSubscription();
+  
+  const isFreeUser = subscription?.plan_type === 'free';
   
   const handleNext = () => {
+    if (step === 1) {
+      // Check if selected platform is premium and user is free
+      if (isFreeUser && isPremiumPlatform(formData.platform as any)) {
+        setShowPricingModal(true);
+        return;
+      }
+    }
+    
     if (step === 2) {
       // Validate form before proceeding
       const validation = validateBioForm(formData);
@@ -66,6 +78,12 @@ const BioGeneratorForm: React.FC = () => {
   };
   
   const handleGenerate = async () => {
+    // Check if selected platform is premium and user is free
+    if (isFreeUser && isPremiumPlatform(formData.platform as any)) {
+      setShowPricingModal(true);
+      return;
+    }
+
     // Check if user can use the tool
     const hasAccess = await canUseTool('bio_generator');
     if (!hasAccess) {
@@ -165,6 +183,40 @@ const BioGeneratorForm: React.FC = () => {
     setShowPricingModal(false);
   };
 
+  const handlePlatformChange = (platform: string) => {
+    // Check if platform is premium and user is free
+    if (isFreeUser && isPremiumPlatform(platform as any)) {
+      setShowPricingModal(true);
+      return;
+    }
+    updatePlatform(platform);
+  };
+
+  // Show premium upgrade prompt if free user tries to access premium platform
+  if (step === 1 && isFreeUser && isPremiumPlatform(formData.platform as any)) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center py-12">
+          <Lock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="text-xl font-semibold mb-2">Premium Feature</h3>
+          <p className="text-muted-foreground mb-6">
+            {formData.platform} bios are available to premium users only.
+          </p>
+          <Button onClick={() => setShowPricingModal(true)}>
+            Upgrade to Continue
+          </Button>
+        </div>
+        
+        <PricingModal
+          isOpen={showPricingModal}
+          onClose={() => setShowPricingModal(false)}
+          toolName="Bio Generator"
+          onUpgradeComplete={handleUpgradeComplete}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-8">
@@ -187,7 +239,7 @@ const BioGeneratorForm: React.FC = () => {
         <div>
           <PlatformSelector
             selectedPlatform={formData.platform}
-            onPlatformChange={updatePlatform}
+            onPlatformChange={handlePlatformChange}
           />
           <div className="pt-4 flex justify-end">
             <Button onClick={handleNext}>

@@ -15,7 +15,8 @@ import {
   Image,
   MessageCircle,
   Heart,
-  Users
+  Users,
+  Lock
 } from 'lucide-react';
 
 export interface PlatformConfig {
@@ -23,6 +24,7 @@ export interface PlatformConfig {
   requiresProfession: boolean;
   defaultCharLimit: number;
   fields: string[];
+  isPremium: boolean; // New field for access control
 }
 
 export const platformConfigs: Record<PlatformType, PlatformConfig> = {
@@ -30,91 +32,106 @@ export const platformConfigs: Record<PlatformType, PlatformConfig> = {
     category: 'professional',
     requiresProfession: true,
     defaultCharLimit: 300,
-    fields: ['name', 'profession', 'experience', 'achievements', 'interests']
+    fields: ['name', 'profession', 'experience', 'achievements', 'interests'],
+    isPremium: true
   },
   resume: {
     category: 'professional',
     requiresProfession: true,
     defaultCharLimit: 200,
-    fields: ['name', 'profession', 'experience', 'achievements']
+    fields: ['name', 'profession', 'experience', 'achievements'],
+    isPremium: true
   },
   portfolio: {
     category: 'professional',
     requiresProfession: true,
     defaultCharLimit: 250,
-    fields: ['name', 'profession', 'experience', 'achievements', 'interests']
+    fields: ['name', 'profession', 'experience', 'achievements', 'interests'],
+    isPremium: true
   },
   twitter: {
     category: 'social',
     requiresProfession: false,
     defaultCharLimit: 160,
-    fields: ['name', 'interests', 'funFacts']
+    fields: ['name', 'interests', 'funFacts'],
+    isPremium: false
   },
   instagram: {
     category: 'social',
     requiresProfession: false,
     defaultCharLimit: 150,
-    fields: ['name', 'interests', 'funFacts']
+    fields: ['name', 'interests', 'funFacts'],
+    isPremium: false
   },
   facebook: {
     category: 'social',
     requiresProfession: false,
     defaultCharLimit: 200,
-    fields: ['name', 'interests', 'funFacts', 'communities']
+    fields: ['name', 'interests', 'funFacts', 'communities'],
+    isPremium: false
   },
   threads: {
     category: 'social',
     requiresProfession: false,
     defaultCharLimit: 150,
-    fields: ['name', 'interests', 'funFacts']
+    fields: ['name', 'interests', 'funFacts'],
+    isPremium: false
   },
   tiktok: {
     category: 'content',
     requiresProfession: false,
     defaultCharLimit: 80,
-    fields: ['name', 'content', 'interests']
+    fields: ['name', 'content', 'interests'],
+    isPremium: false
   },
   snapchat: {
     category: 'social',
     requiresProfession: false,
     defaultCharLimit: 100,
-    fields: ['name', 'interests', 'funFacts']
+    fields: ['name', 'interests', 'funFacts'],
+    isPremium: false
   },
   youtube: {
     category: 'content',
     requiresProfession: false,
     defaultCharLimit: 1000,
-    fields: ['name', 'content', 'interests', 'schedule']
+    fields: ['name', 'content', 'interests', 'schedule'],
+    isPremium: false
   },
   twitch: {
     category: 'content',
     requiresProfession: false,
     defaultCharLimit: 300,
-    fields: ['name', 'games', 'schedule', 'interests']
+    fields: ['name', 'games', 'schedule', 'interests'],
+    isPremium: false
   },
   pinterest: {
     category: 'content',
     requiresProfession: false,
     defaultCharLimit: 160,
-    fields: ['name', 'interests', 'niche', 'style']
+    fields: ['name', 'interests', 'niche', 'style'],
+    isPremium: false
   },
   reddit: {
     category: 'content',
     requiresProfession: false,
     defaultCharLimit: 200,
-    fields: ['name', 'interests', 'communities']
+    fields: ['name', 'interests', 'communities'],
+    isPremium: false
   },
   tinder: {
     category: 'dating',
     requiresProfession: false,
     defaultCharLimit: 500,
-    fields: ['name', 'interests', 'funFacts', 'lookingFor']
+    fields: ['name', 'interests', 'funFacts', 'lookingFor'],
+    isPremium: false
   },
   pof: {
     category: 'dating',
     requiresProfession: false,
     defaultCharLimit: 1000,
-    fields: ['name', 'interests', 'funFacts', 'lookingFor']
+    fields: ['name', 'interests', 'funFacts', 'lookingFor'],
+    isPremium: false
   }
 };
 
@@ -124,105 +141,120 @@ export const platforms = [
     name: 'LinkedIn',
     description: 'Professional networking platform for career growth',
     icon: Linkedin,
-    charLimit: 300
+    charLimit: 300,
+    isPremium: true
   },
   {
     id: 'resume' as PlatformType,
     name: 'Resume',
     description: 'Professional summary for your CV or resume',
     icon: FileText,
-    charLimit: 200
+    charLimit: 200,
+    isPremium: true
   },
   {
     id: 'portfolio' as PlatformType,
     name: 'Portfolio',
     description: 'Personal portfolio or professional website',
     icon: Briefcase,
-    charLimit: 250
+    charLimit: 250,
+    isPremium: true
   },
   {
     id: 'twitter' as PlatformType,
     name: 'Twitter/X',
     description: 'Microblogging platform for quick updates',
     icon: Twitter,
-    charLimit: 160
+    charLimit: 160,
+    isPremium: false
   },
   {
     id: 'instagram' as PlatformType,
     name: 'Instagram',
     description: 'Photo and video sharing social platform',
     icon: Instagram,
-    charLimit: 150
+    charLimit: 150,
+    isPremium: false
   },
   {
     id: 'facebook' as PlatformType,
     name: 'Facebook',
     description: 'Social networking platform for personal connections',
     icon: Facebook,
-    charLimit: 200
+    charLimit: 200,
+    isPremium: false
   },
   {
     id: 'threads' as PlatformType,
     name: 'Threads',
     description: 'Text-based conversation platform by Meta',
     icon: MessageSquare,
-    charLimit: 150
+    charLimit: 150,
+    isPremium: false
   },
   {
     id: 'tiktok' as PlatformType,
     name: 'TikTok',
     description: 'Short-form video content platform',
     icon: Music,
-    charLimit: 80
+    charLimit: 80,
+    isPremium: false
   },
   {
     id: 'snapchat' as PlatformType,
     name: 'Snapchat',
     description: 'Multimedia messaging social platform',
     icon: Camera,
-    charLimit: 100
+    charLimit: 100,
+    isPremium: false
   },
   {
     id: 'youtube' as PlatformType,
     name: 'YouTube',
     description: 'Video sharing and content creation platform',
     icon: Youtube,
-    charLimit: 1000
+    charLimit: 1000,
+    isPremium: false
   },
   {
     id: 'twitch' as PlatformType,
     name: 'Twitch',
     description: 'Live streaming platform for gamers and creators',
     icon: Gamepad2,
-    charLimit: 300
+    charLimit: 300,
+    isPremium: false
   },
   {
     id: 'pinterest' as PlatformType,
     name: 'Pinterest',
     description: 'Visual discovery and inspiration platform',
     icon: Image,
-    charLimit: 160
+    charLimit: 160,
+    isPremium: false
   },
   {
     id: 'reddit' as PlatformType,
     name: 'Reddit',
     description: 'Community-driven discussion platform',
     icon: MessageCircle,
-    charLimit: 200
+    charLimit: 200,
+    isPremium: false
   },
   {
     id: 'tinder' as PlatformType,
     name: 'Tinder',
     description: 'Dating app for meeting new people',
     icon: Heart,
-    charLimit: 500
+    charLimit: 500,
+    isPremium: false
   },
   {
     id: 'pof' as PlatformType,
     name: 'Plenty of Fish',
     description: 'Dating platform for meaningful connections',
     icon: Users,
-    charLimit: 1000
+    charLimit: 1000,
+    isPremium: false
   }
 ];
 
@@ -236,4 +268,8 @@ export const getPlatformCategory = (platform: PlatformType): PlatformCategory =>
 
 export const requiresProfession = (platform: PlatformType): boolean => {
   return platformConfigs[platform].requiresProfession;
+};
+
+export const isPremiumPlatform = (platform: PlatformType): boolean => {
+  return platformConfigs[platform].isPremium;
 };

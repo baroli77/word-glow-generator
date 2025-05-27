@@ -107,19 +107,19 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, toolName, 
               <div 
                 key={index} 
                 className={`relative border rounded-lg p-6 hover:shadow-lg transition-shadow ${
-                  plan.popular ? 'ring-2 ring-wordcraft-purple shadow-lg border-wordcraft-purple' : ''
+                  plan.popular ? 'ring-2 ring-makemybio-purple shadow-lg border-makemybio-purple' : ''
                 } ${isPlanDowngrade ? 'opacity-50' : ''}`}
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-wordcraft-purple text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    <div className="bg-makemybio-purple text-white text-xs font-semibold px-3 py-1 rounded-full">
                       MOST POPULAR
                     </div>
                   </div>
                 )}
                 
                 <div className="text-center mb-4">
-                  <plan.icon className="h-8 w-8 mx-auto mb-2 text-wordcraft-purple" />
+                  <plan.icon className="h-8 w-8 mx-auto mb-2 text-makemybio-purple" />
                   <h3 className="font-semibold text-lg">{plan.name}</h3>
                 </div>
                 
@@ -141,7 +141,7 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, toolName, 
                 
                 <Button 
                   variant={plan.popular ? "default" : "outline"}
-                  className={`w-full ${plan.popular ? 'bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink text-white hover:opacity-90' : ''}`}
+                  className={`w-full ${plan.popular ? 'bg-gradient-to-r from-makemybio-purple to-makemybio-pink text-white hover:opacity-90' : ''}`}
                   onClick={() => handleUpgrade(plan.planType)}
                   disabled={isPlanDowngrade}
                 >

@@ -1,42 +1,62 @@
 
 import React from 'react';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { toneOptions } from './types';
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ToneSelectorProps {
   selectedTone: string;
   onToneChange: (tone: string) => void;
+  disabled?: boolean;
 }
+
+const tones = [
+  { value: 'professional', label: 'Professional', description: 'Formal and business-appropriate' },
+  { value: 'casual', label: 'Casual', description: 'Relaxed and friendly' },
+  { value: 'creative', label: 'Creative', description: 'Unique and expressive' },
+  { value: 'confident', label: 'Confident', description: 'Bold and assertive' },
+  { value: 'friendly', label: 'Friendly', description: 'Warm and approachable' }
+];
 
 const ToneSelector: React.FC<ToneSelectorProps> = ({
   selectedTone,
-  onToneChange
+  onToneChange,
+  disabled = false
 }) => {
   return (
-    <div>
-      <Label className="mb-2 block">Tone</Label>
-      <RadioGroup 
-        value={selectedTone} 
-        onValueChange={onToneChange}
-        className="flex flex-wrap gap-4"
-      >
-        {toneOptions.map((option) => (
-          <div key={option.value} className="flex items-center">
-            <RadioGroupItem 
-              value={option.value} 
-              id={`tone-${option.value}`} 
-              className="peer sr-only" 
-            />
-            <Label
-              htmlFor={`tone-${option.value}`}
-              className="px-4 py-2 rounded-full border cursor-pointer bg-background hover:bg-muted peer-data-[state=checked]:bg-wordcraft-purple peer-data-[state=checked]:text-white"
-            >
-              {option.label}
-            </Label>
-          </div>
+    <div className="space-y-4">
+      <div>
+        <h4 className="text-sm font-medium mb-2">Choose your tone</h4>
+        <p className="text-sm text-muted-foreground">
+          Select the writing style that best fits your personality
+        </p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {tones.map((tone) => (
+          <Button
+            key={tone.value}
+            variant={selectedTone === tone.value ? "default" : "outline"}
+            className={cn(
+              "h-auto p-4 flex flex-col items-start text-left transition-all duration-200",
+              selectedTone === tone.value 
+                ? "ring-2 ring-primary bg-primary text-primary-foreground" 
+                : "hover:border-primary/50"
+            )}
+            onClick={() => onToneChange(tone.value)}
+            disabled={disabled}
+          >
+            <span className="font-medium">{tone.label}</span>
+            <span className={cn(
+              "text-xs mt-1",
+              selectedTone === tone.value 
+                ? "text-primary-foreground/80" 
+                : "text-muted-foreground"
+            )}>
+              {tone.description}
+            </span>
+          </Button>
         ))}
-      </RadioGroup>
+      </div>
     </div>
   );
 };
