@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Check } from 'lucide-react';
+import { Check, Clock, Star, Crown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 
@@ -18,7 +18,8 @@ const pricingPlans = [
     ],
     limitations: ["Must sign up to access", "Limited to 1 bio"],
     planType: "free" as const,
-    buttonText: "Sign Up Free"
+    buttonText: "Sign Up Free",
+    icon: Star
   },
   {
     name: "24-Hour Access",
@@ -33,8 +34,8 @@ const pricingPlans = [
     ],
     limitations: [],
     planType: "daily" as const,
-    popular: true,
-    buttonText: "Get 24h Access"
+    buttonText: "Get 24h Access",
+    icon: Clock
   },
   {
     name: "Monthly Plan",
@@ -50,7 +51,9 @@ const pricingPlans = [
     ],
     limitations: [],
     planType: "monthly" as const,
-    buttonText: "Start Monthly"
+    popular: true,
+    buttonText: "Start Monthly",
+    icon: Star
   },
   {
     name: "Lifetime Access",
@@ -66,7 +69,8 @@ const pricingPlans = [
     ],
     limitations: [],
     planType: "lifetime" as const,
-    buttonText: "Buy Lifetime"
+    buttonText: "Buy Lifetime",
+    icon: Crown
   }
 ];
 
@@ -123,14 +127,14 @@ const Pricing: React.FC = () => {
             return (
               <div 
                 key={index} 
-                className={`relative h-full bg-card border rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col ${
-                  plan.popular ? 'ring-2 ring-brand-purple shadow-lg shadow-brand-purple/10 scale-105' : ''
-                } ${isCurrentPlan ? 'ring-2 ring-green-500 shadow-lg shadow-green-500/10' : ''} animate-enter`} 
+                className={`relative h-full bg-card border-2 rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col ${
+                  plan.popular ? 'border-brand-purple shadow-lg shadow-brand-purple/20 scale-105' : 'border-border'
+                } ${isCurrentPlan ? 'border-green-500 shadow-lg shadow-green-500/10' : ''} animate-enter`} 
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {plan.popular && !isCurrentPlan && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                    <div className="bg-brand-purple text-white text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap">
+                    <div className="bg-brand-pink text-white text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap">
                       MOST POPULAR
                     </div>
                   </div>
@@ -144,12 +148,15 @@ const Pricing: React.FC = () => {
                 )}
                 
                 <div className="flex-grow">
-                  <h3 className="font-semibold text-xl mb-4">{plan.name}</h3>
-                  <div className="mb-4">
+                  <div className="text-center mb-4">
+                    <plan.icon className="h-8 w-8 mx-auto mb-2 text-brand-purple" />
+                    <h3 className="font-semibold text-xl">{plan.name}</h3>
+                  </div>
+                  <div className="text-center mb-4">
                     <span className="text-3xl font-bold">{plan.price}</span>
                     <span className="text-muted-foreground ml-1 text-sm">/{plan.period}</span>
                   </div>
-                  <p className="text-muted-foreground mb-6 text-sm leading-relaxed">{plan.description}</p>
+                  <p className="text-muted-foreground mb-6 text-sm leading-relaxed text-center">{plan.description}</p>
                   
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature, i) => (
@@ -170,9 +177,9 @@ const Pricing: React.FC = () => {
                 <div className="mt-auto">
                   <Button 
                     variant={plan.popular && !isCurrentPlan ? "default" : "outline"}
-                    className={`w-full ${
+                    className={`w-full font-semibold ${
                       plan.popular && !isCurrentPlan 
-                        ? 'bg-gradient-to-r from-brand-purple to-brand-pink text-white hover:opacity-90' 
+                        ? 'bg-brand-purple hover:bg-brand-purple-dark text-white' 
                         : ''
                     } ${isCurrentPlan ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
                     disabled={isCurrentPlan || isPlanDowngrade || isAdminUser}

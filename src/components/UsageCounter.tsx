@@ -207,9 +207,14 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
             </Card>
 
             {/* Monthly Plan */}
-            <Card className="border-2 border-brand-purple/20 hover:border-brand-purple/40 transition-all duration-200 hover:shadow-lg">
+            <Card className="border-2 border-brand-purple/20 hover:border-brand-purple/40 transition-all duration-200 hover:shadow-lg relative">
               <CardContent className="p-6 text-center">
-                <div className="mb-4">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-brand-pink text-white px-3 py-1 rounded-full text-xs font-semibold">
+                    MOST POPULAR
+                  </span>
+                </div>
+                <div className="mb-4 mt-2">
                   <Star className="h-8 w-8 text-brand-purple mx-auto mb-2" />
                   <h5 className="font-semibold text-lg">Monthly Plan</h5>
                 </div>
@@ -231,14 +236,9 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
             </Card>
 
             {/* Lifetime Access */}
-            <Card className="border-2 border-brand-purple/20 hover:border-brand-purple/40 transition-all duration-200 hover:shadow-lg relative">
+            <Card className="border-2 border-brand-purple/20 hover:border-brand-purple/40 transition-all duration-200 hover:shadow-lg">
               <CardContent className="p-6 text-center">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-brand-pink text-white px-3 py-1 rounded-full text-xs font-semibold">
-                    BEST VALUE
-                  </span>
-                </div>
-                <div className="mb-4 mt-2">
+                <div className="mb-4">
                   <Crown className="h-8 w-8 text-brand-purple mx-auto mb-2" />
                   <h5 className="font-semibold text-lg">Lifetime Access</h5>
                 </div>

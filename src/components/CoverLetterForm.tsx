@@ -6,7 +6,6 @@ import { useSubscription } from '@/hooks/useSubscription';
 import PricingModal from './PricingModal';
 import UsageCounter from './UsageCounter';
 import AuthGuard from './cover-letter/AuthGuard';
-import PremiumGuard from './cover-letter/PremiumGuard';
 import CVUploadStep from './cover-letter/CVUploadStep';
 import CustomizeStep from './cover-letter/CustomizeStep';
 import ResultStep from './cover-letter/ResultStep';
@@ -55,7 +54,7 @@ const CoverLetterForm: React.FC = () => {
     return (
       <TooltipProvider>
         <div className="max-w-3xl mx-auto">
-          <PremiumGuard onUpgrade={() => setShowPricingModal(true)} />
+          <UsageCounter toolType="cover_letter" toolDisplayName="Cover Letter Generator" />
           
           <PricingModal 
             isOpen={showPricingModal}
