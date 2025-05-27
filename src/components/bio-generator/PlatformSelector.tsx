@@ -1,33 +1,10 @@
 
 import React from 'react';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Briefcase, Smartphone, Video, Heart } from 'lucide-react';
-import { platformOptions } from './types';
-
-const platformCategories = {
-  professional: { 
-    title: 'Professional', 
-    icon: Briefcase,
-    platforms: platformOptions.filter(p => p.category === 'professional') 
-  },
-  social: { 
-    title: 'Social Media', 
-    icon: Smartphone,
-    platforms: platformOptions.filter(p => p.category === 'social') 
-  },
-  content: { 
-    title: 'Content Creation', 
-    icon: Video,
-    platforms: platformOptions.filter(p => p.category === 'content') 
-  },
-  dating: { 
-    title: 'Dating', 
-    icon: Heart,
-    platforms: platformOptions.filter(p => p.category === 'dating') 
-  }
-};
+import { cn } from "@/lib/utils";
+import { platforms } from './config/platform-config';
 
 interface PlatformSelectorProps {
   selectedPlatform: string;
@@ -39,54 +16,53 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
   onPlatformChange
 }) => {
   return (
-    <div className="animate-fade-in">
+    <div>
       <h3 className="text-lg font-medium mb-4">Choose your platform</h3>
-      <div className="space-y-6">
-        <div>
-          <Label className="mb-4 block">Select the platform for your bio</Label>
-          
-          <Card className="border border-border bg-card">
-            <CardContent className="p-6">
-              {Object.entries(platformCategories).map(([categoryKey, category]) => (
-                <div key={categoryKey} className="mb-8">
-                  <h4 className="flex items-center gap-2 text-lg font-semibold mb-4 text-card-foreground">
-                    <category.icon className="h-5 w-5" />
-                    {category.title}
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {category.platforms.map((option) => (
-                      <div key={option.value} className="flex items-center">
-                        <RadioGroup 
-                          value={selectedPlatform} 
-                          onValueChange={onPlatformChange}
-                          className="flex"
-                        >
-                          <div className="flex items-center">
-                            <RadioGroupItem 
-                              value={option.value} 
-                              id={`platform-${option.value}`} 
-                              className="peer sr-only" 
-                            />
-                            <Label
-                              htmlFor={`platform-${option.value}`}
-                              className={`px-4 py-2 rounded-full border cursor-pointer transition-colors ${
-                                selectedPlatform === option.value 
-                                  ? "bg-wordcraft-purple text-white border-wordcraft-purple" 
-                                  : "bg-background hover:bg-accent border-border text-foreground"
-                              }`}
-                            >
-                              {option.label}
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                      </div>
-                    ))}
-                  </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {platforms.map((platform) => (
+          <Card 
+            key={platform.id} 
+            className={cn(
+              "cursor-pointer transition-all duration-200 hover:shadow-md",
+              selectedPlatform === platform.id 
+                ? "ring-2 ring-primary bg-primary/5 border-primary" 
+                : "hover:border-primary/50"
+            )}
+            onClick={() => onPlatformChange(platform.id)}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center">
+                  <platform.icon className="w-5 h-5 mr-2 text-primary" />
+                  <h4 className="font-medium">{platform.name}</h4>
                 </div>
-              ))}
+                {selectedPlatform === platform.id && (
+                  <Badge variant="default" className="text-xs">
+                    Selected
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">
+                {platform.description}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
+                  {platform.charLimit ? `${platform.charLimit} char limit` : 'No limit'}
+                </span>
+                <Button 
+                  variant={selectedPlatform === platform.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPlatformChange(platform.id);
+                  }}
+                >
+                  {selectedPlatform === platform.id ? "Selected" : "Select"}
+                </Button>
+              </div>
             </CardContent>
           </Card>
-        </div>
+        ))}
       </div>
     </div>
   );
