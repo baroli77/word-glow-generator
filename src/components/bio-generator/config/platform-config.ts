@@ -75,7 +75,7 @@ export const platformConfigs: Record<PlatformType, PlatformConfig> = {
     requiresProfession: false,
     defaultCharLimit: 150,
     fields: ['name', 'interests', 'funFacts'],
-    isPremium: false
+    isPremium: true
   },
   tiktok: {
     category: 'content',
@@ -89,49 +89,49 @@ export const platformConfigs: Record<PlatformType, PlatformConfig> = {
     requiresProfession: false,
     defaultCharLimit: 100,
     fields: ['name', 'interests', 'funFacts'],
-    isPremium: false
+    isPremium: true
   },
   youtube: {
     category: 'content',
     requiresProfession: false,
     defaultCharLimit: 1000,
     fields: ['name', 'content', 'interests', 'schedule'],
-    isPremium: false
+    isPremium: true
   },
   twitch: {
     category: 'content',
     requiresProfession: false,
     defaultCharLimit: 300,
     fields: ['name', 'games', 'schedule', 'interests'],
-    isPremium: false
+    isPremium: true
   },
   pinterest: {
     category: 'content',
     requiresProfession: false,
     defaultCharLimit: 160,
     fields: ['name', 'interests', 'niche', 'style'],
-    isPremium: false
+    isPremium: true
   },
   reddit: {
     category: 'content',
     requiresProfession: false,
     defaultCharLimit: 200,
     fields: ['name', 'interests', 'communities'],
-    isPremium: false
+    isPremium: true
   },
   tinder: {
     category: 'dating',
     requiresProfession: false,
     defaultCharLimit: 500,
     fields: ['name', 'interests', 'funFacts', 'lookingFor'],
-    isPremium: false
+    isPremium: true
   },
   pof: {
     category: 'dating',
     requiresProfession: false,
     defaultCharLimit: 1000,
     fields: ['name', 'interests', 'funFacts', 'lookingFor'],
-    isPremium: false
+    isPremium: true
   }
 };
 
@@ -190,7 +190,7 @@ export const platforms = [
     description: 'Text-based conversation platform by Meta',
     icon: MessageSquare,
     charLimit: 150,
-    isPremium: false
+    isPremium: true
   },
   {
     id: 'tiktok' as PlatformType,
@@ -206,7 +206,7 @@ export const platforms = [
     description: 'Multimedia messaging social platform',
     icon: Camera,
     charLimit: 100,
-    isPremium: false
+    isPremium: true
   },
   {
     id: 'youtube' as PlatformType,
@@ -214,7 +214,7 @@ export const platforms = [
     description: 'Video sharing and content creation platform',
     icon: Youtube,
     charLimit: 1000,
-    isPremium: false
+    isPremium: true
   },
   {
     id: 'twitch' as PlatformType,
@@ -222,7 +222,7 @@ export const platforms = [
     description: 'Live streaming platform for gamers and creators',
     icon: Gamepad2,
     charLimit: 300,
-    isPremium: false
+    isPremium: true
   },
   {
     id: 'pinterest' as PlatformType,
@@ -230,7 +230,7 @@ export const platforms = [
     description: 'Visual discovery and inspiration platform',
     icon: Image,
     charLimit: 160,
-    isPremium: false
+    isPremium: true
   },
   {
     id: 'reddit' as PlatformType,
@@ -238,7 +238,7 @@ export const platforms = [
     description: 'Community-driven discussion platform',
     icon: MessageCircle,
     charLimit: 200,
-    isPremium: false
+    isPremium: true
   },
   {
     id: 'tinder' as PlatformType,
@@ -246,7 +246,7 @@ export const platforms = [
     description: 'Dating app for meeting new people',
     icon: Heart,
     charLimit: 500,
-    isPremium: false
+    isPremium: true
   },
   {
     id: 'pof' as PlatformType,
@@ -254,7 +254,7 @@ export const platforms = [
     description: 'Dating platform for meaningful connections',
     icon: Users,
     charLimit: 1000,
-    isPremium: false
+    isPremium: true
   }
 ];
 

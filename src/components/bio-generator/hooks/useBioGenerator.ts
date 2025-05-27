@@ -15,6 +15,7 @@ export const useBioGenerator = () => {
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
   const [showTemplates, setShowTemplates] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const { user } = useAuth();
   const { canUseTool, recordUsage, refetch, subscription, usageCount } = useSubscription();
   
@@ -24,6 +25,7 @@ export const useBioGenerator = () => {
     if (step === 1) {
       // Check if selected platform is premium and user is free
       if (isFreeUser && isPremiumPlatform(formData.platform as PlatformType)) {
+        setShowPricingModal(true);
         return { shouldShowPricing: true };
       }
     }
@@ -63,12 +65,14 @@ export const useBioGenerator = () => {
   const handleGenerate = async (formData: BioFormData) => {
     // Check if selected platform is premium and user is free
     if (isFreeUser && isPremiumPlatform(formData.platform as PlatformType)) {
+      setShowPricingModal(true);
       return { shouldShowPricing: true };
     }
 
     // Check if user can use the tool
     const hasAccess = await canUseTool('bio_generator');
     if (!hasAccess) {
+      setShowPricingModal(true);
       return { shouldShowPricing: true };
     }
 
@@ -120,6 +124,7 @@ export const useBioGenerator = () => {
     // Check if user can use the tool
     const hasAccess = await canUseTool('bio_generator');
     if (!hasAccess) {
+      setShowPricingModal(true);
       return { shouldShowPricing: true };
     }
 
@@ -153,6 +158,7 @@ export const useBioGenerator = () => {
     setGeneratedBio('');
     setValidationErrors([]);
     setShowTemplates(false);
+    setShowPricingModal(false);
   };
 
   const handleFieldChange = (field: string, value: string) => {
@@ -167,12 +173,14 @@ export const useBioGenerator = () => {
     validationErrors,
     showTemplates,
     selectedTemplate,
+    showPricingModal,
     isFreeUser,
     usageCount,
     setStep,
     setGeneratedBio,
     setShowTemplates,
     setSelectedTemplate,
+    setShowPricingModal,
     handleNext,
     handleBack,
     handleTemplateUse,

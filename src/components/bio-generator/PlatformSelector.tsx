@@ -5,11 +5,13 @@ import PlatformCategoryGrid from './PlatformCategoryGrid';
 interface PlatformSelectorProps {
   selectedPlatform: string;
   onPlatformChange: (platform: string) => void;
+  onShowPricing?: () => void;
 }
 
 const PlatformSelector: React.FC<PlatformSelectorProps> = ({
   selectedPlatform,
-  onPlatformChange
+  onPlatformChange,
+  onShowPricing
 }) => {
   return (
     <div>
@@ -17,6 +19,7 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
       <PlatformCategoryGrid
         selectedPlatform={selectedPlatform}
         onPlatformChange={onPlatformChange}
+        onShowPricing={onShowPricing}
       />
     </div>
   );

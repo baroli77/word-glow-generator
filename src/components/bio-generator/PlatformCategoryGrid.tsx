@@ -13,6 +13,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 interface PlatformCategoryGridProps {
   selectedPlatform: string;
   onPlatformChange: (platform: string) => void;
+  onShowPricing?: () => void;
 }
 
 const categoryLabels: Record<PlatformCategory, string> = {
@@ -31,7 +32,8 @@ const categoryDescriptions: Record<PlatformCategory, string> = {
 
 const PlatformCategoryGrid: React.FC<PlatformCategoryGridProps> = ({
   selectedPlatform,
-  onPlatformChange
+  onPlatformChange,
+  onShowPricing
 }) => {
   const { subscription } = useSubscription();
   const isFreeUser = subscription?.plan_type === 'free';
@@ -63,7 +65,8 @@ const PlatformCategoryGrid: React.FC<PlatformCategoryGridProps> = ({
 
   const handlePlatformClick = (platform: any) => {
     if (isFreeUser && platform.isPremium) {
-      // Don't allow selection of premium platforms for free users
+      // Open pricing modal for premium platforms
+      onShowPricing?.();
       return;
     }
     onPlatformChange(platform.id);
@@ -161,7 +164,7 @@ const PlatformCategoryGrid: React.FC<PlatformCategoryGridProps> = ({
                       {cardContent}
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Upgrade to unlock this feature</p>
+                      <p>Upgrade to unlock this platform</p>
                     </TooltipContent>
                   </Tooltip>
                 );
