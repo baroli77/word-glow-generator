@@ -42,12 +42,12 @@ const ResetPassword = () => {
               description: error.message,
               variant: "destructive",
             });
-            navigate('/login');
+            setValidating(false);
           } else {
             console.log('Session set successfully for password reset');
             setResetReady(true);
+            setValidating(false);
           }
-          setValidating(false);
         });
     } else {
       console.log('Missing or invalid parameters for password reset');
@@ -56,9 +56,9 @@ const ResetPassword = () => {
         description: "The password reset link is invalid or has expired.",
         variant: "destructive",
       });
-      navigate('/login');
+      setValidating(false);
     }
-  }, [navigate]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,10 +146,12 @@ const ResetPassword = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold">Reset Your Password</CardTitle>
-            <CardDescription>Enter your new password below</CardDescription>
+            <CardDescription>
+              {resetReady ? "Enter your new password below" : "There was an issue with your reset link"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            {resetReady && (
+            {resetReady ? (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="password">New Password</Label>
@@ -179,6 +181,16 @@ const ResetPassword = () => {
                   {loading ? <LoadingSpinner /> : 'Update Password'}
                 </Button>
               </form>
+            ) : (
+              <div className="text-center space-y-4">
+                <p className="text-muted-foreground">
+                  The password reset link is invalid, expired, or there was an error setting up your session. 
+                  Please request a new password reset link.
+                </p>
+                <Button onClick={() => navigate('/login')} variant="outline" className="w-full">
+                  Back to Login
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
