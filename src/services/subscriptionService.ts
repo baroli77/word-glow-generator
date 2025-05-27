@@ -40,7 +40,7 @@ export class SubscriptionService {
       if (data && data.expires_at) {
         const isExpired = this.isSubscriptionExpired(data.expires_at);
         const shouldExpire = this.shouldExpireSubscription(data);
-        
+
         if (isExpired && shouldExpire) {
           await this.deactivateSubscription(data.id);
           toast({

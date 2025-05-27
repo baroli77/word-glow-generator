@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, UserCircle, Star, Copy, Trash2, Plus, Edit } from 'lucide-react';
+import { FileText, UserCircle, Star, Copy, Trash2, Plus, Edit, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { getUserBios, getUserCoverLetters } from '@/services/supabaseService';
@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "@/components/ui/use-toast";
 import { getDailyQuote } from '@/utils/dailyQuotes';
+import SubscriptionManagement from '@/components/subscription/SubscriptionManagement';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -256,6 +257,13 @@ const Dashboard = () => {
                   Upgrade Plan
                 </Button>
               </div>
+              
+              {/* Subscription Management Section - only show for paid plans */}
+              {subscription && subscription.plan_type !== 'free' && (
+                <div className="mb-8">
+                  <SubscriptionManagement />
+                </div>
+              )}
               
               <div className="brand-card">
                 <h3 className="text-sm font-medium text-muted-foreground mb-4 uppercase">Usage Stats</h3>
