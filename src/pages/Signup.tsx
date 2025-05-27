@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -55,10 +56,10 @@ const Signup = () => {
     
     try {
       await signUp(email, password, firstName, lastName);
-      // Show email verification screen after successful signup
+      // Show email verification screen immediately after successful signup
       setShowEmailVerification(true);
     } catch (error) {
-      // Error is handled in the signUp function
+      // Error is handled in the signUp function, don't show verification screen
     } finally {
       setLoading(false);
     }

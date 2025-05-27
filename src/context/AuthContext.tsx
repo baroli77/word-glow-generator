@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 type AuthContextType = {
   session: Session | null;
@@ -94,10 +94,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         },
       });
       if (error) throw error;
-      toast({
-        title: "Account created",
-        description: "Please check your email to verify your account.",
-      });
+      // Don't show toast here - let the component handle the UI flow
     } catch (error) {
       toast({
         title: "Error signing up",
