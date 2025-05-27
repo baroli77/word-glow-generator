@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Check } from 'lucide-react';
@@ -106,15 +107,15 @@ const Pricing: React.FC = () => {
             Choose the plan that's right for you and start creating professional bios.
           </p>
           {user && (
-            <div className="mt-4 inline-block bg-wordcraft-purple/10 border border-wordcraft-purple/20 px-4 py-2 rounded-lg">
-              <p className="text-sm text-wordcraft-purple font-medium">
+            <div className="mt-4 inline-block bg-brand-purple/10 border border-brand-purple/20 px-4 py-2 rounded-lg">
+              <p className="text-sm text-brand-purple font-medium">
                 Current Plan: {isAdminUser ? 'Admin (Unlimited)' : currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)}
               </p>
             </div>
           )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {pricingPlans.map((plan, index) => {
             const isCurrentPlan = currentPlan === plan.planType;
             const isPlanDowngrade = isDowngrade(plan.planType);
@@ -122,69 +123,73 @@ const Pricing: React.FC = () => {
             return (
               <div 
                 key={index} 
-                className={`wordcraft-card relative overflow-hidden ${
-                  plan.popular ? 'ring-2 ring-wordcraft-purple shadow-lg shadow-wordcraft-purple/10' : ''
+                className={`relative h-full bg-card border rounded-xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg flex flex-col ${
+                  plan.popular ? 'ring-2 ring-brand-purple shadow-lg shadow-brand-purple/10 scale-105' : ''
                 } ${isCurrentPlan ? 'ring-2 ring-green-500 shadow-lg shadow-green-500/10' : ''} animate-enter`} 
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {plan.popular && !isCurrentPlan && (
-                  <div className="absolute top-0 right-0">
-                    <div className="bg-wordcraft-purple text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                    <div className="bg-brand-purple text-white text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap">
                       MOST POPULAR
                     </div>
                   </div>
                 )}
                 {isCurrentPlan && (
-                  <div className="absolute top-0 right-0">
-                    <div className="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                    <div className="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap">
                       CURRENT PLAN
                     </div>
                   </div>
                 )}
                 
-                <h3 className="font-semibold text-xl">{plan.name}</h3>
-                <div className="mt-4 mb-6">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground ml-1">/{plan.period}</span>
+                <div className="flex-grow">
+                  <h3 className="font-semibold text-xl mb-4">{plan.name}</h3>
+                  <div className="mb-4">
+                    <span className="text-3xl font-bold">{plan.price}</span>
+                    <span className="text-muted-foreground ml-1 text-sm">/{plan.period}</span>
+                  </div>
+                  <p className="text-muted-foreground mb-6 text-sm leading-relaxed">{plan.description}</p>
+                  
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-start">
+                        <Check className="h-4 w-4 text-green-500 mr-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm leading-relaxed">{feature}</span>
+                      </li>
+                    ))}
+                    {plan.limitations.map((limitation, i) => (
+                      <li key={i} className="flex items-start">
+                        <span className="h-4 w-4 mr-3 mt-0.5 flex-shrink-0 text-amber-500 text-xs">⚠️</span>
+                        <span className="text-sm text-muted-foreground leading-relaxed">{limitation}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="text-muted-foreground mb-6">{plan.description}</p>
                 
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-start">
-                      <Check className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                  {plan.limitations.map((limitation, i) => (
-                    <li key={i} className="flex items-start">
-                      <span className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0 text-amber-500">⚠️</span>
-                      <span className="text-sm text-muted-foreground">{limitation}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <Button 
-                  variant={plan.popular && !isCurrentPlan ? "default" : "outline"}
-                  className={`w-full ${
-                    plan.popular && !isCurrentPlan 
-                      ? 'bg-gradient-to-r from-wordcraft-purple to-wordcraft-pink text-white hover:opacity-90' 
-                      : ''
-                  } ${isCurrentPlan ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
-                  disabled={isCurrentPlan || isPlanDowngrade || isAdminUser}
-                  onClick={() => {
-                    if (plan.planType === 'free') {
-                      window.location.href = '/signup';
-                    } else {
-                      handleUpgrade(plan.planType);
-                    }
-                  }}
-                >
-                  {isCurrentPlan ? 'Current Plan' : 
-                   isPlanDowngrade ? 'Downgrade Not Allowed' :
-                   isAdminUser ? 'Admin Access' :
-                   plan.buttonText}
-                </Button>
+                <div className="mt-auto">
+                  <Button 
+                    variant={plan.popular && !isCurrentPlan ? "default" : "outline"}
+                    className={`w-full ${
+                      plan.popular && !isCurrentPlan 
+                        ? 'bg-gradient-to-r from-brand-purple to-brand-pink text-white hover:opacity-90' 
+                        : ''
+                    } ${isCurrentPlan ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
+                    disabled={isCurrentPlan || isPlanDowngrade || isAdminUser}
+                    onClick={() => {
+                      if (plan.planType === 'free') {
+                        window.location.href = '/signup';
+                      } else {
+                        handleUpgrade(plan.planType);
+                      }
+                    }}
+                  >
+                    {isCurrentPlan ? 'Current Plan' : 
+                     isPlanDowngrade ? 'Downgrade Not Allowed' :
+                     isAdminUser ? 'Admin Access' :
+                     plan.buttonText}
+                  </Button>
+                </div>
               </div>
             );
           })}
