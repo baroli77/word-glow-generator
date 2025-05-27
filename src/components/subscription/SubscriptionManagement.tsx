@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -134,22 +135,22 @@ const SubscriptionManagement: React.FC = () => {
         {/* Plan Features */}
         <div className="space-y-3">
           <h4 className="font-medium text-sm">Your Plan Includes:</h4>
-          <div className="space-y-2">
-            <div className="flex gap-3">
-              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Unlimited bio generation</span>
+          <div className="space-y-2 mt-4">
+            <div className="flex items-start gap-2">
+              <CheckCircle className="mt-1 h-5 w-5 text-green-500" />
+              <span>Unlimited bio generation</span>
             </div>
-            <div className="flex gap-3">
-              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Unlimited cover letter generation</span>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="mt-1 h-5 w-5 text-green-500" />
+              <span>Unlimited cover letter generation</span>
             </div>
-            <div className="flex gap-3">
-              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">All platform types available</span>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="mt-1 h-5 w-5 text-green-500" />
+              <span>All platform types available</span>
             </div>
-            <div className="flex gap-3">
-              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span className="text-sm text-muted-foreground">Priority support</span>
+            <div className="flex items-start gap-2">
+              <CheckCircle className="mt-1 h-5 w-5 text-green-500" />
+              <span>Priority support</span>
             </div>
           </div>
         </div>
