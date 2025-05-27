@@ -2,16 +2,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { subscriptionService, type Subscription } from '@/services/subscriptionService';
+import { useSubscriptionExpiry } from './useSubscriptionExpiry';
 
 export const useSubscriptionData = () => {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const { checkAndExpireUserSubscription } = useSubscriptionExpiry();
 
   // Check if user is admin
   const isAdminUser = user?.email === 'obarton77@gmail.com';
 
-  const fetchSubscription = useCallback(async () => {
+  const fetchSubscription = useCallback(async (skipExpiryCheck = false) => {
     if (!user) {
       setSubscription(null);
       setLoading(false);
@@ -31,6 +33,13 @@ export const useSubscriptionData = () => {
     }
 
     try {
+      // Check and expire subscription first (unless we're skipping it to avoid loops)
+      if (!skipExpiryCheck) {
+        const expiryResult = await checkAndExpireUserSubscription(user.id);
+        console.log('Subscription expiry check result:', expiryResult);
+      }
+
+      // Fetch current subscription after expiry check
       const userSubscription = await subscriptionService.fetchUserSubscription(user.id);
       setSubscription(userSubscription);
     } catch (error) {
@@ -39,8 +48,9 @@ export const useSubscriptionData = () => {
     } finally {
       setLoading(false);
     }
-  }, [user, isAdminUser]);
+  }, [user, isAdminUser, checkAndExpireUserSubscription]);
 
+  // Initial fetch when user changes
   useEffect(() => {
     if (user) {
       fetchSubscription();
@@ -50,20 +60,35 @@ export const useSubscriptionData = () => {
     }
   }, [user, fetchSubscription]);
 
-  // Set up automatic revalidation for daily subscriptions
+  // Set up automatic revalidation for time-based subscriptions
   useEffect(() => {
-    if (!subscription || subscription.plan_type !== 'daily' || !subscription.expires_at) {
+    if (!subscription || !subscription.expires_at) {
       return;
     }
 
-    const interval = setInterval(async () => {
-      const expiresAt = new Date(subscription.expires_at!);
-      const now = new Date();
-      
-      if (now > expiresAt) {
-        await fetchSubscription(); // This will handle the expiration
-      }
-    }, 10 * 60 * 1000); // Check every 10 minutes
+    const expiresAt = new Date(subscription.expires_at);
+    const now = new Date();
+    const timeUntilExpiry = expiresAt.getTime() - now.getTime();
+
+    // If already expired, check immediately
+    if (timeUntilExpiry <= 0) {
+      fetchSubscription();
+      return;
+    }
+
+    // For daily subscriptions, check more frequently as they approach expiry
+    let checkInterval: number;
+    if (subscription.plan_type === 'daily') {
+      // Check every minute if expiring within an hour, otherwise every 10 minutes
+      checkInterval = timeUntilExpiry <= 60 * 60 * 1000 ? 60 * 1000 : 10 * 60 * 1000;
+    } else {
+      // For monthly plans, check every hour
+      checkInterval = 60 * 60 * 1000;
+    }
+
+    const interval = setInterval(() => {
+      fetchSubscription();
+    }, checkInterval);
 
     return () => clearInterval(interval);
   }, [subscription, fetchSubscription]);

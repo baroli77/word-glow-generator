@@ -159,6 +159,7 @@ export type Database = {
           id: string
           is_active: boolean
           plan_type: string
+          subscription_cancelled: boolean | null
           updated_at: string
           user_id: string
         }
@@ -168,6 +169,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           plan_type: string
+          subscription_cancelled?: boolean | null
           updated_at?: string
           user_id: string
         }
@@ -177,6 +179,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           plan_type?: string
+          subscription_cancelled?: boolean | null
           updated_at?: string
           user_id?: string
         }
@@ -187,9 +190,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_expire_subscriptions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       can_use_tool: {
         Args: { user_id_param: string; tool_type_param: string }
         Returns: boolean
+      }
+      check_user_subscription_expiry: {
+        Args: { target_user_id: string }
+        Returns: {
+          expired: boolean
+          old_plan_type: string
+          new_plan_type: string
+        }[]
       }
       delete_user_and_data: {
         Args: { user_email: string }

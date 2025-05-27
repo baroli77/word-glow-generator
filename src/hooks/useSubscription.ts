@@ -22,6 +22,11 @@ export const useSubscription = () => {
 
   const { upgradeSubscription } = useSubscriptionActions();
 
+  // Enhanced refetch that forces expiry check
+  const refetchWithExpiryCheck = async () => {
+    await fetchSubscription(false); // false = don't skip expiry check
+  };
+
   return {
     subscription,
     loading,
@@ -29,7 +34,7 @@ export const useSubscription = () => {
     canUseTool: (toolType: 'cover_letter' | 'bio_generator') => canUseTool(toolType, subscription, isAdminUser),
     recordUsage,
     upgradeSubscription,
-    refetch: fetchSubscription,
+    refetch: refetchWithExpiryCheck,
     getRemainingTime,
     getPlanDisplayName,
     isAdminUser
