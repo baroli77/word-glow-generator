@@ -103,3 +103,37 @@ export async function getUserCoverLetters() {
     return [];
   }
 }
+
+export async function generateCoverLetter(formData: any, cvContent: string) {
+  try {
+    const response = await fetch(`https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/generate-content`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabase.supabaseKey}`,
+      },
+      body: JSON.stringify({
+        type: 'cover_letter',
+        formData: {
+          ...formData,
+          cvContent
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate cover letter');
+    }
+
+    const data = await response.json();
+    return { content: data.content, error: null };
+  } catch (error) {
+    console.error('Error generating cover letter:', error);
+    toast({
+      title: "Generation Error",
+      description: "Failed to generate cover letter. Please try again.",
+      variant: "destructive"
+    });
+    return { content: null, error: error.message };
+  }
+}

@@ -69,3 +69,43 @@ export async function getUserBios() {
     return [];
   }
 }
+
+export async function generateBio(formData: any) {
+  try {
+    const response = await fetch(`https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/generate-content`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabase.supabaseKey}`,
+      },
+      body: JSON.stringify({
+        type: 'bio',
+        formData
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate bio');
+    }
+
+    const data = await response.json();
+    return { content: data.content, error: null };
+  } catch (error) {
+    console.error('Error generating bio:', error);
+    return { content: null, error: error.message };
+  }
+}
+
+export function simulateBioGeneration(formData: any) {
+  const { platform, name, profession, tone } = formData;
+  
+  // Create a simple template-based bio as fallback
+  const templates = {
+    professional: `${name} is a ${profession} with expertise in delivering high-quality results. Known for professionalism and dedication to excellence.`,
+    casual: `Hey! I'm ${name}, a ${profession} who loves what I do. Always up for new challenges and connecting with great people.`,
+    creative: `${name} - ${profession} with a passion for innovation and creativity. Turning ideas into reality, one project at a time.`,
+    confident: `${name} | ${profession} | Expert in my field with a proven track record of success. Let's make great things happen together.`
+  };
+
+  return templates[tone] || templates.professional;
+}
