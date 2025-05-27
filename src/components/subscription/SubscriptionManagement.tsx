@@ -1,12 +1,17 @@
 
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Calendar, Clock, Crown, CreditCard, AlertTriangle, CheckCircle } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
+import {
+  Calendar, Clock, Crown, CreditCard, AlertTriangle, CheckCircle
+} from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { subscriptionService } from '@/services/subscriptionService';
 import { useAuth } from '@/context/AuthContext';
@@ -24,13 +29,10 @@ const SubscriptionManagement: React.FC = () => {
 
   const handleCancelSubscription = async () => {
     if (!user) return;
-    
     setIsLoading(true);
     try {
       const success = await subscriptionService.cancelSubscription(user.id);
-      if (success) {
-        await refetch();
-      }
+      if (success) await refetch();
     } catch (error) {
       console.error('Error cancelling subscription:', error);
     } finally {
@@ -38,104 +40,58 @@ const SubscriptionManagement: React.FC = () => {
     }
   };
 
-  const handleResubscribe = () => {
-    navigate('/pricing');
-  };
+  const handleResubscribe = () => navigate('/pricing');
 
   const getPlanIcon = () => {
     switch (subscription.plan_type) {
-      case 'daily':
-        return <Clock className="h-5 w-5" />;
-      case 'monthly':
-        return <Calendar className="h-5 w-5" />;
-      case 'lifetime':
-        return <Crown className="h-5 w-5" />;
-      default:
-        return <CreditCard className="h-5 w-5" />;
+      case 'daily': return <Clock className="h-5 w-5" />;
+      case 'monthly': return <Calendar className="h-5 w-5" />;
+      case 'lifetime': return <Crown className="h-5 w-5" />;
+      default: return <CreditCard className="h-5 w-5" />;
     }
   };
-
-  const getPlanColor = () => {
-    switch (subscription.plan_type) {
-      case 'daily':
-        return 'bg-blue-500';
-      case 'monthly':
-        return 'bg-purple-500';
-      case 'lifetime':
-        return 'bg-yellow-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const remainingTime = getRemainingTime();
-  const isCancelled = subscription.subscription_cancelled;
 
   return (
-    <Card className="border-2">
+    <Card className="w-full bg-background border border-muted">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <div className={`p-2 rounded-full ${getPlanColor()} text-white`}>
-            {getPlanIcon()}
-          </div>
+          {getPlanIcon()}
           Subscription Management
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Current Plan Status */}
-        <div className="space-y-4">
+      <CardContent className="space-y-4">
+        <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium">Current Plan</h3>
-              <p className="text-sm text-muted-foreground">{getPlanDisplayName()}</p>
-            </div>
-            <Badge variant={isCancelled ? "destructive" : "default"}>
-              {isCancelled ? 'Cancelled' : 'Active'}
-            </Badge>
+            <p className="text-sm text-muted-foreground">Current Plan</p>
+            {subscription.is_cancelled && (
+              <Badge variant="destructive">Cancelled</Badge>
+            )}
           </div>
-
-          {/* Expiry Information */}
-          {subscription.expires_at && (
-            <div className="p-4 bg-muted/30 rounded-lg">
-              <div className="flex items-start gap-3">
-                {isCancelled ? (
-                  <AlertTriangle className="h-5 w-5 text-orange-500 mt-0.5" />
-                ) : (
-                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                )}
-                <div className="flex-1">
-                  <h4 className="font-medium text-sm">
-                    {isCancelled ? 'Subscription Ends' : 'Next Renewal'}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(subscription.expires_at).toLocaleDateString('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                  {remainingTime && !isCancelled && (
-                    <p className="text-sm font-medium text-green-600 mt-1">
-                      {remainingTime}
-                    </p>
-                  )}
-                  {isCancelled && (
-                    <p className="text-sm text-orange-600 mt-1">
-                      You'll retain access until this date, then be moved to the free plan.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+          <p className="text-base font-medium capitalize">
+            {getPlanDisplayName(subscription.plan_type)}
+          </p>
         </div>
 
-        {/* Plan Features */}
-        <div className="space-y-3">
-          <h4 className="font-medium text-sm">Your Plan Includes:</h4>
+        {subscription.expires_at && (
+          <div className="rounded-md border border-yellow-700 bg-yellow-950 p-4 text-yellow-300">
+            <div className="flex items-center gap-2 text-sm font-medium mb-1">
+              <AlertTriangle className="h-4 w-4" />
+              Subscription Ends
+            </div>
+            <p className="text-sm">
+              {new Date(subscription.expires_at).toLocaleString(undefined, {
+                weekday: 'long', year: 'numeric', month: 'long',
+                day: 'numeric', hour: '2-digit', minute: '2-digit'
+              })}
+            </p>
+            <p className="text-sm text-red-400 mt-1">
+              You&apos;ll retain access until this date, then be moved to the free plan.
+            </p>
+          </div>
+        )}
+
+        <div>
+          <p className="text-sm font-semibold mb-2">Your Plan Includes:</p>
           <ul className="space-y-3 mt-4 list-none">
             <li className="flex items-start gap-3">
               <CheckCircle className="h-5 w-5 mt-1 text-green-500 shrink-0" />
@@ -156,73 +112,18 @@ const SubscriptionManagement: React.FC = () => {
           </ul>
         </div>
 
-        {/* Action Buttons */}
-        <div className="space-y-3 pt-4 border-t">
-          {subscription.plan_type === 'monthly' && !isCancelled && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" className="w-full" disabled={isLoading}>
-                  Cancel Subscription
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Cancel Your Subscription?</AlertDialogTitle>
-                  <AlertDialogDescription className="space-y-2">
-                    <p>
-                      Are you sure you want to cancel your monthly subscription? 
-                    </p>
-                    <p className="font-medium">
-                      You'll retain full access until {subscription.expires_at ? 
-                        new Date(subscription.expires_at).toLocaleDateString() : 'the end of your billing period'}, 
-                      after which you'll be moved to the free plan.
-                    </p>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
-                  <AlertDialogAction 
-                    onClick={handleCancelSubscription}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    Yes, Cancel Subscription
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+        {subscription.is_cancelled && (
+          <p className="text-xs text-muted-foreground text-center pt-4">
+            Your subscription has been cancelled but remains active until the end date.
+          </p>
+        )}
 
-          {subscription.plan_type === 'daily' && (
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                24-hour access cannot be cancelled but will automatically expire.
-              </p>
-            </div>
-          )}
-
-          {subscription.plan_type === 'lifetime' && (
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                You have lifetime access - no expiration or cancellation needed!
-              </p>
-            </div>
-          )}
-
-          {isCancelled && (
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-3">
-                Your subscription has been cancelled but remains active until the end date.
-              </p>
-              <Button variant="default" className="w-full" onClick={handleResubscribe}>
-                Resubscribe
-              </Button>
-            </div>
-          )}
-        </div>
+        <Button onClick={handleResubscribe} className="w-full mt-4" disabled={isLoading}>
+          Resubscribe
+        </Button>
       </CardContent>
     </Card>
   );
 };
 
 export default SubscriptionManagement;
-
