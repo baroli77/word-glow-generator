@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Clock, Infinity, Lock, Crown, Star } from 'lucide-react';
-import { createClient } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UsageCounterProps {
   toolType: 'cover_letter' | 'bio_generator';
@@ -20,7 +19,6 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
 
   const remainingTime = getRemainingTime();
   const planName = getPlanDisplayName();
-  const supabase = createClient();
 
   // Determine if user can use the tool
   useEffect(() => {
