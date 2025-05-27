@@ -14,7 +14,18 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Starting create-checkout function");
+    
+    // Check if Stripe secret key is available
+    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeSecretKey) {
+      console.error("STRIPE_SECRET_KEY environment variable is not set");
+      throw new Error("Stripe configuration is missing. Please contact support.");
+    }
+    console.log("Stripe secret key found");
+
     const { planType } = await req.json();
+    console.log("Plan type requested:", planType);
     
     // Get the authenticated user
     const supabaseClient = createClient(
@@ -31,10 +42,13 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     
     if (userError || !user) {
+      console.error("User authentication error:", userError);
       throw new Error("User not authenticated");
     }
+    
+    console.log("User authenticated:", user.email);
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
     });
 
@@ -47,6 +61,9 @@ serve(async (req) => {
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
+      console.log("Existing customer found:", customerId);
+    } else {
+      console.log("No existing customer found, will create during checkout");
     }
 
     // Define pricing
@@ -61,12 +78,17 @@ serve(async (req) => {
       throw new Error("Invalid plan type");
     }
 
+    console.log("Creating checkout session for plan:", planType, "amount:", priceConfig.amount);
+
+    // Get origin for redirect URLs
+    const origin = req.headers.get("origin") || "https://id-preview--0556325d-6d42-4139-9d9a-797b034f7768.lovable.app";
+
     // Create checkout session
     const sessionConfig: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      success_url: `${req.headers.get("origin")}/bio-generator?upgrade=success`,
-      cancel_url: `${req.headers.get("origin")}/pricing`,
+      success_url: `${origin}/bio-generator?upgrade=success`,
+      cancel_url: `${origin}/pricing`,
       metadata: {
         user_id: user.id,
         plan_type: planType,
@@ -111,7 +133,11 @@ serve(async (req) => {
       ];
     }
 
+    console.log("Creating Stripe checkout session with config:", JSON.stringify(sessionConfig, null, 2));
+
     const session = await stripe.checkout.sessions.create(sessionConfig);
+
+    console.log("Checkout session created successfully:", session.id);
 
     return new Response(
       JSON.stringify({ url: session.url }),
@@ -123,7 +149,9 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error creating checkout session:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message || "Failed to create checkout session"
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
