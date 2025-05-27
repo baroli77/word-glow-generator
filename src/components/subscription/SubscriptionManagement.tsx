@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -127,26 +126,26 @@ const SubscriptionManagement: React.FC = () => {
         </div>
 
         {/* Plan Features */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <h4 className="font-medium text-sm">Your Plan Includes:</h4>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            <li className="flex items-start gap-2">
+          <div className="space-y-2">
+            <div className="flex gap-3">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Unlimited bio generation</span>
-            </li>
-            <li className="flex items-start gap-2">
+              <span className="text-sm text-muted-foreground">Unlimited bio generation</span>
+            </div>
+            <div className="flex gap-3">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Unlimited cover letter generation</span>
-            </li>
-            <li className="flex items-start gap-2">
+              <span className="text-sm text-muted-foreground">Unlimited cover letter generation</span>
+            </div>
+            <div className="flex gap-3">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>All platform types available</span>
-            </li>
-            <li className="flex items-start gap-2">
+              <span className="text-sm text-muted-foreground">All platform types available</span>
+            </div>
+            <div className="flex gap-3">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-              <span>Priority support</span>
-            </li>
-          </ul>
+              <span className="text-sm text-muted-foreground">Priority support</span>
+            </div>
+          </div>
         </div>
 
         {/* Action Buttons */}
