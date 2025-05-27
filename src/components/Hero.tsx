@@ -41,7 +41,7 @@ const Hero: React.FC = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Link to="/cover-letter">
+              <Link to="/examples">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 border-2 hover:bg-accent">
                   View Examples
                 </Button>

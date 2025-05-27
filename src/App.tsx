@@ -8,6 +8,7 @@ import CoverLetter from "./pages/CoverLetter";
 import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
 import FAQ from "./pages/FAQ";
+import Examples from "./pages/Examples";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -32,6 +33,7 @@ function App() {
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/about" element={<About />} />
               <Route path="/faq" element={<FAQ />} />
+              <Route path="/examples" element={<Examples />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
