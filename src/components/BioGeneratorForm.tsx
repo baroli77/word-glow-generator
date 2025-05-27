@@ -19,7 +19,7 @@ import { generateBio, simulateBioGeneration } from '../services/bioService';
 import { validateBioForm, ValidationError } from './bio-generator/utils/validation';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useAuth } from '@/context/AuthContext';
-import { isPremiumPlatform } from './bio-generator/config/platform-config';
+import { isPremiumPlatform, PlatformType } from './bio-generator/config/platform-config';
 
 const BioGeneratorForm: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -38,7 +38,7 @@ const BioGeneratorForm: React.FC = () => {
   const handleNext = () => {
     if (step === 1) {
       // Check if selected platform is premium and user is free
-      if (isFreeUser && isPremiumPlatform(formData.platform)) {
+      if (isFreeUser && isPremiumPlatform(formData.platform as PlatformType)) {
         setShowPricingModal(true);
         return;
       }
@@ -78,7 +78,7 @@ const BioGeneratorForm: React.FC = () => {
   
   const handleGenerate = async () => {
     // Check if selected platform is premium and user is free
-    if (isFreeUser && isPremiumPlatform(formData.platform)) {
+    if (isFreeUser && isPremiumPlatform(formData.platform as PlatformType)) {
       setShowPricingModal(true);
       return;
     }
@@ -183,16 +183,19 @@ const BioGeneratorForm: React.FC = () => {
   };
 
   const handlePlatformChange = (platform: string) => {
+    // Cast platform to PlatformType since we know it's valid from the selector
+    const platformType = platform as PlatformType;
+    
     // Check if platform is premium and user is free
-    if (isFreeUser && isPremiumPlatform(platform)) {
+    if (isFreeUser && isPremiumPlatform(platformType)) {
       setShowPricingModal(true);
       return;
     }
-    updatePlatform(platform);
+    updatePlatform(platformType);
   };
 
   // Show premium upgrade prompt if free user tries to access premium platform
-  if (step === 1 && isFreeUser && isPremiumPlatform(formData.platform)) {
+  if (step === 1 && isFreeUser && isPremiumPlatform(formData.platform as PlatformType)) {
     return (
       <div className="max-w-3xl mx-auto">
         <div className="text-center py-12">
