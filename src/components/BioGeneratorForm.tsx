@@ -19,7 +19,8 @@ import { generateBio, simulateBioGeneration } from '../services/bioService';
 import { validateBioForm, ValidationError } from './bio-generator/utils/validation';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useAuth } from '@/context/AuthContext';
-import { isPremiumPlatform, PlatformType } from './bio-generator/config/platform-config';
+import { isPremiumPlatform } from './bio-generator/config/platform-config';
+import { PlatformType } from './bio-generator/types';
 
 const BioGeneratorForm: React.FC = () => {
   const [step, setStep] = useState(1);
