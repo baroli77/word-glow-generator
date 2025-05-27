@@ -43,28 +43,33 @@ export const useSubscription = () => {
         return;
       }
 
-      // Call the edge function
-      const response = await fetch('https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/expire-daily-subscriptions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Try to call the edge function, but don't let it block the main functionality
+      try {
+        const response = await fetch('https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/expire-daily-subscriptions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
-      if (response.ok) {
-        console.log('Expiration cleanup completed successfully');
-        // Update the last check timestamp
-        localStorage.setItem(EXPIRATION_CHECK_KEY, now.toString());
-        
-        // Refresh subscription data after cleanup
-        await fetchSubscription();
-      } else {
-        console.error('Expiration cleanup failed:', response.status, response.statusText);
+        if (response.ok) {
+          console.log('Expiration cleanup completed successfully');
+          // Update the last check timestamp
+          localStorage.setItem(EXPIRATION_CHECK_KEY, now.toString());
+          
+          // Refresh subscription data after cleanup
+          await fetchSubscription();
+        } else {
+          console.log('Expiration cleanup failed:', response.status, response.statusText);
+        }
+      } catch (fetchError) {
+        // Silently fail on fetch errors - don't block the main app
+        console.log('Edge function not available, skipping expiration cleanup');
       }
     } catch (error) {
       // Fail silently as requested
-      console.error('Error during expiration cleanup:', error);
+      console.log('Error during expiration cleanup, continuing normally');
     }
   }, []);
 
@@ -180,8 +185,10 @@ export const useSubscription = () => {
       fetchSubscription();
       fetchUsageCount();
       
-      // Run expiration cleanup on user login
-      runExpirationCleanup();
+      // Run expiration cleanup on user login, but don't await it
+      runExpirationCleanup().catch(() => {
+        // Silently handle any errors
+      });
     } else {
       setSubscription(null);
       setUsageCount(0);
@@ -212,7 +219,9 @@ export const useSubscription = () => {
     if (!user) return;
 
     const interval = setInterval(() => {
-      runExpirationCleanup();
+      runExpirationCleanup().catch(() => {
+        // Silently handle any errors
+      });
     }, CHECK_INTERVAL_MS);
 
     return () => clearInterval(interval);
