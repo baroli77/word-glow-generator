@@ -20,11 +20,15 @@ const ResetPassword = () => {
   const [validating, setValidating] = useState(true);
 
   useEffect(() => {
-    // Check if we have the required token parameters
+    // Check if we have the required parameters for password reset
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
+    const type = searchParams.get('type');
     
-    if (!accessToken || !refreshToken) {
+    console.log('Reset password params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
+    
+    if (!accessToken || !refreshToken || type !== 'recovery') {
+      console.log('Missing or invalid parameters for password reset');
       toast({
         title: "Invalid reset link",
         description: "The password reset link is invalid or has expired.",
@@ -40,6 +44,7 @@ const ResetPassword = () => {
       refresh_token: refreshToken,
     }).then(({ error }) => {
       if (error) {
+        console.error('Error setting session:', error);
         toast({
           title: "Invalid reset link",
           description: "The password reset link is invalid or has expired.",
@@ -47,6 +52,7 @@ const ResetPassword = () => {
         });
         navigate('/login');
       } else {
+        console.log('Session set successfully for password reset');
         setValidating(false);
       }
     });
@@ -81,19 +87,24 @@ const ResetPassword = () => {
       });
 
       if (error) {
+        console.error('Error updating password:', error);
         toast({
           title: "Error updating password",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log('Password updated successfully');
         toast({
           title: "Password updated",
           description: "Your password has been successfully updated. You can now sign in with your new password.",
         });
+        // Sign out to ensure clean state
+        await supabase.auth.signOut();
         navigate('/login');
       }
     } catch (error) {
+      console.error('Unexpected error:', error);
       toast({
         title: "Error updating password",
         description: "An unexpected error occurred. Please try again.",
