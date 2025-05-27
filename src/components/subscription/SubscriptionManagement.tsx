@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -135,23 +136,18 @@ const SubscriptionManagement: React.FC = () => {
         {/* Plan Features */}
         <div className="space-y-3">
           <h4 className="font-medium text-sm">Your Plan Includes:</h4>
-          <div className="space-y-2 mt-4">
-            <div className="flex items-start gap-2">
-              <CheckCircle className="mt-1 h-5 w-5 text-green-500" />
-              <span>Unlimited bio generation</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckCircle className="mt-1 h-5 w-5 text-green-500" />
-              <span>Unlimited cover letter generation</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckCircle className="mt-1 h-5 w-5 text-green-500" />
-              <span>All platform types available</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <CheckCircle className="mt-1 h-5 w-5 text-green-500" />
-              <span>Priority support</span>
-            </div>
+          <div className="space-y-3 mt-4">
+            {[
+              "Unlimited bio generation",
+              "Unlimited cover letter generation",
+              "All platform types available",
+              "Priority support"
+            ].map((text, idx) => (
+              <div key={idx} className="flex items-start gap-2">
+                <CheckCircle className="mt-1 h-5 w-5 text-green-500 shrink-0" />
+                <p className="text-sm leading-snug text-white">{text}</p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -224,3 +220,4 @@ const SubscriptionManagement: React.FC = () => {
 };
 
 export default SubscriptionManagement;
+
