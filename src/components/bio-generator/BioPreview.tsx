@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Copy, Download, Sparkles, Save } from 'lucide-react';
-import { toast } from "@/components/ui/use-toast";
+import { showToast } from "@/utils/toast";
 import { saveBio } from "@/services/supabaseService";
 
 interface BioPreviewProps {
@@ -31,16 +31,9 @@ const BioPreview: React.FC<BioPreviewProps> = ({
     if (!bio) return;
     
     navigator.clipboard.writeText(bio).then(() => {
-      toast({
-        title: "Copied to clipboard",
-        description: "Your bio has been copied to clipboard."
-      });
+      showToast.success("Copied to clipboard!");
     }).catch(() => {
-      toast({
-        title: "Failed to copy",
-        description: "Could not copy bio to clipboard.",
-        variant: "destructive"
-      });
+      showToast.error("Failed to copy to clipboard");
     });
   };
 
@@ -56,15 +49,13 @@ const BioPreview: React.FC<BioPreviewProps> = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+    
+    showToast.success("Bio downloaded successfully!");
   };
 
   const handleSave = async () => {
     if (!bio || !bioName.trim()) {
-      toast({
-        title: "Please provide a name",
-        description: "Give your bio a name before saving.",
-        variant: "destructive"
-      });
+      showToast.error("Please provide a name for your bio");
       return;
     }
 
@@ -78,14 +69,12 @@ const BioPreview: React.FC<BioPreviewProps> = ({
       });
       
       if (success) {
-        setBioName(''); // Clear the input after successful save
-        toast({
-          title: "Bio saved successfully",
-          description: "Your bio has been saved and can be found in your dashboard."
-        });
+        setBioName('');
+        showToast.success("Bio saved successfully!");
       }
     } catch (error) {
       console.error('Error saving bio:', error);
+      showToast.error("Failed to save bio");
     } finally {
       setSaving(false);
     }

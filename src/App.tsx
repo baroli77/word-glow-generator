@@ -1,6 +1,7 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as HotToaster } from "react-hot-toast";
 import Index from "./pages/Index";
 import BioGenerator from "./pages/BioGenerator";
 import CoverLetter from "./pages/CoverLetter";
@@ -38,6 +39,39 @@ function App() {
             </Routes>
           </Router>
           <Toaster />
+          <HotToaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: 'hsl(var(--background))',
+                color: 'hsl(var(--foreground))',
+                border: '1px solid hsl(var(--border))',
+              },
+              success: {
+                style: {
+                  background: 'hsl(var(--background))',
+                  color: 'hsl(var(--foreground))',
+                  border: '1px solid hsl(142.1 76.2% 36.3%)',
+                },
+                iconTheme: {
+                  primary: 'hsl(142.1 76.2% 36.3%)',
+                  secondary: 'hsl(var(--background))',
+                },
+              },
+              error: {
+                style: {
+                  background: 'hsl(var(--background))',
+                  color: 'hsl(var(--foreground))',
+                  border: '1px solid hsl(var(--destructive))',
+                },
+                iconTheme: {
+                  primary: 'hsl(var(--destructive))',
+                  secondary: 'hsl(var(--background))',
+                },
+              },
+            }}
+          />
         </AdminProvider>
       </AuthProvider>
     </ThemeProvider>

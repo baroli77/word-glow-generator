@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { showToast } from "@/utils/toast";
 
 export async function saveCoverLetter(jobTitle: string, companyName: string, content: string, formData: any) {
   try {
@@ -8,11 +8,7 @@ export async function saveCoverLetter(jobTitle: string, companyName: string, con
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to save your cover letter.",
-        variant: "destructive",
-      });
+      showToast.error("Please sign in to save your cover letter");
       return false;
     }
 
@@ -35,11 +31,7 @@ export async function saveCoverLetter(jobTitle: string, companyName: string, con
 
       if (createProfileError) {
         console.error('Error creating profile:', createProfileError);
-        toast({
-          title: "Profile Error",
-          description: "Unable to create user profile. Please try again.",
-          variant: "destructive",
-        });
+        showToast.error("Unable to create user profile. Please try again.");
         return false;
       }
     }
@@ -60,19 +52,12 @@ export async function saveCoverLetter(jobTitle: string, companyName: string, con
       throw error;
     }
     
-    toast({
-      title: "Cover letter saved",
-      description: "Your cover letter has been saved successfully."
-    });
+    showToast.success("Cover letter saved successfully!");
     
     return true;
   } catch (error) {
     console.error('saveCoverLetter error:', error);
-    toast({
-      title: "Error saving cover letter",
-      description: "Failed to save cover letter. Please try again.",
-      variant: "destructive"
-    });
+    showToast.error("Failed to save cover letter. Please try again.");
     return false;
   }
 }
@@ -95,11 +80,7 @@ export async function getUserCoverLetters() {
     
     return data;
   } catch (error) {
-    toast({
-      title: "Error loading cover letters",
-      description: error.message,
-      variant: "destructive"
-    });
+    showToast.error("Failed to load cover letters");
     return [];
   }
 }
@@ -135,11 +116,7 @@ export async function generateCoverLetter(formData: any, cvContent: string) {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to generate a cover letter.",
-        variant: "destructive",
-      });
+      showToast.error("Please sign in to generate a cover letter");
       return { content: null, error: "Authentication required" };
     }
 
@@ -166,11 +143,7 @@ export async function generateCoverLetter(formData: any, cvContent: string) {
     return { content: data.content, error: null };
   } catch (error) {
     console.error('Error generating cover letter:', error);
-    toast({
-      title: "Generation Error",
-      description: "Failed to generate cover letter. Please try again.",
-      variant: "destructive"
-    });
+    showToast.error("Failed to generate cover letter. Please try again.");
     return { content: null, error: error.message };
   }
 }

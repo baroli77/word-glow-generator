@@ -1,6 +1,6 @@
 
 import { generateWithAI as generateAI } from "./supabaseService";
-import { toast } from "@/components/ui/use-toast";
+import { showToast } from "@/utils/toast";
 
 // Cache to store previously generated content
 const contentCache: Record<string, string> = {};
@@ -33,11 +33,7 @@ export async function generateWithAI(prompt: string, retryCount = 0): Promise<Op
     const response = await generateAI(prompt);
     
     if (response.error) {
-      toast({
-        title: "Error",
-        description: response.error,
-        variant: "destructive",
-      });
+      showToast.error(response.error);
       return { content: "", error: response.error };
     }
     
@@ -46,11 +42,8 @@ export async function generateWithAI(prompt: string, retryCount = 0): Promise<Op
     
     return response;
   } catch (error) {
-    toast({
-      title: "Error",
-      description: error instanceof Error ? error.message : "Failed to generate content",
-      variant: "destructive",
-    });
-    return { content: "", error: error instanceof Error ? error.message : "Error generating content" };
+    const errorMessage = error instanceof Error ? error.message : "Failed to generate content";
+    showToast.error(errorMessage);
+    return { content: "", error: errorMessage };
   }
 }

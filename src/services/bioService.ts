@@ -1,5 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/components/ui/use-toast";
+import { showToast } from "@/utils/toast";
 import { PromptBuilder } from "./bio-generation/prompt-builder";
 import { BioSimulator } from "./bio-generation/bio-simulator";
 
@@ -9,11 +10,7 @@ export async function saveBio(platform: string, content: string, formData: any) 
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to save your bio.",
-        variant: "destructive",
-      });
+      showToast.error("Please sign in to save your bio");
       return false;
     }
 
@@ -28,18 +25,11 @@ export async function saveBio(platform: string, content: string, formData: any) 
     
     if (error) throw error;
     
-    toast({
-      title: "Bio saved",
-      description: "Your bio has been saved successfully."
-    });
+    showToast.success("Bio saved successfully!");
     
     return true;
   } catch (error) {
-    toast({
-      title: "Error saving bio",
-      description: error.message,
-      variant: "destructive"
-    });
+    showToast.error("Failed to save bio");
     return false;
   }
 }
@@ -62,11 +52,7 @@ export async function getUserBios() {
     
     return data;
   } catch (error) {
-    toast({
-      title: "Error loading bios",
-      description: error.message,
-      variant: "destructive"
-    });
+    showToast.error("Failed to load bios");
     return [];
   }
 }
@@ -77,11 +63,7 @@ export async function generateBio(formData: any) {
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to generate a bio.",
-        variant: "destructive",
-      });
+      showToast.error("Please sign in to generate a bio");
       return { content: null, error: "Authentication required" };
     }
 
