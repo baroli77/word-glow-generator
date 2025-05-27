@@ -1,15 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from "@/components/ui/use-toast";
-
-interface Subscription {
-  id: string;
-  plan_type: 'free' | 'daily' | 'monthly' | 'lifetime';
-  expires_at: string | null;
-  is_active: boolean;
-}
+import { subscriptionService, type Subscription } from '@/services/subscriptionService';
 
 export const useSubscriptionData = () => {
   const { user } = useAuth();
@@ -39,71 +31,11 @@ export const useSubscriptionData = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-      
-      // Check if subscription has expired
-      if (data && data.expires_at) {
-        const expiresAt = new Date(data.expires_at);
-        const now = new Date();
-        
-        if (now > expiresAt) {
-          // Deactivate expired subscription
-          await supabase
-            .from('user_subscriptions')
-            .update({ is_active: false })
-            .eq('id', data.id);
-          
-          // Set to default free subscription
-          setSubscription({
-            id: "default-free",
-            plan_type: "free",
-            expires_at: null,
-            is_active: true
-          });
-          
-          toast({
-            title: "Subscription expired",
-            description: "Your subscription has expired. You're now on the free tier.",
-            variant: "destructive"
-          });
-          return;
-        }
-      }
-      
-      if (data) {
-        setSubscription({
-          id: data.id,
-          plan_type: data.plan_type as 'free' | 'daily' | 'monthly' | 'lifetime',
-          expires_at: data.expires_at,
-          is_active: data.is_active
-        });
-      } else {
-        // No subscription found - assign default free subscription
-        setSubscription({
-          id: "default-free",
-          plan_type: "free",
-          expires_at: null,
-          is_active: true
-        });
-      }
+      const userSubscription = await subscriptionService.fetchUserSubscription(user.id);
+      setSubscription(userSubscription);
     } catch (error) {
       console.error('Error fetching subscription:', error);
-      // Fallback to free subscription on error
-      setSubscription({
-        id: "default-free",
-        plan_type: "free",
-        expires_at: null,
-        is_active: true
-      });
+      setSubscription(subscriptionService['getDefaultFreeSubscription']());
     } finally {
       setLoading(false);
     }
@@ -137,41 +69,11 @@ export const useSubscriptionData = () => {
   }, [subscription, fetchSubscription]);
 
   const getRemainingTime = () => {
-    if (!subscription || !subscription.expires_at) return null;
-    
-    const expiresAt = new Date(subscription.expires_at);
-    const now = new Date();
-    const timeLeft = expiresAt.getTime() - now.getTime();
-    
-    if (timeLeft <= 0) return null;
-    
-    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours > 24) {
-      const days = Math.floor(hours / 24);
-      return `${days} day${days !== 1 ? 's' : ''} remaining`;
-    }
-    
-    return `${hours}h ${minutes}m remaining`;
+    return subscriptionService.getRemainingTime(subscription?.expires_at || null);
   };
 
   const getPlanDisplayName = () => {
-    // Admin users get special treatment
-    if (isAdminUser) {
-      return 'Admin (Unlimited)';
-    }
-    
-    if (!subscription) return 'Free';
-    
-    const names = {
-      free: 'Free',
-      daily: '24-Hour Access',
-      monthly: 'Monthly Plan',
-      lifetime: 'Lifetime Access'
-    };
-    
-    return names[subscription.plan_type];
+    return subscriptionService.getPlanDisplayName(subscription?.plan_type || 'free', isAdminUser);
   };
 
   return {

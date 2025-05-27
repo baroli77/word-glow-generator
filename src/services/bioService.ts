@@ -1,60 +1,71 @@
 
-import { generateWithAI } from "./supabaseService";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
-import { BioFormData } from "../components/bio-generator/types";
-import { PromptBuilder } from "./bio-generation/prompt-builder";
-import { BioSimulator } from "./bio-generation/bio-simulator";
 
-export interface BioGenerationResponse {
-  content: string;
-  error?: string;
-}
-
-export async function generateBio(formData: BioFormData): Promise<BioGenerationResponse> {
+export async function saveBio(platform: string, content: string, formData: any) {
   try {
-    const promptBuilder = new PromptBuilder(formData);
-    const prompt = promptBuilder.build();
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
     
-    const response = await generateWithAI(prompt);
-    
-    if (response.error) {
+    if (!session) {
       toast({
-        title: "Generation Error",
-        description: response.error,
+        title: "Authentication required",
+        description: "Please sign in to save your bio.",
         variant: "destructive",
       });
-      return { content: "", error: response.error };
+      return false;
     }
+
+    const { error } = await supabase
+      .from('bios')
+      .insert({
+        platform,
+        content,
+        form_data: formData,
+        user_id: session.user.id
+      });
     
-    let bio = response.content.trim();
-    
-    // Apply character limit if enabled
-    if (formData.charLimit && formData.customCharCount > 0) {
-      bio = bio.substring(0, formData.customCharCount);
-    }
-    
-    return { content: bio };
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Failed to generate bio";
-    console.error("Error generating bio:", error);
+    if (error) throw error;
     
     toast({
-      title: "Generation Failed",
-      description: errorMessage,
-      variant: "destructive",
+      title: "Bio saved",
+      description: "Your bio has been saved successfully."
     });
     
-    return { content: "", error: errorMessage };
+    return true;
+  } catch (error) {
+    toast({
+      title: "Error saving bio",
+      description: error.message,
+      variant: "destructive"
+    });
+    return false;
   }
 }
 
-export function simulateBioGeneration(formData: BioFormData): string {
-  const simulator = new BioSimulator(formData);
-  return simulator.simulate();
-}
+export async function getUserBios() {
+  try {
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return [];
+    }
 
-// Legacy function for backward compatibility
-export function createBioPrompt(formData: BioFormData): string {
-  const promptBuilder = new PromptBuilder(formData);
-  return promptBuilder.build();
+    const { data, error } = await supabase
+      .from('bios')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error) {
+    toast({
+      title: "Error loading bios",
+      description: error.message,
+      variant: "destructive"
+    });
+    return [];
+  }
 }

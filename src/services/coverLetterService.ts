@@ -1,56 +1,105 @@
-import { generateWithAI } from "./supabaseService";
-import { toast } from "@/hooks/use-toast";
 
-export function createCoverLetterPrompt(formData: any, parsedCV: string): string {
-  const basePrompt = `Write a cover letter for a ${formData.jobTitle} role at ${formData.companyName} using a ${formData.tone} tone. Base it on this CV text: ${parsedCV}. Include strong intro, 2-3 paragraphs on relevant experience, and a confident closing.`;
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
-  const additionalInfoSection = formData.additionalInfo && formData.additionalInfo.trim() 
-    ? `\n\nAdditional context to incorporate: ${formData.additionalInfo.trim()}`
-    : '';
-
-  const finalPrompt = `${basePrompt}${additionalInfoSection}
-
-Make the cover letter professional, engaging, and tailored to the specific role and company. Ensure it highlights the most relevant experience from the CV.${additionalInfoSection ? ' Make sure to incorporate the additional context provided naturally into the cover letter.' : ''}`;
-
-  return finalPrompt;
-}
-
-export async function generateCoverLetter(formData: any, parsedCV: string) {
-  // Validate CV content before proceeding
-  if (!parsedCV || typeof parsedCV !== 'string' || parsedCV.trim().length < 100) {
-    const errorMessage = "Your CV couldn't be processed. Try a different file.";
-    toast({
-      title: "CV Processing Error",
-      description: errorMessage,
-      variant: "destructive",
-    });
-    return { content: '', error: errorMessage };
-  }
-
+export async function saveCoverLetter(jobTitle: string, companyName: string, content: string, formData: any) {
   try {
-    const prompt = createCoverLetterPrompt(formData, parsedCV);
-    const result = await generateWithAI(prompt);
-
-    // Validate the generated content
-    if (!result.content || typeof result.content !== 'string' || result.content.trim().length === 0) {
-      const errorMessage = "Cover letter generation failed. Try again or re-upload your CV.";
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
       toast({
-        title: "Generation Failed",
-        description: errorMessage,
+        title: "Authentication required",
+        description: "Please sign in to save your cover letter.",
         variant: "destructive",
       });
-      return { content: '', error: errorMessage };
+      return false;
     }
 
-    return { content: result.content.trim() };
-  } catch (error) {
-    console.error('Cover letter generation error:', error);
-    const errorMessage = "Cover letter generation failed. Try again or re-upload your CV.";
+    // First, ensure the user profile exists
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profileError || !profile) {
+      // Create the profile if it doesn't exist
+      const { error: createProfileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: session.user.id,
+          email: session.user.email || '',
+          full_name: session.user.user_metadata?.full_name || null
+        });
+
+      if (createProfileError) {
+        console.error('Error creating profile:', createProfileError);
+        toast({
+          title: "Profile Error",
+          description: "Unable to create user profile. Please try again.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    }
+
+    // Now save the cover letter
+    const { error } = await supabase
+      .from('cover_letters')
+      .insert({
+        job_title: jobTitle,
+        company_name: companyName,
+        content,
+        form_data: formData,
+        user_id: session.user.id
+      });
+    
+    if (error) {
+      console.error('Error saving cover letter:', error);
+      throw error;
+    }
+    
     toast({
-      title: "Generation Failed",
-      description: errorMessage,
-      variant: "destructive",
+      title: "Cover letter saved",
+      description: "Your cover letter has been saved successfully."
     });
-    return { content: '', error: errorMessage };
+    
+    return true;
+  } catch (error) {
+    console.error('saveCoverLetter error:', error);
+    toast({
+      title: "Error saving cover letter",
+      description: "Failed to save cover letter. Please try again.",
+      variant: "destructive"
+    });
+    return false;
+  }
+}
+
+export async function getUserCoverLetters() {
+  try {
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return [];
+    }
+
+    const { data, error } = await supabase
+      .from('cover_letters')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error) {
+    toast({
+      title: "Error loading cover letters",
+      description: error.message,
+      variant: "destructive"
+    });
+    return [];
   }
 }
