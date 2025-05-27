@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,11 +35,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       (event, session) => {
         console.log('Auth event:', event, 'Session:', session);
         
-        // For password recovery, don't immediately redirect to dashboard
+        // For password recovery, check if we're on the reset password page
         if (event === 'PASSWORD_RECOVERY') {
-          // Don't set the session yet - let the reset password page handle it
-          console.log('Password recovery event detected');
-          return;
+          console.log('Password recovery event detected, current path:', window.location.pathname);
+          // Only skip setting session if we're NOT on the reset password page
+          if (!window.location.pathname.includes('/reset-password')) {
+            console.log('Not on reset password page, skipping session set');
+            return;
+          }
         }
         
         setSession(session);
@@ -51,6 +53,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      // Don't set session if we're on reset password page and have recovery tokens
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasRecoveryTokens = urlParams.get('access_token') && urlParams.get('refresh_token') && urlParams.get('type') === 'recovery';
+      
+      if (window.location.pathname.includes('/reset-password') && hasRecoveryTokens) {
+        console.log('On reset password page with recovery tokens, not setting session from getSession');
+        setLoading(false);
+        return;
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
