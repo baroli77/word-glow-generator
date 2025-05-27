@@ -1,3 +1,4 @@
+
 import { BioFormData, PlatformCategory, ToneType } from '../../components/bio-generator/types';
 import { getPlatformCategory } from '../../components/bio-generator/config/platform-config';
 
@@ -116,13 +117,13 @@ Write as if the person is describing themselves to potential matches.`;
 
   private addCharacterLimit(): string {
     if (this.formData.charLimit && this.formData.customCharCount > 0) {
-      return ` Max ${this.formData.customCharCount} characters.`;
+      return ` IMPORTANT: Keep the bio under ${this.formData.customCharCount} characters total.`;
     }
     return '';
   }
 
   private addInstructions(): string {
-    return `
+    const baseInstructions = `
 
 Important: 
 - Write in FIRST PERSON using "I", "I'm", "I have", "I love", etc.
@@ -132,5 +133,12 @@ Important:
 - Make it feel human and genuine
 - Generate exactly one bio, nothing else
 - Never use third person references like "John is" or "She has"`;
+
+    if (this.formData.charLimit && this.formData.customCharCount > 0) {
+      return baseInstructions + `
+- CRITICAL: The entire bio must be ${this.formData.customCharCount} characters or less`;
+    }
+
+    return baseInstructions;
   }
 }

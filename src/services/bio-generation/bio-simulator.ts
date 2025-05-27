@@ -11,11 +11,14 @@ export class BioSimulator {
   simulate(): string {
     const category = getPlatformCategory(this.formData.platform as any);
     
+    let bio: string;
     if (this.formData.tone === 'funny') {
-      return this.createFunnyBio(category);
+      bio = this.createFunnyBio(category);
+    } else {
+      bio = this.createStandardBio(category);
     }
     
-    return this.createStandardBio(category);
+    return this.applyCharacterLimit(bio);
   }
 
   private createFunnyBio(category: string): string {
@@ -94,7 +97,18 @@ export class BioSimulator {
 
   private applyCharacterLimit(bio: string): string {
     if (this.formData.charLimit && this.formData.customCharCount > 0) {
-      return bio.substring(0, this.formData.customCharCount);
+      if (bio.length > this.formData.customCharCount) {
+        // Trim to character limit, but try to end at a word boundary
+        let trimmed = bio.substring(0, this.formData.customCharCount);
+        const lastSpaceIndex = trimmed.lastIndexOf(' ');
+        
+        // If we can find a space within the last 20 characters, cut there
+        if (lastSpaceIndex > this.formData.customCharCount - 20) {
+          trimmed = trimmed.substring(0, lastSpaceIndex);
+        }
+        
+        return trimmed;
+      }
     }
     return bio;
   }
