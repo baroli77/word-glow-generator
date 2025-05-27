@@ -1,9 +1,10 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Check, Clock, Star, Crown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from "@/components/ui/use-toast";
 
 const pricingPlans = [
   {
@@ -76,7 +77,8 @@ const pricingPlans = [
 
 const Pricing: React.FC = () => {
   const { user } = useAuth();
-  const { subscription, upgradeSubscription, isAdminUser } = useSubscription();
+  const { subscription, isAdminUser } = useSubscription();
+  const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null);
 
   const handleUpgrade = async (planType: 'daily' | 'monthly' | 'lifetime') => {
     if (!user) {
@@ -85,7 +87,37 @@ const Pricing: React.FC = () => {
       return;
     }
     
-    await upgradeSubscription(planType);
+    setUpgradeLoading(planType);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planType }
+      });
+
+      if (error) {
+        console.error('Checkout error:', error);
+        toast({
+          title: "Upgrade failed",
+          description: "Unable to create checkout session. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      toast({
+        title: "Upgrade failed",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setUpgradeLoading(null);
+    }
   };
 
   const getCurrentPlan = () => {
@@ -123,6 +155,7 @@ const Pricing: React.FC = () => {
           {pricingPlans.map((plan, index) => {
             const isCurrentPlan = currentPlan === plan.planType;
             const isPlanDowngrade = isDowngrade(plan.planType);
+            const isLoading = upgradeLoading === plan.planType;
             
             return (
               <div 
@@ -182,7 +215,7 @@ const Pricing: React.FC = () => {
                         ? 'bg-brand-purple hover:bg-brand-purple-dark text-white' 
                         : ''
                     } ${isCurrentPlan ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
-                    disabled={isCurrentPlan || isPlanDowngrade || isAdminUser}
+                    disabled={isCurrentPlan || isPlanDowngrade || isAdminUser || isLoading}
                     onClick={() => {
                       if (plan.planType === 'free') {
                         window.location.href = '/signup';
@@ -191,7 +224,8 @@ const Pricing: React.FC = () => {
                       }
                     }}
                   >
-                    {isCurrentPlan ? 'Current Plan' : 
+                    {isLoading ? 'Processing...' :
+                     isCurrentPlan ? 'Current Plan' : 
                      isPlanDowngrade ? 'Downgrade Not Allowed' :
                      isAdminUser ? 'Admin Access' :
                      plan.buttonText}

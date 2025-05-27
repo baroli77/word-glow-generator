@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Clock, Infinity, Lock, Crown, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from "@/components/ui/use-toast";
 
 interface UsageCounterProps {
   toolType: 'cover_letter' | 'bio_generator';
@@ -53,7 +54,14 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
   }, [user, subscription, usageCount, toolType, isAdminUser]);
 
   const handleUpgrade = async (planType: 'daily' | 'monthly' | 'lifetime') => {
-    if (!user) return;
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to upgrade your plan.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setUpgradeLoading(planType);
     
@@ -64,6 +72,11 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
 
       if (error) {
         console.error('Checkout error:', error);
+        toast({
+          title: "Upgrade failed",
+          description: "Unable to create checkout session. Please try again.",
+          variant: "destructive"
+        });
         return;
       }
 
@@ -73,6 +86,11 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
       }
     } catch (error) {
       console.error('Error creating checkout:', error);
+      toast({
+        title: "Upgrade failed",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
     } finally {
       setUpgradeLoading(null);
     }

@@ -1,9 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Check, Clock, Infinity, Star } from 'lucide-react';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from "@/components/ui/use-toast";
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -64,26 +66,57 @@ const pricingPlans = [
 ];
 
 const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, toolName, onUpgradeComplete }) => {
-  const { subscription, upgradeSubscription, refetch } = useSubscription();
-
-  const isDowngrade = (planType: string) => {
-    if (!subscription) return false;
-    const planHierarchy = { 'free': 0, 'daily': 1, 'monthly': 2, 'lifetime': 3 };
-    return planHierarchy[planType as keyof typeof planHierarchy] < planHierarchy[subscription.plan_type as keyof typeof planHierarchy];
-  };
+  const { user } = useAuth();
+  const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null);
 
   const handleUpgrade = async (planType: 'daily' | 'monthly' | 'lifetime') => {
-    const success = await upgradeSubscription(planType);
-    if (success) {
-      // Refresh subscription data immediately
-      await refetch();
-      
-      // Notify parent component about successful upgrade
-      if (onUpgradeComplete) {
-        onUpgradeComplete();
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to upgrade your plan.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setUpgradeLoading(planType);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planType }
+      });
+
+      if (error) {
+        console.error('Checkout error:', error);
+        toast({
+          title: "Upgrade failed",
+          description: "Unable to create checkout session. Please try again.",
+          variant: "destructive"
+        });
+        return;
       }
-      
-      onClose();
+
+      if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
+        
+        // Close modal after opening checkout
+        onClose();
+        
+        // Notify parent component
+        if (onUpgradeComplete) {
+          onUpgradeComplete();
+        }
+      }
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      toast({
+        title: "Upgrade failed",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setUpgradeLoading(null);
     }
   };
 
@@ -101,14 +134,14 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, toolName, 
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
           {pricingPlans.map((plan, index) => {
-            const isPlanDowngrade = isDowngrade(plan.planType);
+            const isLoading = upgradeLoading === plan.planType;
             
             return (
               <div 
                 key={index} 
                 className={`relative border rounded-lg p-6 hover:shadow-lg transition-shadow ${
                   plan.popular ? 'ring-2 ring-makemybio-purple shadow-lg border-makemybio-purple' : ''
-                } ${isPlanDowngrade ? 'opacity-50' : ''}`}
+                }`}
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -143,9 +176,9 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, toolName, 
                   variant={plan.popular ? "default" : "outline"}
                   className={`w-full ${plan.popular ? 'bg-gradient-to-r from-makemybio-purple to-makemybio-pink text-white hover:opacity-90' : ''}`}
                   onClick={() => handleUpgrade(plan.planType)}
-                  disabled={isPlanDowngrade}
+                  disabled={isLoading}
                 >
-                  {isPlanDowngrade ? 'Downgrade Not Allowed' : `Choose ${plan.name}`}
+                  {isLoading ? 'Processing...' : `Choose ${plan.name}`}
                 </Button>
               </div>
             );
