@@ -12,9 +12,19 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // Add error boundary for React hooks
+  if (typeof React === 'undefined' || React === null) {
+    console.error('React is not properly loaded');
+    return <div>{children}</div>;
+  }
+
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem('theme') as Theme;
-    return stored || 'system';
+    try {
+      const stored = localStorage.getItem('theme') as Theme;
+      return stored || 'system';
+    } catch {
+      return 'system';
+    }
   });
 
   const [actualTheme, setActualTheme] = useState<'dark' | 'light'>('light');
@@ -35,7 +45,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     };
 
     updateTheme(theme);
-    localStorage.setItem('theme', theme);
+    
+    try {
+      localStorage.setItem('theme', theme);
+    } catch {
+      // Handle localStorage errors silently
+    }
 
     if (theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
