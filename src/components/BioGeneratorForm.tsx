@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Lock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,7 @@ const BioGeneratorForm: React.FC = () => {
     selectedTemplate,
     isFreeUser,
     usageCount,
+    setStep,
     setGeneratedBio,
     setShowTemplates,
     setSelectedTemplate,
