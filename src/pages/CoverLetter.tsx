@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import CoverLetterForm from '../components/CoverLetterForm';
 import InfoBadge from '../components/InfoBadge';
 import SEOHead from '../components/SEOHead';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const CoverLetter = () => {
   const structuredData = {
@@ -63,7 +64,9 @@ const CoverLetter = () => {
                   </span>
                   Powered by OpenAI's advanced GPT-4o-mini model
                   <span className="ml-2">
-                    <InfoBadge text="This service uses a shared API key. No need to provide your own." />
+                    <TooltipProvider>
+                      <InfoBadge text="This service uses a shared API key. No need to provide your own." />
+                    </TooltipProvider>
                   </span>
                 </p>
               </div>

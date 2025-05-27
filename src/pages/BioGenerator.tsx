@@ -9,6 +9,7 @@ import InfoBadge from '../components/InfoBadge';
 import SEOHead from '../components/SEOHead';
 import { useAuth } from '@/context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const BioGenerator = () => {
   const { user, loading } = useAuth();
@@ -95,7 +96,9 @@ const BioGenerator = () => {
                   </span>
                   Powered by OpenAI's advanced GPT-4o-mini model
                   <span className="ml-2">
-                    <InfoBadge text="This service uses a shared API key. No need to provide your own." />
+                    <TooltipProvider>
+                      <InfoBadge text="This service uses a shared API key. No need to provide your own." />
+                    </TooltipProvider>
                   </span>
                 </p>
               </div>
