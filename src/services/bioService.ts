@@ -1,6 +1,7 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { PromptBuilder } from "./bio-generation/prompt-builder";
+import { BioSimulator } from "./bio-generation/bio-simulator";
 
 export async function saveBio(platform: string, content: string, formData: any) {
   try {
@@ -84,6 +85,10 @@ export async function generateBio(formData: any) {
       return { content: null, error: "Authentication required" };
     }
 
+    // Build the prompt using the PromptBuilder
+    const promptBuilder = new PromptBuilder(formData);
+    const prompt = promptBuilder.build();
+
     const response = await fetch(`https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/generate-content`, {
       method: 'POST',
       headers: {
@@ -91,8 +96,7 @@ export async function generateBio(formData: any) {
         'Authorization': `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({
-        type: 'bio',
-        formData
+        prompt: prompt
       }),
     });
 
@@ -109,15 +113,6 @@ export async function generateBio(formData: any) {
 }
 
 export function simulateBioGeneration(formData: any) {
-  const { platform, name, profession, tone } = formData;
-  
-  // Create a simple template-based bio as fallback
-  const templates = {
-    professional: `${name} is a ${profession} with expertise in delivering high-quality results. Known for professionalism and dedication to excellence.`,
-    casual: `Hey! I'm ${name}, a ${profession} who loves what I do. Always up for new challenges and connecting with great people.`,
-    creative: `${name} - ${profession} with a passion for innovation and creativity. Turning ideas into reality, one project at a time.`,
-    confident: `${name} | ${profession} | Expert in my field with a proven track record of success. Let's make great things happen together.`
-  };
-
-  return templates[tone] || templates.professional;
+  const bioSimulator = new BioSimulator(formData);
+  return bioSimulator.simulate();
 }

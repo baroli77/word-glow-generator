@@ -1,4 +1,3 @@
-
 import { BioFormData, PlatformCategory, ToneType } from '../../components/bio-generator/types';
 import { getPlatformCategory } from '../../components/bio-generator/config/platform-config';
 
@@ -32,37 +31,41 @@ export class PromptBuilder {
 
   private createProfessionalPrompt(): string {
     const details = this.gatherAllDetails();
-    return `Write a short and punchy professional bio. This person is a ${this.formData.profession}. 
+    return `Write a short and punchy professional bio in FIRST PERSON (using "I am", "I have", etc.). This person is a ${this.formData.profession}. 
 Tone: ${this.formData.tone}. 
 Include these details about them: ${details}. 
 Avoid buzzwords like 'passionate', 'dedicated', 'expert'. 
-No greetings or hashtags.`;
+No greetings or hashtags.
+Write as if the person is introducing themselves directly.`;
   }
 
   private createSocialPrompt(): string {
     const details = this.gatherAllDetails();
-    return `Write a creative and casual social media bio. 
+    return `Write a creative and casual social media bio in FIRST PERSON. 
 Tone: ${this.formData.tone}. 
 Include these details: ${details}. 
 Use short fragments or emojis if relevant. 
-No intros or full sentences.`;
+No intros or full sentences.
+Write as if the person is describing themselves.`;
   }
 
   private createContentPrompt(): string {
     const details = this.gatherAllDetails();
-    return `Write a creator-style bio for ${this.formData.platform}. 
+    return `Write a creator-style bio for ${this.formData.platform} in FIRST PERSON. 
 Tone: ${this.formData.tone}. 
 Include these details: ${details}. 
-Make it edgy, fun, or intriguing — whatever fits the tone.`;
+Make it edgy, fun, or intriguing — whatever fits the tone.
+Write as if the creator is introducing themselves.`;
   }
 
   private createDatingPrompt(): string {
     const details = this.gatherAllDetails();
-    return `Write a dating profile bio. 
+    return `Write a dating profile bio in FIRST PERSON. 
 Tone: ${this.formData.tone}. 
 Include these personal details: ${details}. 
 Avoid generic statements like 'I love long walks on the beach'. 
-Be clever, human, and memorable.`;
+Be clever, human, and memorable.
+Write as if the person is describing themselves to potential matches.`;
   }
 
   private gatherAllDetails(): string {
@@ -122,10 +125,12 @@ Be clever, human, and memorable.`;
     return `
 
 Important: 
+- Write in FIRST PERSON using "I", "I'm", "I have", "I love", etc.
 - Do not include any intros like "Hi, I'm..." or endings like "Thanks for reading"
 - Keep it direct and authentic
 - Avoid corporate fluff and generic phrases
 - Make it feel human and genuine
-- Generate exactly one bio, nothing else`;
+- Generate exactly one bio, nothing else
+- Never use third person references like "John is" or "She has"`;
   }
 }
