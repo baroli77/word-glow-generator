@@ -72,11 +72,23 @@ export async function getUserBios() {
 
 export async function generateBio(formData: any) {
   try {
+    // Get the current user's session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to generate a bio.",
+        variant: "destructive",
+      });
+      return { content: null, error: "Authentication required" };
+    }
+
     const response = await fetch(`https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/generate-content`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabase.supabaseKey}`,
+        'Authorization': `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({
         type: 'bio',
