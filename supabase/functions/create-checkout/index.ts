@@ -8,6 +8,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Centralized pricing configuration
+const PRICING_CONFIG = {
+  daily: { amount: 900, interval: 'day' as const, interval_count: 1 },
+  monthly: { amount: 2900, interval: 'month' as const, interval_count: 1 },
+  lifetime: { amount: 9900, interval: null, interval_count: null }
+};
+
+const VALID_PLAN_TYPES = ['daily', 'monthly', 'lifetime'] as const;
+type PlanType = typeof VALID_PLAN_TYPES[number];
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -26,6 +36,11 @@ serve(async (req) => {
 
     const { planType } = await req.json();
     console.log("Plan type requested:", planType);
+    
+    // Validate plan type
+    if (!VALID_PLAN_TYPES.includes(planType)) {
+      throw new Error(`Invalid plan type: ${planType}`);
+    }
     
     // Get the authenticated user
     const supabaseClient = createClient(
@@ -66,18 +81,7 @@ serve(async (req) => {
       console.log("No existing customer found, will create during checkout");
     }
 
-    // Define pricing
-    const prices = {
-      daily: { amount: 900, interval: 'day' as const, interval_count: 1 },
-      monthly: { amount: 2900, interval: 'month' as const, interval_count: 1 },
-      lifetime: { amount: 9900, interval: null, interval_count: null }
-    };
-
-    const priceConfig = prices[planType as keyof typeof prices];
-    if (!priceConfig) {
-      throw new Error("Invalid plan type");
-    }
-
+    const priceConfig = PRICING_CONFIG[planType as PlanType];
     console.log("Creating checkout session for plan:", planType, "amount:", priceConfig.amount);
 
     // Get origin for redirect URLs
