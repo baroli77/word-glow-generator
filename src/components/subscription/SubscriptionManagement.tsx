@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -136,19 +137,22 @@ const SubscriptionManagement: React.FC = () => {
         <div className="space-y-3">
           <h4 className="font-medium text-sm">Your Plan Includes:</h4>
           <ul className="space-y-3 mt-4 list-none">
-            {[
-              "Unlimited bio generation",
-              "Unlimited cover letter generation",
-              "All platform types available",
-              "Priority support"
-            ].map((item, idx) => (
-              <li key={idx} className="flex items-start gap-3">
-                <span className="mt-1 text-green-500 shrink-0">
-                  <CheckCircle className="h-5 w-5" />
-                </span>
-                <span className="text-sm leading-snug text-white">{item}</span>
-              </li>
-            ))}
+            <li className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 mt-1 text-green-500 shrink-0" />
+              <span className="text-sm leading-snug text-white">Unlimited bio generation</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 mt-1 text-green-500 shrink-0" />
+              <span className="text-sm leading-snug text-white">Unlimited cover letter generation</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 mt-1 text-green-500 shrink-0" />
+              <span className="text-sm leading-snug text-white">All platform types available</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 mt-1 text-green-500 shrink-0" />
+              <span className="text-sm leading-snug text-white">Priority support</span>
+            </li>
           </ul>
         </div>
 
@@ -221,3 +225,4 @@ const SubscriptionManagement: React.FC = () => {
 };
 
 export default SubscriptionManagement;
+
