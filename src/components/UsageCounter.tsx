@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -134,7 +135,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
                 {planName} - Unlimited Access
               </h3>
               <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                Generate as many bios as you need!
+                Generate as many {toolType === 'bio_generator' ? 'bios' : 'cover letters'} as you need!
                 {remainingTime && subscription.plan_type === 'daily' && (
                   <span className="block mt-1 font-medium">
                     <Clock className="inline h-4 w-4 mr-1" />
@@ -152,7 +153,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
   // Free user - show usage and upgrade options
   const hasUsedFree = usageCount >= 1;
 
-  if (hasUsedFree) {
+  if (hasUsedFree || toolType === 'cover_letter') {
     return (
       <div className="mb-8 space-y-6">
         {/* Limit Reached Alert */}
@@ -162,10 +163,13 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
               <Sparkles className="h-6 w-6 text-red-600 mt-0.5" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">
-                  Free Plan - Limit Reached
+                  {toolType === 'cover_letter' ? 'Premium Feature' : 'Free Plan - Limit Reached'}
                 </h3>
                 <p className="text-red-700 dark:text-red-300 mb-4">
-                  You've reached your free limit. Unlock all bio platforms and unlimited access by upgrading below.
+                  {toolType === 'cover_letter' 
+                    ? 'The Cover Letter Generator is available to premium users only. Upgrade to create professional, AI-powered cover letters.'
+                    : "You've reached your free limit. Unlock all bio platforms and unlimited access by upgrading below."
+                  }
                 </p>
               </div>
             </div>
@@ -190,7 +194,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
                   <span className="text-3xl font-bold text-brand-purple">£9</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Unlimited bios for 24 hours
+                  Unlimited {toolType === 'bio_generator' ? 'bios' : 'cover letters'} for 24 hours
                 </p>
                 <Button 
                   className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold"
@@ -214,7 +218,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
                   <span className="text-sm text-muted-foreground">/month</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Unlimited bios all month long
+                  Unlimited {toolType === 'bio_generator' ? 'bios' : 'cover letters'} all month long
                 </p>
                 <Button 
                   className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold"
@@ -242,7 +246,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
                   <span className="text-3xl font-bold text-brand-purple">£99</span>
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Unlimited bios forever
+                  Unlimited {toolType === 'bio_generator' ? 'bios' : 'cover letters'} forever
                 </p>
                 <Button 
                   className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold"
