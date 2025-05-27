@@ -8,6 +8,7 @@ Allow: /cover-letter
 Allow: /about
 Allow: /faq
 Allow: /pricing
+Allow: /examples
 
 # Disallow admin and private pages
 Disallow: /admin
@@ -16,7 +17,7 @@ Disallow: /login
 Disallow: /signup
 
 # Sitemap
-Sitemap: https://wordcraft.ai/sitemap.xml
+Sitemap: https://makemy.bio/sitemap.xml
 
 # Crawl delay
 Crawl-delay: 1
