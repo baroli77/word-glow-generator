@@ -64,25 +64,36 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
     }
     
     setUpgradeLoading(planType);
+    console.log('Starting upgrade process for plan:', planType);
     
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { planType }
       });
 
+      console.log('Checkout response:', { data, error });
+
       if (error) {
         console.error('Checkout error:', error);
         toast({
           title: "Upgrade failed",
-          description: "Unable to create checkout session. Please try again.",
+          description: error.message || "Unable to create checkout session. Please try again.",
           variant: "destructive"
         });
         return;
       }
 
       if (data?.url) {
+        console.log('Opening checkout URL:', data.url);
         // Open Stripe checkout in a new tab
         window.open(data.url, '_blank');
+        
+        toast({
+          title: "Redirecting to checkout",
+          description: "Opening Stripe checkout in a new tab...",
+        });
+      } else {
+        throw new Error('No checkout URL received');
       }
     } catch (error) {
       console.error('Error creating checkout:', error);
