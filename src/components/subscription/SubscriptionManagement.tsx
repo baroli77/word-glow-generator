@@ -99,7 +99,7 @@ const SubscriptionManagement: React.FC = () => {
             </li>
             <li className="flex items-start gap-3">
               <CheckCircle className="h-5 w-5 mt-1 text-green-500 shrink-0" />
-              <span className="text-sm leading-snug text-white">Unlimited cover letter generation</span>
+              <span className="text-sm leading-snug text-white">Unlimited cover letters</span>
             </li>
             <li className="flex items-start gap-3">
               <CheckCircle className="h-5 w-5 mt-1 text-green-500 shrink-0" />
