@@ -31,9 +31,15 @@ const CharacterLimitSettings: React.FC<CharacterLimitSettingsProps> = ({
   onCharLimitChange,
   onCharCountChange
 }) => {
-  const isCustomValue = ![80, 150, 200].includes(customCharCount);
+  const [selectedOption, setSelectedOption] = React.useState(() => {
+    if ([80, 150, 200].includes(customCharCount)) {
+      return customCharCount.toString();
+    }
+    return 'custom';
+  });
 
   const handlePresetChange = (value: string) => {
+    setSelectedOption(value);
     if (value !== 'custom') {
       onCharCountChange(parseInt(value));
     }
@@ -66,7 +72,7 @@ const CharacterLimitSettings: React.FC<CharacterLimitSettingsProps> = ({
           <Label htmlFor="charCountSelect">Character Count</Label>
           <div className="flex gap-4">
             <Select 
-              value={isCustomValue ? 'custom' : customCharCount.toString()}
+              value={selectedOption}
               onValueChange={handlePresetChange}
             >
               <SelectTrigger className="w-[180px]">
@@ -81,7 +87,7 @@ const CharacterLimitSettings: React.FC<CharacterLimitSettingsProps> = ({
               </SelectContent>
             </Select>
             
-            {isCustomValue && (
+            {selectedOption === 'custom' && (
               <Input
                 type="number"
                 value={customCharCount}
