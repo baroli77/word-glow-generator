@@ -5,6 +5,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sparkles, Clock, Infinity, Lock, Crown, Star } from 'lucide-react';
+import { createClient } from '@/integrations/supabase/client';
 
 interface UsageCounterProps {
   toolType: 'cover_letter' | 'bio_generator';
@@ -15,9 +16,11 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
   const { user } = useAuth();
   const { subscription, usageCount, loading, getRemainingTime, getPlanDisplayName, isAdminUser } = useSubscription();
   const [canUse, setCanUse] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState<string | null>(null);
 
   const remainingTime = getRemainingTime();
   const planName = getPlanDisplayName();
+  const supabase = createClient();
 
   // Determine if user can use the tool
   useEffect(() => {
@@ -49,6 +52,32 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
 
     checkAccess();
   }, [user, subscription, usageCount, toolType, isAdminUser]);
+
+  const handleUpgrade = async (planType: 'daily' | 'monthly' | 'lifetime') => {
+    if (!user) return;
+    
+    setUpgradeLoading(planType);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planType }
+      });
+
+      if (error) {
+        console.error('Checkout error:', error);
+        return;
+      }
+
+      if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+    } finally {
+      setUpgradeLoading(null);
+    }
+  };
 
   if (loading || !user) return null;
 
@@ -167,9 +196,10 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
                 </p>
                 <Button 
                   className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold"
-                  onClick={() => window.location.href = '/pricing'}
+                  onClick={() => handleUpgrade('daily')}
+                  disabled={upgradeLoading === 'daily'}
                 >
-                  Upgrade Now
+                  {upgradeLoading === 'daily' ? 'Processing...' : 'Upgrade Now'}
                 </Button>
               </CardContent>
             </Card>
@@ -190,9 +220,10 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
                 </p>
                 <Button 
                   className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold"
-                  onClick={() => window.location.href = '/pricing'}
+                  onClick={() => handleUpgrade('monthly')}
+                  disabled={upgradeLoading === 'monthly'}
                 >
-                  Upgrade Now
+                  {upgradeLoading === 'monthly' ? 'Processing...' : 'Upgrade Now'}
                 </Button>
               </CardContent>
             </Card>
@@ -217,9 +248,10 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
                 </p>
                 <Button 
                   className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold"
-                  onClick={() => window.location.href = '/pricing'}
+                  onClick={() => handleUpgrade('lifetime')}
+                  disabled={upgradeLoading === 'lifetime'}
                 >
-                  Upgrade Now
+                  {upgradeLoading === 'lifetime' ? 'Processing...' : 'Upgrade Now'}
                 </Button>
               </CardContent>
             </Card>
