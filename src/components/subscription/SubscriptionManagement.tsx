@@ -63,12 +63,12 @@ const SubscriptionManagement: React.FC = () => {
         <div className="space-y-1">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">Current Plan</p>
-            {subscription.is_cancelled && (
+            {subscription.subscription_cancelled && (
               <Badge variant="destructive">Cancelled</Badge>
             )}
           </div>
           <p className="text-base font-medium capitalize">
-            {getPlanDisplayName(subscription.plan_type)}
+            {getPlanDisplayName()}
           </p>
         </div>
 
@@ -112,7 +112,7 @@ const SubscriptionManagement: React.FC = () => {
           </ul>
         </div>
 
-        {subscription.is_cancelled && (
+        {subscription.subscription_cancelled && (
           <p className="text-xs text-muted-foreground text-center pt-4">
             Your subscription has been cancelled but remains active until the end date.
           </p>
