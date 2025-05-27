@@ -104,6 +104,31 @@ export async function getUserCoverLetters() {
   }
 }
 
+function buildCoverLetterPrompt(formData: any, cvContent: string): string {
+  const { jobTitle, companyName, additionalInfo, tone } = formData;
+  
+  return `Create a professional cover letter with the following requirements:
+
+Job Title: ${jobTitle}
+Company: ${companyName}
+Tone: ${tone}
+${additionalInfo ? `Additional Information: ${additionalInfo}` : ''}
+
+CV Content:
+${cvContent}
+
+Please write a compelling cover letter that:
+1. Uses a ${tone} tone throughout
+2. Is written in first person (use "I", "my", "me")
+3. Highlights relevant experience from the CV
+4. Shows enthusiasm for the specific role and company
+5. Is well-structured with proper paragraphs
+6. Includes a professional greeting and closing
+7. Is approximately 250-400 words long
+
+The cover letter should be personalized based on the CV content and job requirements, demonstrating clear connections between the candidate's experience and the role.`;
+}
+
 export async function generateCoverLetter(formData: any, cvContent: string) {
   try {
     // Get the current user's session
@@ -118,6 +143,10 @@ export async function generateCoverLetter(formData: any, cvContent: string) {
       return { content: null, error: "Authentication required" };
     }
 
+    // Build the prompt for the edge function
+    const prompt = buildCoverLetterPrompt(formData, cvContent);
+    console.log('Generated prompt for cover letter:', prompt.substring(0, 100) + '...');
+
     const response = await fetch(`https://qwlotordnpeaahjtqyel.supabase.co/functions/v1/generate-content`, {
       method: 'POST',
       headers: {
@@ -125,11 +154,7 @@ export async function generateCoverLetter(formData: any, cvContent: string) {
         'Authorization': `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({
-        type: 'cover_letter',
-        formData: {
-          ...formData,
-          cvContent
-        }
+        prompt: prompt
       }),
     });
 
