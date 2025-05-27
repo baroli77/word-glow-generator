@@ -29,6 +29,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const isOnResetPasswordWithRecovery = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasRecoveryTokens = urlParams.get('access_token') && urlParams.get('refresh_token') && urlParams.get('type') === 'recovery';
+    return window.location.pathname.includes('/reset-password') && hasRecoveryTokens;
+  };
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -38,11 +44,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // For password recovery, check if we're on the reset password page
         if (event === 'PASSWORD_RECOVERY') {
           console.log('Password recovery event detected, current path:', window.location.pathname);
-          // Only skip setting session if we're NOT on the reset password page
-          if (!window.location.pathname.includes('/reset-password')) {
-            console.log('Not on reset password page, skipping session set');
+          // Skip setting session if we're on reset password page - let the page handle it
+          if (isOnResetPasswordWithRecovery()) {
+            console.log('On reset password page with recovery tokens, skipping auth state change');
             return;
           }
+        }
+        
+        // Don't set session automatically if we're on reset password page with recovery tokens
+        if (isOnResetPasswordWithRecovery()) {
+          console.log('On reset password page with recovery tokens, skipping session set from auth state change');
+          return;
         }
         
         setSession(session);
@@ -54,10 +66,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       // Don't set session if we're on reset password page and have recovery tokens
-      const urlParams = new URLSearchParams(window.location.search);
-      const hasRecoveryTokens = urlParams.get('access_token') && urlParams.get('refresh_token') && urlParams.get('type') === 'recovery';
-      
-      if (window.location.pathname.includes('/reset-password') && hasRecoveryTokens) {
+      if (isOnResetPasswordWithRecovery()) {
         console.log('On reset password page with recovery tokens, not setting session from getSession');
         setLoading(false);
         return;

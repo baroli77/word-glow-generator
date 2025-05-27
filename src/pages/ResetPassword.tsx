@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,22 +12,44 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { toast } from "@/hooks/use-toast";
 
 const ResetPassword = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetReady, setResetReady] = useState(false);
   const [validating, setValidating] = useState(true);
 
   useEffect(() => {
-    // Check if we have the required parameters for password reset
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const type = searchParams.get('type');
-    
-    console.log('Reset password params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
-    
-    if (!accessToken || !refreshToken || type !== 'recovery') {
+    const url = new URL(window.location.href);
+    const access_token = url.searchParams.get("access_token");
+    const refresh_token = url.searchParams.get("refresh_token");
+    const type = url.searchParams.get("type");
+
+    console.log('Reset password params:', { 
+      hasAccessToken: !!access_token, 
+      hasRefreshToken: !!refresh_token, 
+      type 
+    });
+
+    if (access_token && refresh_token && type === "recovery") {
+      supabase.auth
+        .setSession({ access_token, refresh_token })
+        .then(({ error }) => {
+          if (error) {
+            console.error('Session setup failed:', error);
+            toast({
+              title: "Session setup failed",
+              description: error.message,
+              variant: "destructive",
+            });
+            navigate('/login');
+          } else {
+            console.log('Session set successfully for password reset');
+            setResetReady(true);
+          }
+          setValidating(false);
+        });
+    } else {
       console.log('Missing or invalid parameters for password reset');
       toast({
         title: "Invalid reset link",
@@ -35,28 +57,8 @@ const ResetPassword = () => {
         variant: "destructive",
       });
       navigate('/login');
-      return;
     }
-
-    // Set the session with the tokens from the URL
-    supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    }).then(({ error }) => {
-      if (error) {
-        console.error('Error setting session:', error);
-        toast({
-          title: "Invalid reset link",
-          description: "The password reset link is invalid or has expired.",
-          variant: "destructive",
-        });
-        navigate('/login');
-      } else {
-        console.log('Session set successfully for password reset');
-        setValidating(false);
-      }
-    });
-  }, [searchParams, navigate]);
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,35 +149,37 @@ const ResetPassword = () => {
             <CardDescription>Enter your new password below</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">New Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="Enter your new password"
-                  minLength={6}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  placeholder="Confirm your new password"
-                  minLength={6}
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? <LoadingSpinner /> : 'Update Password'}
-              </Button>
-            </form>
+            {resetReady && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">New Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="Enter your new password"
+                    minLength={6}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="Confirm your new password"
+                    minLength={6}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? <LoadingSpinner /> : 'Update Password'}
+                </Button>
+              </form>
+            )}
           </CardContent>
         </Card>
       </main>
