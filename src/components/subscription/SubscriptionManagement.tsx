@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -144,7 +142,7 @@ const SubscriptionManagement: React.FC = () => {
               "Priority support"
             ].map((text, idx) => (
               <div key={idx} className="flex items-start gap-2">
-                <CheckCircle className="mt-1 h-5 w-5 text-green-500 shrink-0" />
+                <CheckCircle className="h-5 w-5 text-green-500 shrink-0 translate-y-[1px]" />
                 <p className="text-sm leading-snug text-white">{text}</p>
               </div>
             ))}
@@ -220,4 +218,3 @@ const SubscriptionManagement: React.FC = () => {
 };
 
 export default SubscriptionManagement;
-
