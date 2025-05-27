@@ -32,7 +32,7 @@ const BioGeneratorForm: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const { formData, updateField, updatePlatform, resetForm } = useBioForm();
   const { user } = useAuth();
-  const { canUseTool, recordUsage, refetch, subscription } = useSubscription();
+  const { canUseTool, recordUsage, refetch, subscription, usageCount } = useSubscription();
   
   const isFreeUser = subscription?.plan_type === 'free';
   
