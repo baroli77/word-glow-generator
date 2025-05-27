@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ const SubscriptionManagement: React.FC = () => {
   const { user } = useAuth();
   const { subscription, getRemainingTime, getPlanDisplayName, refetch } = useSubscription();
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   if (!subscription || subscription.plan_type === 'free') {
     return null;
@@ -32,6 +34,10 @@ const SubscriptionManagement: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleResubscribe = () => {
+    navigate('/pricing');
   };
 
   const getPlanIcon = () => {
@@ -205,7 +211,7 @@ const SubscriptionManagement: React.FC = () => {
               <p className="text-sm text-muted-foreground mb-3">
                 Your subscription has been cancelled but remains active until the end date.
               </p>
-              <Button variant="default" className="w-full" onClick={() => window.open('/pricing', '_blank')}>
+              <Button variant="default" className="w-full" onClick={handleResubscribe}>
                 Resubscribe
               </Button>
             </div>
