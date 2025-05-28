@@ -156,11 +156,13 @@ export type Database = {
         Row: {
           cancel_requested: boolean | null
           created_at: string
+          customer_id: string | null
           expires_at: string | null
           id: string
           is_active: boolean
           plan_type: string
           subscription_cancelled: boolean | null
+          subscription_id: string | null
           subscription_start: string | null
           updated_at: string
           user_id: string
@@ -168,11 +170,13 @@ export type Database = {
         Insert: {
           cancel_requested?: boolean | null
           created_at?: string
+          customer_id?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean
           plan_type: string
           subscription_cancelled?: boolean | null
+          subscription_id?: string | null
           subscription_start?: string | null
           updated_at?: string
           user_id: string
@@ -180,11 +184,13 @@ export type Database = {
         Update: {
           cancel_requested?: boolean | null
           created_at?: string
+          customer_id?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean
           plan_type?: string
           subscription_cancelled?: boolean | null
+          subscription_id?: string | null
           subscription_start?: string | null
           updated_at?: string
           user_id?: string

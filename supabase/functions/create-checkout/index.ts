@@ -8,15 +8,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Centralized pricing configuration
-const PRICING_CONFIG = {
-  daily: { amount: 900, interval: 'day' as const, interval_count: 1 },
-  monthly: { amount: 2900, interval: 'month' as const, interval_count: 1 },
-  lifetime: { amount: 9900, interval: null, interval_count: null }
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
 };
-
-const VALID_PLAN_TYPES = ['daily', 'monthly', 'lifetime'] as const;
-type PlanType = typeof VALID_PLAN_TYPES[number];
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -24,142 +19,97 @@ serve(async (req) => {
   }
 
   try {
-    console.log("Starting create-checkout function");
-    
-    // Check if Stripe secret key is available
-    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeSecretKey) {
-      console.error("STRIPE_SECRET_KEY environment variable is not set");
-      throw new Error("Stripe configuration is missing. Please contact support.");
-    }
-    console.log("Stripe secret key found");
+    logStep("Function started");
 
     const { planType } = await req.json();
-    console.log("Plan type requested:", planType);
-    
-    // Validate plan type
-    if (!VALID_PLAN_TYPES.includes(planType)) {
-      throw new Error(`Invalid plan type: ${planType}`);
+    if (!planType) {
+      throw new Error('No planType provided');
     }
-    
-    // Get the authenticated user
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      throw new Error("No authorization header");
-    }
-
+    const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-    
-    if (userError || !user) {
-      console.error("User authentication error:", userError);
-      throw new Error("User not authenticated");
-    }
-    
-    console.log("User authenticated:", user.email);
+    const { data } = await supabaseClient.auth.getUser(token);
+    const user = data.user;
+    if (!user?.email) throw new Error("User not authenticated or email not available");
 
-    const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: "2023-10-16",
-    });
+    logStep("User authenticated", { userId: user.id, email: user.email });
 
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2023-10-16" });
+    
     // Check if customer exists
-    const customers = await stripe.customers.list({
-      email: user.email!,
-      limit: 1,
-    });
-
+    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
-      console.log("Existing customer found:", customerId);
-    } else {
-      console.log("No existing customer found, will create during checkout");
+      logStep("Found existing customer", { customerId });
     }
 
-    const priceConfig = PRICING_CONFIG[planType as PlanType];
-    console.log("Creating checkout session for plan:", planType, "amount:", priceConfig.amount);
+    // Define plan pricing
+    const planPricing = {
+      daily: { amount: 199, interval: 'month', interval_count: 1 }, // $1.99 for 24 hours
+      monthly: { amount: 799, interval: 'month', interval_count: 1 }, // $7.99/month
+      lifetime: { amount: 4999, interval: null, interval_count: null } // $49.99 one-time
+    };
 
-    // Get origin for redirect URLs
-    const origin = req.headers.get("origin") || "https://id-preview--0556325d-6d42-4139-9d9a-797b034f7768.lovable.app";
+    const plan = planPricing[planType as keyof typeof planPricing];
+    if (!plan) {
+      throw new Error('Invalid plan type');
+    }
 
-    // Create checkout session
+    logStep("Creating checkout session", { planType, amount: plan.amount });
+
     const sessionConfig: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      success_url: `${origin}/bio-generator?upgrade=success`,
-      cancel_url: `${origin}/pricing`,
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: { 
+              name: `${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan`,
+              description: `Unlimited bio generation - ${planType} access`
+            },
+            unit_amount: plan.amount,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: planType === 'lifetime' ? 'payment' : 'subscription',
+      success_url: `${req.headers.get("origin")}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get("origin")}/pricing`,
       metadata: {
-        user_id: user.id,
         plan_type: planType,
-      },
+        user_id: user.id
+      }
     };
 
-    if (planType === 'lifetime') {
-      // One-time payment for lifetime
-      sessionConfig.mode = "payment";
-      sessionConfig.line_items = [
-        {
-          price_data: {
-            currency: "gbp",
-            product_data: {
-              name: "Lifetime Access - MakeMy.Bio",
-              description: "Unlimited bio and cover letter generation forever",
-            },
-            unit_amount: priceConfig.amount,
-          },
-          quantity: 1,
-        },
-      ];
-    } else {
-      // Subscription for daily/monthly
-      sessionConfig.mode = "subscription";
-      sessionConfig.line_items = [
-        {
-          price_data: {
-            currency: "gbp",
-            product_data: {
-              name: `${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan - MakeMy.Bio`,
-              description: "Unlimited bio and cover letter generation",
-            },
-            unit_amount: priceConfig.amount,
-            recurring: {
-              interval: priceConfig.interval,
-              interval_count: priceConfig.interval_count,
-            },
-          },
-          quantity: 1,
-        },
-      ];
+    // Add recurring configuration for subscription plans
+    if (planType !== 'lifetime') {
+      sessionConfig.line_items[0].price_data.recurring = {
+        interval: plan.interval,
+        interval_count: plan.interval_count
+      };
     }
-
-    console.log("Creating Stripe checkout session with config:", JSON.stringify(sessionConfig, null, 2));
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
 
-    console.log("Checkout session created successfully:", session.id);
+    logStep("Checkout session created", { sessionId: session.id, url: session.url });
 
-    return new Response(
-      JSON.stringify({ url: session.url }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
+    return new Response(JSON.stringify({ url: session.url }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
   } catch (error) {
-    console.error("Error creating checkout session:", error);
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || "Failed to create checkout session"
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep("ERROR", { message: errorMessage });
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
   }
 });

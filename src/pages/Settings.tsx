@@ -7,25 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Calendar, Clock, Crown, Settings as SettingsIcon, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useSubscription } from '@/hooks/useSubscription';
+import { subscriptionService } from '@/services/subscriptionService';
 import { toast } from "@/components/ui/use-toast";
 import Header from '@/components/Header';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
-interface UserSubscription {
-  id: string;
-  plan_type: string;
-  subscription_start: string;
-  expires_at: string | null;
-  cancel_requested: boolean;
-  is_active: boolean;
-}
-
 const Settings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { subscription, loading, refetch, getRemainingTime, getPlanDisplayName } = useSubscription();
   const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
@@ -33,93 +24,27 @@ const Settings = () => {
       navigate('/login');
       return;
     }
-    fetchSubscription();
   }, [user, navigate]);
 
-  const fetchSubscription = async () => {
-    if (!user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching subscription:', error);
-        return;
-      }
-
-      setSubscription(data);
-    } catch (error) {
-      console.error('Error fetching subscription:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleCancelSubscription = async () => {
-    if (!subscription) return;
+    if (!user) return;
     
     setCancelling(true);
     try {
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .update({ cancel_requested: true })
-        .eq('id', subscription.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Subscription cancelled",
-        description: "Your subscription will remain active until the end of your billing cycle.",
-      });
-
-      await fetchSubscription();
+      const success = await subscriptionService.cancelSubscription(user.id);
+      if (success) {
+        await refetch();
+      }
     } catch (error) {
       console.error('Error cancelling subscription:', error);
-      toast({
-        title: "Error",
-        description: "Failed to cancel subscription. Please try again.",
-        variant: "destructive",
-      });
     } finally {
       setCancelling(false);
     }
   };
 
-  const getTimeRemaining = () => {
-    if (!subscription?.expires_at) return null;
-    
-    const now = new Date();
-    const expiryDate = new Date(subscription.expires_at);
-    const timeLeft = expiryDate.getTime() - now.getTime();
-    
-    if (timeLeft <= 0) return null;
-    
-    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours > 24) {
-      const days = Math.floor(hours / 24);
-      return `${days} day${days !== 1 ? 's' : ''} remaining`;
-    }
-    
-    return `${hours}h ${minutes}m remaining`;
-  };
-
   const getNextBillingDate = () => {
     if (!subscription?.subscription_start) return null;
-    
-    const startDate = new Date(subscription.subscription_start);
-    const nextBilling = new Date(startDate);
-    nextBilling.setMonth(nextBilling.getMonth() + 1);
-    
-    return nextBilling.toLocaleDateString();
+    return subscriptionService.getNextBillingDate(subscription.subscription_start);
   };
 
   const getPlanIcon = () => {
@@ -128,16 +53,6 @@ const Settings = () => {
       case 'monthly': return <Calendar className="h-5 w-5" />;
       case 'lifetime': return <Crown className="h-5 w-5" />;
       default: return <SettingsIcon className="h-5 w-5" />;
-    }
-  };
-
-  const getPlanName = () => {
-    switch (subscription?.plan_type) {
-      case 'daily': return '24-Hour Access';
-      case 'monthly': return 'Monthly Plan';
-      case 'lifetime': return 'Lifetime Access';
-      case 'free': return 'Free Plan';
-      default: return 'Free Plan';
     }
   };
 
@@ -187,7 +102,7 @@ const Settings = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Current Plan</p>
-                  <p className="text-lg font-semibold">{getPlanName()}</p>
+                  <p className="text-lg font-semibold">{getPlanDisplayName()}</p>
                 </div>
                 <Badge variant={subscription?.plan_type === 'free' ? 'secondary' : 'default'}>
                   {subscription?.plan_type || 'free'}
@@ -203,7 +118,7 @@ const Settings = () => {
                       <span className="font-medium text-blue-800 dark:text-blue-200">Time Remaining</span>
                     </div>
                     <p className="text-blue-700 dark:text-blue-300">
-                      {getTimeRemaining() || "Plan has expired - you'll be moved to free plan"}
+                      {getRemainingTime() || "Plan has expired - you'll be moved to free plan"}
                     </p>
                   </div>
                   
@@ -234,13 +149,13 @@ const Settings = () => {
                       <div className="flex items-center gap-2 mb-2">
                         <span className="font-medium">Status</span>
                       </div>
-                      <p className={subscription.cancel_requested ? "text-orange-600" : "text-green-600"}>
-                        {subscription.cancel_requested ? "Cancellation Requested" : "Active"}
+                      <p className={subscription.subscription_cancelled ? "text-orange-600" : "text-green-600"}>
+                        {subscription.subscription_cancelled ? "Cancellation Requested" : "Active"}
                       </p>
                     </div>
                   </div>
 
-                  {subscription.cancel_requested ? (
+                  {subscription.subscription_cancelled ? (
                     <div className="p-4 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
                       <div className="flex items-center gap-2 mb-2">
                         <AlertTriangle className="h-4 w-4 text-yellow-600" />

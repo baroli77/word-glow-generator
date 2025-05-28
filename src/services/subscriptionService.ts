@@ -8,6 +8,9 @@ export interface Subscription {
   expires_at: string | null;
   is_active: boolean;
   subscription_cancelled?: boolean;
+  subscription_id?: string;
+  customer_id?: string;
+  subscription_start?: string;
 }
 
 export class SubscriptionService {
@@ -36,7 +39,6 @@ export class SubscriptionService {
         return this.getDefaultFreeSubscription();
       }
       
-      // Additional client-side expiry check for safety
       if (data && data.expires_at) {
         const isExpired = this.isSubscriptionExpired(data.expires_at);
         const shouldExpire = this.shouldExpireSubscription(data);
@@ -57,11 +59,50 @@ export class SubscriptionService {
         plan_type: data.plan_type as 'free' | 'daily' | 'monthly' | 'lifetime',
         expires_at: data.expires_at,
         is_active: data.is_active,
-        subscription_cancelled: data.subscription_cancelled
+        subscription_cancelled: data.subscription_cancelled,
+        subscription_id: data.subscription_id,
+        customer_id: data.customer_id,
+        subscription_start: data.subscription_start
       } : this.getDefaultFreeSubscription();
     } catch (error) {
       console.error('Error in fetchUserSubscription:', error);
       return this.getDefaultFreeSubscription();
+    }
+  }
+
+  async cancelSubscription(userId: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-subscription', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast({
+          title: "Cancellation failed",
+          description: data.error,
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      toast({
+        title: "Subscription cancelled",
+        description: data.message || "Your subscription will remain active until the end of your billing period."
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      toast({
+        title: "Cancellation failed",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+      return false;
     }
   }
 
@@ -77,13 +118,11 @@ export class SubscriptionService {
         expiresAt.setMonth(expiresAt.getMonth() + 1);
       }
 
-      // Deactivate current subscription
       await supabase
         .from('user_subscriptions')
         .update({ is_active: false })
         .eq('user_id', userId);
 
-      // Create new subscription
       const { error } = await supabase
         .from('user_subscriptions')
         .insert({
@@ -119,37 +158,6 @@ export class SubscriptionService {
     }
   }
 
-  async cancelSubscription(userId: string): Promise<boolean> {
-    try {
-      // Mark subscription as cancelled but keep it active until expiry
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .update({ 
-          subscription_cancelled: true,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId)
-        .eq('is_active', true);
-
-      if (error) throw error;
-
-      toast({
-        title: "Subscription cancelled",
-        description: "Your subscription will remain active until the end of your billing period."
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error cancelling subscription:', error);
-      toast({
-        title: "Cancellation failed",
-        description: "Please try again later.",
-        variant: "destructive"
-      });
-      return false;
-    }
-  }
-
   private async deactivateSubscription(subscriptionId: string): Promise<void> {
     await supabase
       .from('user_subscriptions')
@@ -166,17 +174,14 @@ export class SubscriptionService {
   }
 
   private shouldExpireSubscription(subscription: any): boolean {
-    // Daily plans should expire when past expiry time
     if (subscription.plan_type === 'daily') {
       return true;
     }
     
-    // Monthly plans should only expire if cancelled and past expiry time
     if (subscription.plan_type === 'monthly') {
       return subscription.subscription_cancelled === true;
     }
     
-    // Lifetime plans never expire
     if (subscription.plan_type === 'lifetime') {
       return false;
     }
@@ -227,6 +232,16 @@ export class SubscriptionService {
     };
     
     return names[planType as keyof typeof names] || 'Free';
+  }
+
+  getNextBillingDate(subscriptionStart: string | null): string | null {
+    if (!subscriptionStart) return null;
+    
+    const startDate = new Date(subscriptionStart);
+    const nextBilling = new Date(startDate);
+    nextBilling.setMonth(nextBilling.getMonth() + 1);
+    
+    return nextBilling.toLocaleDateString();
   }
 }
 
