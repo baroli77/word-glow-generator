@@ -130,10 +130,12 @@
   /* Enhanced animations for mobile */
   .animation-delay-500 {
     animation-delay: 500ms;
+    animation-fill-mode: both;
   }
   
   .animation-delay-1000 {
     animation-delay: 1000ms;
+    animation-fill-mode: both;
   }
 
   /* Responsive text utilities */

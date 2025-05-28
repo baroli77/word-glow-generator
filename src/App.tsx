@@ -17,12 +17,24 @@ import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/AdminDashboard";
 import PricingPage from "./pages/Pricing";
 import Settings from "./pages/Settings";
+import SplashScreen from "./components/SplashScreen";
 import { AuthProvider } from "./context/AuthContext";
 import { AdminProvider } from "./context/AdminContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import "./App.css";
 
 function App() {
+  // Set this to false to disable the splash screen
+  const showComingSoon = true;
+
+  if (showComingSoon) {
+    return (
+      <ThemeProvider>
+        <SplashScreen />
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider>
       <AuthProvider>
