@@ -154,32 +154,38 @@ export type Database = {
       }
       user_subscriptions: {
         Row: {
+          cancel_requested: boolean | null
           created_at: string
           expires_at: string | null
           id: string
           is_active: boolean
           plan_type: string
           subscription_cancelled: boolean | null
+          subscription_start: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          cancel_requested?: boolean | null
           created_at?: string
           expires_at?: string | null
           id?: string
           is_active?: boolean
           plan_type: string
           subscription_cancelled?: boolean | null
+          subscription_start?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          cancel_requested?: boolean | null
           created_at?: string
           expires_at?: string | null
           id?: string
           is_active?: boolean
           plan_type?: string
           subscription_cancelled?: boolean | null
+          subscription_start?: string | null
           updated_at?: string
           user_id?: string
         }

@@ -16,6 +16,7 @@ import Verify from "./pages/Verify";
 import ResetPassword from "./pages/ResetPassword";
 import AdminDashboard from "./pages/AdminDashboard";
 import PricingPage from "./pages/Pricing";
+import Settings from "./pages/Settings";
 import { AuthProvider } from "./context/AuthContext";
 import { AdminProvider } from "./context/AdminContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -32,6 +33,7 @@ function App() {
               <Route path="/bio-generator" element={<BioGenerator />} />
               <Route path="/cover-letter" element={<CoverLetter />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/about" element={<About />} />
               <Route path="/faq" element={<FAQ />} />

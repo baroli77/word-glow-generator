@@ -85,6 +85,12 @@ const Header = () => {
                     Dashboard
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/settings" className="flex items-center">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
                 {isAdminUser && (
                   <DropdownMenuItem asChild>
                     <Link to="/admin" className="flex items-center">
