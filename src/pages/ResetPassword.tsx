@@ -20,15 +20,29 @@ const ResetPassword = () => {
   const [validating, setValidating] = useState(true);
 
   useEffect(() => {
+    // Parse parameters from both URL search params and hash fragments
     const url = new URL(window.location.href);
-    const access_token = url.searchParams.get("access_token");
-    const refresh_token = url.searchParams.get("refresh_token");
-    const type = url.searchParams.get("type");
+    
+    // First try to get from search params (query string)
+    let access_token = url.searchParams.get("access_token");
+    let refresh_token = url.searchParams.get("refresh_token");
+    let type = url.searchParams.get("type");
+    
+    // If not found in search params, try hash fragments
+    if (!access_token && url.hash) {
+      const hashParams = new URLSearchParams(url.hash.substring(1)); // Remove the # and parse
+      access_token = hashParams.get("access_token");
+      refresh_token = hashParams.get("refresh_token");
+      type = hashParams.get("type");
+    }
 
     console.log('Reset password params:', { 
       hasAccessToken: !!access_token, 
       hasRefreshToken: !!refresh_token, 
-      type 
+      type,
+      fullUrl: window.location.href,
+      hash: url.hash,
+      search: url.search
     });
 
     if (access_token && refresh_token && type === "recovery") {
