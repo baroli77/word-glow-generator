@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -139,14 +138,47 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      console.log('Starting logout process...');
+      
+      // Clear local state immediately
+      setSession(null);
+      setUser(null);
+      
+      // Call Supabase signOut
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Supabase signOut error:', error);
+        // Even if Supabase throws an error, we've cleared local state
+        toast({
+          title: "Signed out",
+          description: "You have been signed out locally.",
+        });
+      } else {
+        console.log('Successfully signed out from Supabase');
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+        });
+      }
+      
+      // Force a page reload to ensure complete cleanup
+      window.location.href = '/';
+      
     } catch (error) {
+      console.error('Logout error:', error);
+      
+      // Clear local state even if there's an error
+      setSession(null);
+      setUser(null);
+      
       toast({
-        title: "Error signing out",
-        description: error.message,
-        variant: "destructive",
+        title: "Signed out",
+        description: "You have been signed out locally.",
       });
-      throw error;
+      
+      // Force a page reload
+      window.location.href = '/';
     }
   };
 
