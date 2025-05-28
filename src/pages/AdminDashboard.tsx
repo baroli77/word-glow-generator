@@ -22,21 +22,44 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!adminLoading && (!user || !isAdmin)) {
-      navigate('/');
-      return;
-    }
+    console.log('AdminDashboard useEffect - admin check:', { 
+      adminLoading, 
+      user: user?.email, 
+      isAdmin 
+    });
 
-    if (isAdmin) {
+    if (!adminLoading) {
+      if (!user) {
+        console.log('No user, redirecting to home');
+        navigate('/');
+        return;
+      }
+      
+      if (!isAdmin) {
+        console.log('User is not admin, redirecting to home');
+        navigate('/');
+        return;
+      }
+
+      // User is admin, load users
+      console.log('User is admin, loading users');
       loadUsers();
     }
   }, [isAdmin, adminLoading, user, navigate]);
 
   const loadUsers = async () => {
+    console.log('Loading users...');
     setLoading(true);
-    const userData = await getAllUsers();
-    setUsers(userData);
-    setLoading(false);
+    
+    try {
+      const userData = await getAllUsers();
+      console.log('Users loaded in component:', userData);
+      setUsers(userData);
+    } catch (error) {
+      console.error('Error loading users in component:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePlanUpdate = async (userId: string, newPlan: string) => {
@@ -143,6 +166,10 @@ const AdminDashboard = () => {
             {loading ? (
               <div className="flex justify-center py-8">
                 <LoadingSpinner />
+              </div>
+            ) : users.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No users found</p>
               </div>
             ) : (
               <div className="overflow-x-auto">

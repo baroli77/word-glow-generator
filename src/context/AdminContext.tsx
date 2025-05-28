@@ -24,6 +24,8 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const { user } = useAuth();
 
   const checkAdminStatus = async () => {
+    setLoading(true);
+    
     if (!user) {
       setIsAdmin(false);
       setLoading(false);
@@ -33,11 +35,13 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     // Check if the user is the hardcoded admin - this is the primary check
     const adminEmail = 'obarton77@gmail.com';
     if (user.email === adminEmail) {
+      console.log('User is admin:', user.email);
       setIsAdmin(true);
       setLoading(false);
       return;
     }
 
+    console.log('User is not admin:', user.email);
     // For non-admin users, they are not admin
     setIsAdmin(false);
     setLoading(false);
