@@ -14,7 +14,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "@/components/ui/use-toast";
 import { getDailyQuote } from '@/utils/dailyQuotes';
-import SubscriptionManagement from '@/components/subscription/SubscriptionManagement';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -257,13 +256,6 @@ const Dashboard = () => {
                   Upgrade Plan
                 </Button>
               </div>
-              
-              {/* Subscription Management Section - only show for paid plans */}
-              {subscription && subscription.plan_type !== 'free' && (
-                <div className="mb-8">
-                  <SubscriptionManagement />
-                </div>
-              )}
               
               <div className="brand-card">
                 <h3 className="text-sm font-medium text-muted-foreground mb-4 uppercase">Usage Stats</h3>
