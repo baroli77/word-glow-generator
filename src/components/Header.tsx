@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '@/context/AdminContext';
 import { ThemeToggle } from './ThemeToggle';
-import { LogOut, Settings, Shield } from 'lucide-react';
+import { LogOut, Settings, Shield, ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,29 +35,58 @@ const Header = () => {
         </Link>
         
         <nav className="hidden md:flex items-center space-x-6">
-          <Link to="/bio-generator" className="text-muted-foreground hover:text-foreground transition-colors">
-            Bio Generator
+          {/* Tools Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center space-x-1">
+                <span>Tools</span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem asChild>
+                <Link to="/bio-generator">Bio Generator</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/cover-letter">Cover Letter</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Resources Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center space-x-1">
+                <span>Resources</span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem asChild>
+                <Link to="/examples">Examples</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/about">About</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/faq">FAQ</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Pricing as standalone link */}
+          <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+            Pricing
           </Link>
-          <Link to="/cover-letter" className="text-muted-foreground hover:text-foreground transition-colors">
-            Cover Letter
-          </Link>
-          <Link to="/examples" className="text-muted-foreground hover:text-foreground transition-colors">
-            Examples
-          </Link>
+
+          {/* Dashboard for logged in users */}
           {user && (
             <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
               Dashboard
             </Link>
           )}
-          <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
-            About
-          </Link>
-          <Link to="/faq" className="text-muted-foreground hover:text-foreground transition-colors">
-            FAQ
-          </Link>
-          <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-            Pricing
-          </Link>
+
+          {/* Admin link for admin users */}
           {isAdminUser && (
             <Link to="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
               Admin
