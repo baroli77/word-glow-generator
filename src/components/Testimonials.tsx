@@ -3,7 +3,7 @@ import React from 'react';
 
 const testimonials = [
   {
-    quote: "WordCraft helped me create a professional bio that perfectly captures my experience and personality. I've received so many compliments!",
+    quote: "MakeMy.Bio helped me create a professional bio that perfectly captures my experience and personality. I've received so many compliments!",
     author: "Sarah Johnson",
     role: "Marketing Director",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=256&q=80"
@@ -15,7 +15,7 @@ const testimonials = [
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=256&q=80"
   },
   {
-    quote: "As someone who struggles with writing about myself, WordCraft has been a game-changer. It feels like having a professional writer on call.",
+    quote: "As someone who struggles with writing about myself, MakeMy.Bio has been a game-changer. It feels like having a professional writer on call.",
     author: "Priya Patel",
     role: "Freelance Designer",
     image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=256&q=80"
@@ -37,7 +37,7 @@ const Testimonials: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="wordcraft-card wordcraft-card-hover animate-enter" style={{ animationDelay: `${index * 100}ms` }}>
+            <div key={index} className="brand-card brand-card-hover animate-enter" style={{ animationDelay: `${index * 100}ms` }}>
               <div className="flex items-center mb-6">
                 <div className="h-12 w-12 rounded-full overflow-hidden mr-4">
                   <img 
