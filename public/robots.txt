@@ -2,22 +2,47 @@
 User-agent: *
 Allow: /
 
-# Main pages
+# Main pages - high priority
 Allow: /bio-generator
 Allow: /cover-letter
-Allow: /about
-Allow: /faq
 Allow: /pricing
 Allow: /examples
+Allow: /about
+Allow: /faq
 
 # Disallow admin and private pages
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /login
 Disallow: /signup
+Disallow: /settings
+Disallow: /verify
+Disallow: /reset-password
+
+# Disallow query parameters that don't add value
+Disallow: /*?*
+Allow: /bio-generator?*
+Allow: /cover-letter?*
+
+# Block crawlers from assets that aren't needed
+Disallow: /src/
+Disallow: /*.json$
+Disallow: /*.ts$
+Disallow: /*.tsx$
 
 # Sitemap
 Sitemap: https://makemy.bio/sitemap.xml
 
-# Crawl delay
+# Crawl delay to be respectful
 Crawl-delay: 1
+
+# Additional directives for better SEO
+# Allow social media crawlers full access
+User-agent: facebookexternalhit/*
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /

@@ -40,42 +40,108 @@ const Index = () => {
     return null;
   }
 
-  const structuredData = {
+  const enhancedStructuredData = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "MakeMy.Bio",
-    "url": "https://makemy.bio",
-    "description": "AI-powered bio and cover letter generator for professional content creation",
-    "applicationCategory": "ProductivityApplication",
-    "operatingSystem": "Web Browser",
-    "offers": [
+    "@graph": [
       {
-        "@type": "Offer",
-        "name": "Free Plan",
-        "price": "0",
-        "priceCurrency": "USD",
-        "description": "3 generations per day"
+        "@type": "WebSite",
+        "@id": "https://makemy.bio/#website",
+        "url": "https://makemy.bio/",
+        "name": "MakeMy.Bio",
+        "description": "AI-powered bio and cover letter generator for professional content creation",
+        "publisher": {
+          "@id": "https://makemy.bio/#organization"
+        },
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://makemy.bio/bio-generator?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        ]
       },
       {
-        "@type": "Offer",
-        "name": "Premium Plan", 
-        "price": "9.99",
-        "priceCurrency": "USD",
-        "billingDuration": "P1M",
-        "description": "Unlimited generations and premium features"
+        "@type": "Organization",
+        "@id": "https://makemy.bio/#organization",
+        "name": "MakeMy.Bio",
+        "url": "https://makemy.bio/",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://makemy.bio/og-makemybio.jpg"
+        },
+        "sameAs": [
+          "https://twitter.com/makemybio_ai"
+        ]
+      },
+      {
+        "@type": "WebApplication",
+        "name": "MakeMy.Bio",
+        "url": "https://makemy.bio",
+        "description": "AI-powered bio and cover letter generator for professional content creation",
+        "applicationCategory": "ProductivityApplication",
+        "operatingSystem": "Web Browser",
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "Free Plan",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "1 free bio generation to try our service",
+            "availability": "https://schema.org/InStock"
+          },
+          {
+            "@type": "Offer",
+            "name": "Daily Plan",
+            "price": "2.99",
+            "priceCurrency": "USD",
+            "description": "24-hour unlimited access",
+            "availability": "https://schema.org/InStock"
+          },
+          {
+            "@type": "Offer",
+            "name": "Weekly Plan", 
+            "price": "4.99",
+            "priceCurrency": "USD",
+            "description": "7-day unlimited access",
+            "availability": "https://schema.org/InStock"
+          },
+          {
+            "@type": "Offer",
+            "name": "Monthly Plan", 
+            "price": "9.99",
+            "priceCurrency": "USD",
+            "billingDuration": "P1M",
+            "description": "30-day unlimited access",
+            "availability": "https://schema.org/InStock"
+          },
+          {
+            "@type": "Offer",
+            "name": "Lifetime Plan", 
+            "price": "49.99",
+            "priceCurrency": "USD",
+            "description": "Unlimited access forever",
+            "availability": "https://schema.org/InStock"
+          }
+        ],
+        "creator": {
+          "@id": "https://makemy.bio/#organization"
+        },
+        "featureList": [
+          "AI-powered bio generation",
+          "Cover letter creation", 
+          "Multiple platform optimization",
+          "Professional templates",
+          "Character limit customization",
+          "LinkedIn bio optimization",
+          "Resume bio generation",
+          "Social media bio creation",
+          "Dating profile optimization"
+        ]
       }
-    ],
-    "creator": {
-      "@type": "Organization",
-      "name": "MakeMy.Bio",
-      "url": "https://makemy.bio"
-    },
-    "featureList": [
-      "AI-powered bio generation",
-      "Cover letter creation", 
-      "Multiple platform optimization",
-      "Professional templates",
-      "Character limit customization"
     ]
   };
 
@@ -84,9 +150,9 @@ const Index = () => {
       <SEOHead
         title="MakeMy.Bio - AI-Powered Bio & Cover Letter Generator"
         description="Create compelling bios and cover letters with MakeMy.Bio's AI-powered generator. Professional content for LinkedIn, resumes, social media, and more. Free templates and premium features available."
-        keywords="AI bio generator, cover letter generator, LinkedIn bio, professional bio, resume writing, AI content creation, social media bio, dating profile, professional writing"
+        keywords="AI bio generator, cover letter generator, LinkedIn bio, professional bio, resume writing, AI content creation, social media bio, dating profile, professional writing, CV generator, bio maker, AI writing assistant"
         canonicalUrl="https://makemy.bio/"
-        structuredData={structuredData}
+        structuredData={enhancedStructuredData}
       />
       <Header />
       <main className="flex-grow">

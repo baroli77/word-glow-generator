@@ -29,7 +29,26 @@ const CoverLetter = () => {
         "CV upload and analysis",
         "Job description matching",
         "Professional formatting",
-        "Industry-specific templates"
+        "Industry-specific templates",
+        "ATS-optimized content",
+        "Multiple format exports"
+      ]
+    },
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://makemy.bio/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Cover Letter Generator",
+          "item": "https://makemy.bio/cover-letter"
+        }
       ]
     }
   };
@@ -38,8 +57,8 @@ const CoverLetter = () => {
     <div className="flex flex-col min-h-screen">
       <SEOHead
         title="AI Cover Letter Generator - Create Professional Cover Letters"
-        description="Create personalized, professional cover letters that help you stand out from the crowd. Simply upload your CV and let our AI craft the perfect cover letter for any job application."
-        keywords="AI cover letter generator, cover letter writer, job application, CV upload, personalized cover letter, professional cover letter, job search tool"
+        description="Create personalized, professional cover letters that help you stand out from the crowd. Simply upload your CV and let our AI craft the perfect cover letter for any job application. ATS-optimized and industry-specific."
+        keywords="AI cover letter generator, cover letter writer, job application, CV upload, personalized cover letter, professional cover letter, job search tool, ATS optimized, resume companion"
         canonicalUrl="https://makemy.bio/cover-letter"
         structuredData={structuredData}
       />

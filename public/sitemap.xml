@@ -1,11 +1,17 @@
 
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://makemy.bio/</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://makemy.bio/og-makemybio.jpg</image:loc>
+      <image:title>MakeMy.Bio - AI-Powered Bio Generator</image:title>
+      <image:caption>Professional AI-powered bio and cover letter generator</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://makemy.bio/bio-generator</loc>
@@ -26,6 +32,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://makemy.bio/pricing</loc>
+    <lastmod>2025-01-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://makemy.bio/about</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>monthly</changefreq>
@@ -36,11 +48,5 @@
     <lastmod>2025-01-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://makemy.bio/pricing</loc>
-    <lastmod>2025-01-27</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
   </url>
 </urlset>

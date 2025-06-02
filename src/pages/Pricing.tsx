@@ -5,10 +5,67 @@ import Footer from '../components/Footer';
 import Pricing from '../components/Pricing';
 import { Button } from "@/components/ui/button";
 import { Check, Star, Clock, Infinity } from 'lucide-react';
+import SEOHead from '../components/SEOHead';
 
 const PricingPage = () => {
+  const pricingStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "MakeMy.Bio Premium Plans",
+    "description": "Professional AI-powered bio and cover letter generation with multiple pricing options",
+    "brand": {
+      "@type": "Brand",
+      "name": "MakeMy.Bio"
+    },
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Daily Access",
+        "price": "2.99",
+        "priceCurrency": "USD",
+        "description": "24-hour unlimited access to all features",
+        "availability": "https://schema.org/InStock",
+        "validFrom": "2024-01-01"
+      },
+      {
+        "@type": "Offer",
+        "name": "Weekly Access",
+        "price": "4.99",
+        "priceCurrency": "USD",
+        "description": "7-day unlimited access to all features",
+        "availability": "https://schema.org/InStock",
+        "validFrom": "2024-01-01"
+      },
+      {
+        "@type": "Offer",
+        "name": "Monthly Access",
+        "price": "9.99",
+        "priceCurrency": "USD",
+        "description": "30-day unlimited access to all features",
+        "availability": "https://schema.org/InStock",
+        "validFrom": "2024-01-01"
+      },
+      {
+        "@type": "Offer",
+        "name": "Lifetime Access",
+        "price": "49.99",
+        "priceCurrency": "USD",
+        "description": "Permanent unlimited access to all features",
+        "availability": "https://schema.org/InStock",
+        "validFrom": "2024-01-01"
+      }
+    ]
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <SEOHead
+        title="Pricing Plans - Choose Your MakeMy.Bio Plan"
+        description="Flexible pricing for AI-powered bio and cover letter generation. From free trials to lifetime access - find the perfect plan. Daily, weekly, monthly, and lifetime options available."
+        keywords="pricing, plans, AI bio generator cost, cover letter generator pricing, subscription plans, lifetime access, free trial, professional writing tools"
+        canonicalUrl="https://makemy.bio/pricing"
+        structuredData={pricingStructuredData}
+      />
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
