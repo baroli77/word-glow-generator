@@ -1,6 +1,6 @@
 
 import { useAuth } from '@/context/AuthContext';
-import { subscriptionService } from '@/services/subscriptionService';
+import { userAccessService } from '@/services/userAccessService';
 import { useUserAccess } from './useUserAccess';
 
 export const useSubscriptionActions = () => {
@@ -10,7 +10,7 @@ export const useSubscriptionActions = () => {
   const upgradeSubscription = async (planType: 'daily' | 'weekly' | 'monthly' | 'lifetime') => {
     if (!user) return false;
     
-    const success = await subscriptionService.upgradeSubscription(user.id, planType);
+    const success = await userAccessService.upgradeSubscription(user.id, planType);
     if (success) {
       // Refresh subscription data after successful upgrade
       await refetch();
@@ -21,7 +21,7 @@ export const useSubscriptionActions = () => {
   const cancelSubscription = async () => {
     if (!user) return false;
     
-    const success = await subscriptionService.cancelSubscription(user.id);
+    const success = await userAccessService.cancelSubscription(user.id);
     if (success) {
       // Refresh subscription data after successful cancellation
       await refetch();

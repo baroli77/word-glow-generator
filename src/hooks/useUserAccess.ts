@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { subscriptionService, type Subscription } from '@/services/subscriptionService';
-import { usageService } from '@/services/usageService';
+import { userAccessService } from '@/services/userAccessService';
 import { useSubscriptionExpiry } from './useSubscriptionExpiry';
 
 interface UserAccessState {
@@ -67,9 +67,10 @@ export const useUserAccess = (): UserAccessState & UserAccessActions => {
     }
   }, [user, subscription, navigate, location, isAdminUser]);
 
-  const fetchSubscription = useCallback(async (skipExpiryCheck = false) => {
+  const fetchData = useCallback(async (skipExpiryCheck = false) => {
     if (!user) {
       setSubscription(null);
+      setUsageCount(0);
       setLoading(false);
       return;
     }
@@ -82,6 +83,7 @@ export const useUserAccess = (): UserAccessState & UserAccessActions => {
         expires_at: null,
         is_active: true
       });
+      setUsageCount(0);
       setLoading(false);
       return;
     }
@@ -92,39 +94,23 @@ export const useUserAccess = (): UserAccessState & UserAccessActions => {
         await checkAndExpireUserSubscription(user.id);
       }
 
-      // Fetch current subscription after expiry check
-      const userSubscription = await subscriptionService.fetchUserSubscription(user.id);
-      setSubscription(userSubscription);
+      // Fetch user access data using the new service
+      const accessData = await userAccessService.getUserAccessData(user.id, isAdminUser);
+      setSubscription(accessData.subscription);
+      setUsageCount(accessData.usageCount);
     } catch (error) {
-      console.error('Error fetching subscription:', error);
+      console.error('Error fetching user access data:', error);
       setSubscription(subscriptionService['getDefaultFreeSubscription']());
+      setUsageCount(0);
     } finally {
       setLoading(false);
     }
   }, [user, isAdminUser, checkAndExpireUserSubscription]);
 
-  const fetchUsageCount = useCallback(async () => {
-    if (!user) return;
-    
-    try {
-      const count = await usageService.fetchUsageCount(user.id, 'bio_generator');
-      setUsageCount(count);
-    } catch (error) {
-      console.error('Error fetching usage count:', error);
-    }
-  }, [user]);
-
   // Initial fetch when user changes
   useEffect(() => {
-    if (user) {
-      fetchSubscription();
-      fetchUsageCount();
-    } else {
-      setSubscription(null);
-      setUsageCount(0);
-      setLoading(false);
-    }
-  }, [user, fetchSubscription, fetchUsageCount]);
+    fetchData();
+  }, [fetchData]);
 
   // Set up automatic revalidation for time-based subscriptions
   useEffect(() => {
@@ -138,7 +124,7 @@ export const useUserAccess = (): UserAccessState & UserAccessActions => {
 
     // If already expired, check immediately
     if (timeUntilExpiry <= 0) {
-      fetchSubscription();
+      fetchData();
       return;
     }
 
@@ -153,40 +139,40 @@ export const useUserAccess = (): UserAccessState & UserAccessActions => {
     }
 
     const interval = setInterval(() => {
-      fetchSubscription();
+      fetchData();
     }, checkInterval);
 
     return () => clearInterval(interval);
-  }, [subscription, fetchSubscription]);
+  }, [subscription, fetchData]);
 
   const canUseTool = useCallback((toolType: 'cover_letter' | 'bio_generator'): boolean => {
     if (!user) return false;
-    return usageService.canUseTool(toolType, subscription, isAdminUser, usageCount);
+    return userAccessService.canUseTool(toolType, subscription, isAdminUser, usageCount);
   }, [user, subscription, isAdminUser, usageCount]);
 
   const recordUsage = useCallback(async (toolType: 'cover_letter' | 'bio_generator') => {
     if (!user) return;
 
     try {
-      const success = await usageService.recordUsage(user.id, toolType);
+      const success = await userAccessService.recordToolUsage(user.id, toolType);
       if (success) {
-        await fetchUsageCount();
+        await fetchData();
       }
     } catch (error) {
       console.error('Error recording usage:', error);
     }
-  }, [user, fetchUsageCount]);
+  }, [user, fetchData]);
 
   const refetch = useCallback(async () => {
-    await fetchSubscription(false); // false = don't skip expiry check
-  }, [fetchSubscription]);
+    await fetchData(false); // false = don't skip expiry check
+  }, [fetchData]);
 
   const getRemainingTime = useCallback(() => {
-    return subscriptionService.getRemainingTime(subscription?.expires_at || null);
+    return userAccessService.getRemainingTime(subscription?.expires_at || null);
   }, [subscription]);
 
   const getPlanDisplayName = useCallback(() => {
-    return subscriptionService.getPlanDisplayName(subscription?.plan_type || 'free', isAdminUser);
+    return userAccessService.getPlanDisplayName(subscription?.plan_type || 'free', isAdminUser);
   }, [subscription, isAdminUser]);
 
   return {

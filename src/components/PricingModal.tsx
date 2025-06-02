@@ -21,6 +21,11 @@ const PricingModal: React.FC<PricingModalProps> = ({
   currentPlan = 'free',
   onUpgradeComplete
 }) => {
+  const handleUpgradeComplete = () => {
+    onUpgradeComplete?.();
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
@@ -40,6 +45,7 @@ const PricingModal: React.FC<PricingModalProps> = ({
               planType={planType}
               currentPlan={currentPlan}
               showCurrentBadge={false}
+              onUpgradeComplete={handleUpgradeComplete}
             />
           ))}
         </div>

@@ -25,12 +25,16 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
   
   const [showPricingModal, setShowPricingModal] = useState(false);
 
+  if (loading || !user) return null;
+
   const hasAccess = canUseTool(toolType);
   const remainingTime = getRemainingTime();
   const planName = getPlanDisplayName();
   const currentPlan = (subscription?.plan_type || 'free') as PlanType;
 
-  if (loading || !user) return null;
+  const handleUpgradeComplete = () => {
+    setShowPricingModal(false);
+  };
 
   return (
     <>
@@ -54,7 +58,6 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
         toolDisplayName={toolDisplayName}
         onUpgrade={() => setShowPricingModal(true)}
       >
-        {/* This will only render if user has access */}
         <div />
       </AccessGuard>
       
@@ -63,6 +66,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
         onClose={() => setShowPricingModal(false)}
         toolName={toolDisplayName}
         currentPlan={currentPlan}
+        onUpgradeComplete={handleUpgradeComplete}
       />
     </>
   );
