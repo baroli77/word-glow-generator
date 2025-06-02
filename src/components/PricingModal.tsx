@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Clock, Star, Crown, Sparkles, Calendar } from 'lucide-react';
 import { PRICING_CONFIG, type PlanType } from '@/config/pricing';
 import PlanCard from '@/components/shared/PlanCard';
 
@@ -9,12 +8,17 @@ interface PricingModalProps {
   isOpen: boolean;
   onClose: () => void;
   toolName: string;
-  onUpgradeComplete?: () => void;
+  currentPlan?: string;
 }
 
 const MODAL_PLANS: PlanType[] = ['daily', 'weekly', 'monthly', 'lifetime'];
 
-const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, toolName, onUpgradeComplete }) => {
+const PricingModal: React.FC<PricingModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  toolName, 
+  currentPlan = 'free' 
+}) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
@@ -28,11 +32,11 @@ const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, toolName, 
         </DialogHeader>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-          {MODAL_PLANS.map((planType, index) => (
+          {MODAL_PLANS.map((planType) => (
             <PlanCard
               key={planType}
               planType={planType}
-              currentPlan="free"
+              currentPlan={currentPlan}
               showCurrentBadge={false}
             />
           ))}

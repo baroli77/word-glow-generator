@@ -27,6 +27,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
   const hasAccess = canUseTool(toolType);
   const remainingTime = getRemainingTime();
   const planName = getPlanDisplayName();
+  const currentPlan = subscription?.plan_type || 'free';
 
   if (loading || !user) return null;
 
@@ -36,7 +37,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
         isAdminUser={isAdminUser}
         planName={planName}
         remainingTime={remainingTime}
-        planType={subscription?.plan_type || 'free'}
+        planType={currentPlan}
         toolType={toolType}
         usageCount={usageCount}
         hasAccess={hasAccess}
@@ -46,7 +47,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
         hasAccess={hasAccess}
         isLoading={loading}
         isAdminUser={isAdminUser}
-        planType={subscription?.plan_type || 'free'}
+        planType={currentPlan}
         usageCount={usageCount}
         toolType={toolType}
         toolDisplayName={toolDisplayName}
@@ -60,6 +61,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
         isOpen={showPricingModal}
         onClose={() => setShowPricingModal(false)}
         toolName={toolDisplayName}
+        currentPlan={currentPlan}
       />
     </>
   );
