@@ -20,8 +20,14 @@ const Header = () => {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    try {
+      await signOut();
+      // Navigate to home page after successful sign out
+      navigate('/');
+    } catch (error) {
+      // Even if there's an error, navigate to home page
+      navigate('/');
+    }
   };
 
   // Check if user is admin directly as well for consistent behavior

@@ -140,30 +140,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       console.log('Starting logout process...');
       
-      // Clear local state immediately
-      setSession(null);
-      setUser(null);
-      
-      // Call Supabase signOut
+      // Call Supabase signOut first
       const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error('Supabase signOut error:', error);
-        // Even if Supabase throws an error, we've cleared local state
         toast({
-          title: "Signed out",
-          description: "You have been signed out locally.",
+          title: "Error signing out",
+          description: error.message,
+          variant: "destructive",
         });
-      } else {
-        console.log('Successfully signed out from Supabase');
-        toast({
-          title: "Signed out",
-          description: "You have been signed out successfully.",
-        });
+        throw error;
       }
       
-      // Force a page reload to ensure complete cleanup
-      window.location.href = '/';
+      console.log('Successfully signed out from Supabase');
+      
+      // Clear local state - this will happen automatically via onAuthStateChange
+      // but we can do it here for immediate UI feedback
+      setSession(null);
+      setUser(null);
+      
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
       
     } catch (error) {
       console.error('Logout error:', error);
@@ -177,8 +177,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         description: "You have been signed out locally.",
       });
       
-      // Force a page reload
-      window.location.href = '/';
+      throw error;
     }
   };
 
