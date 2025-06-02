@@ -8,7 +8,8 @@ interface PricingModalProps {
   isOpen: boolean;
   onClose: () => void;
   toolName: string;
-  currentPlan?: string;
+  currentPlan?: PlanType;
+  onUpgradeComplete?: () => void;
 }
 
 const MODAL_PLANS: PlanType[] = ['daily', 'weekly', 'monthly', 'lifetime'];
@@ -17,7 +18,8 @@ const PricingModal: React.FC<PricingModalProps> = ({
   isOpen, 
   onClose, 
   toolName, 
-  currentPlan = 'free' 
+  currentPlan = 'free',
+  onUpgradeComplete
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

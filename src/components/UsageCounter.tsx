@@ -4,6 +4,7 @@ import { useUserAccess } from '@/hooks/useUserAccess';
 import AccessGuard from './access/AccessGuard';
 import SubscriptionDisplay from './access/SubscriptionDisplay';
 import PricingModal from './PricingModal';
+import type { PlanType } from '@/config/pricing';
 
 interface UsageCounterProps {
   toolType: 'cover_letter' | 'bio_generator';
@@ -27,7 +28,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
   const hasAccess = canUseTool(toolType);
   const remainingTime = getRemainingTime();
   const planName = getPlanDisplayName();
-  const currentPlan = subscription?.plan_type || 'free';
+  const currentPlan = (subscription?.plan_type || 'free') as PlanType;
 
   if (loading || !user) return null;
 
