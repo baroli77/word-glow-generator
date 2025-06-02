@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface User {
   access_expires_at?: string | null;
@@ -8,21 +8,21 @@ interface User {
 }
 
 const useAccessProtection = (user: User | null | undefined) => {
-  const router = useRouter();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    // Skip checks during initial loading or if already on auth/pricing pages
+    // Skip checks if already on auth/pricing pages
     if (
-      router.pathname === '/login' || 
-      router.pathname === '/pricing' ||
-      !router.isReady
+      location.pathname === '/login' || 
+      location.pathname === '/pricing'
     ) {
       return;
     }
 
     // Check if user is missing
     if (!user) {
-      router.push('/login');
+      navigate('/login');
       return;
     }
 
@@ -32,11 +32,11 @@ const useAccessProtection = (user: User | null | undefined) => {
       const currentDate = new Date();
       
       if (currentDate > expirationDate) {
-        router.push('/pricing');
+        navigate('/pricing');
         return;
       }
     }
-  }, [user, router]);
+  }, [user, navigate, location]);
 };
 
 export default useAccessProtection;
