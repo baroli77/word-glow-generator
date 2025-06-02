@@ -36,8 +36,8 @@ export const PRICING_CONFIG = {
     },
     weekly: {
       name: "1 Week Access",
-      price: 18,
-      displayPrice: "$18",
+      price: 20,
+      displayPrice: "$20",
       period: "7 days",
       description: "Great for short-term projects",
       features: [
@@ -48,7 +48,7 @@ export const PRICING_CONFIG = {
       ],
       limitations: [],
       buttonText: "Get 1 Week Access",
-      stripeAmount: 1800,
+      stripeAmount: 2000,
       popular: false
     },
     monthly: {
