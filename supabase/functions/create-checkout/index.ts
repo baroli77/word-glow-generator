@@ -13,6 +13,7 @@ const logStep = (step: string, details?: any) => {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -27,6 +28,7 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    // Parse request body
     const { email, plan } = await req.json();
     
     if (!email || !plan) {
@@ -37,7 +39,7 @@ serve(async (req) => {
       });
     }
 
-    // Map plan to price ID
+    // Map plan to price ID with fallback to hardcoded values
     const planToPriceId = {
       "24hr": Deno.env.get("STRIPE_PRICE_24H_ACCESS") || "price_1RVT86BfWiYNCeVOOPb189bF",
       "1week": Deno.env.get("STRIPE_PRICE_1WEEK_ACCESS") || "price_1RVT8cBfWiYNCeVOk2SVsBMn",
@@ -57,7 +59,17 @@ serve(async (req) => {
 
     logStep("Plan validated", { plan, priceId });
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { apiVersion: "2023-10-16" });
+    // Initialize Stripe
+    const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeSecretKey) {
+      logStep("ERROR: Missing Stripe secret key");
+      return new Response(JSON.stringify({ error: "Stripe configuration error" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: "2023-10-16" });
     
     // Check if customer exists
     const customers = await stripe.customers.list({ email, limit: 1 });
@@ -67,8 +79,12 @@ serve(async (req) => {
       logStep("Found existing customer", { customerId });
     }
 
-    logStep("Creating checkout session", { plan, priceId, email });
+    // Get site URL for success/cancel URLs
+    const siteUrl = Deno.env.get("NEXT_PUBLIC_SITE_URL") || req.headers.get("origin") || "http://localhost:3000";
+    
+    logStep("Creating checkout session", { plan, priceId, email, siteUrl });
 
+    // Create Stripe Checkout Session (one-time payment)
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : email,
@@ -78,9 +94,9 @@ serve(async (req) => {
           quantity: 1,
         },
       ],
-      mode: 'payment',
-      success_url: `${req.headers.get("origin")}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/pricing`,
+      mode: 'payment', // One-time payment, not subscription
+      success_url: `${siteUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/pricing`,
       metadata: {
         plan_type: plan,
         email: email
@@ -93,10 +109,13 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
+
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    
+    // Don't expose sensitive error details to client
+    return new Response(JSON.stringify({ error: "An error occurred processing your request" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

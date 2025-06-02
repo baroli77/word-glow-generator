@@ -17,8 +17,44 @@ export class UpgradeService {
     try {
       console.log('Starting upgrade process for plan:', planType);
       
+      // Get user email from auth
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user?.email) {
+        console.error('User authentication error:', userError);
+        toast({
+          title: "Authentication error",
+          description: "Please sign in to continue.",
+          variant: "destructive"
+        });
+        return null;
+      }
+
+      // Map planType to the correct plan string for the API
+      const planMapping = {
+        'daily': '24hr',
+        'weekly': '1week', 
+        'monthly': '1month',
+        'lifetime': 'lifetime',
+        'free': null // Free plan doesn't need checkout
+      };
+
+      const apiPlan = planMapping[planType as keyof typeof planMapping];
+      
+      if (!apiPlan) {
+        console.error('Invalid plan type for checkout:', planType);
+        toast({
+          title: "Invalid plan",
+          description: "Please select a valid plan.",
+          variant: "destructive"
+        });
+        return null;
+      }
+
       const { data, error } = await supabase.functions.invoke('create-checkout', {
-        body: { planType }
+        body: { 
+          email: user.email,
+          plan: apiPlan
+        }
       });
 
       console.log('Checkout response:', { data, error });
