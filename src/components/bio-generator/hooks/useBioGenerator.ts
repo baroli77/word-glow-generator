@@ -69,11 +69,21 @@ export const useBioGenerator = () => {
       return { shouldShowPricing: true };
     }
 
-    // Check if user can use the tool
-    const hasAccess = await canUseTool('bio_generator');
-    if (!hasAccess) {
-      setShowPricingModal(true);
-      return { shouldShowPricing: true };
+    // For free users on non-premium platforms, check if they've used their free bio
+    if (isFreeUser && !isPremiumPlatform(formData.platform as PlatformType)) {
+      if (usageCount >= 1) {
+        setShowPricingModal(true);
+        return { shouldShowPricing: true };
+      }
+    }
+
+    // For premium users, check if they can use the tool (should always be true for premium)
+    if (!isFreeUser) {
+      const hasAccess = await canUseTool('bio_generator');
+      if (!hasAccess) {
+        setShowPricingModal(true);
+        return { shouldShowPricing: true };
+      }
     }
 
     // Final validation
@@ -121,11 +131,22 @@ export const useBioGenerator = () => {
   };
   
   const handleRegenerate = async (formData: BioFormData) => {
-    // Check if user can use the tool
-    const hasAccess = await canUseTool('bio_generator');
-    if (!hasAccess) {
+    // Check if selected platform is premium and user is free
+    if (isFreeUser && isPremiumPlatform(formData.platform as PlatformType)) {
       setShowPricingModal(true);
       return { shouldShowPricing: true };
+    }
+
+    // For free users on non-premium platforms, they can regenerate their one free bio
+    // without additional usage counting since it's the same session
+
+    // For premium users, check if they can use the tool
+    if (!isFreeUser) {
+      const hasAccess = await canUseTool('bio_generator');
+      if (!hasAccess) {
+        setShowPricingModal(true);
+        return { shouldShowPricing: true };
+      }
     }
 
     setLoading(true);

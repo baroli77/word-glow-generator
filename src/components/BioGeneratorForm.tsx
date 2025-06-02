@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Lock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -88,8 +89,7 @@ const BioGeneratorForm: React.FC = () => {
   };
 
   // Show premium upgrade prompt only if free user tries to access premium platform
-  // AND they haven't reached their global usage limit yet
-  if (step === 1 && isFreeUser && isPremiumPlatform(formData.platform as PlatformType) && usageCount < 1) {
+  if (step === 1 && isFreeUser && isPremiumPlatform(formData.platform as PlatformType)) {
     return (
       <div className="max-w-3xl mx-auto">
         <div className="text-center py-12">

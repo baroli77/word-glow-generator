@@ -69,9 +69,14 @@ export class UsageService {
       return true;
     }
 
-    // For free users, check if they've used their allocation
+    // For free users and bio generator, check if they've used their allocation
     if (toolType === 'bio_generator') {
       return usageCount < 1;
+    }
+
+    // Cover letter is premium only
+    if (toolType === 'cover_letter') {
+      return false;
     }
 
     return false;
