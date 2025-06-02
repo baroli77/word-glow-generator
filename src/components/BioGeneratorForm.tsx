@@ -88,31 +88,6 @@ const BioGeneratorForm: React.FC = () => {
     resetForm();
   };
 
-  // Show premium upgrade prompt only if free user tries to access premium platform
-  if (step === 1 && isFreeUser && isPremiumPlatform(formData.platform as PlatformType)) {
-    return (
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center py-12">
-          <Lock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-xl font-semibold mb-2">Premium Feature</h3>
-          <p className="text-muted-foreground mb-6">
-            {formData.platform} bios are available to premium users only.
-          </p>
-          <Button onClick={() => setShowPricingModal(true)}>
-            Upgrade to Continue
-          </Button>
-        </div>
-        
-        <PricingModal
-          isOpen={showPricingModal}
-          onClose={() => setShowPricingModal(false)}
-          toolName="Bio Generator"
-          onUpgradeComplete={handleUpgradeComplete}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-3xl mx-auto">
       <StepIndicator currentStep={step} totalSteps={4} />
