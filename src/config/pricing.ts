@@ -1,9 +1,10 @@
+
 export const PRICING_CONFIG = {
   plans: {
     free: {
       name: "Free",
       price: 0,
-      displayPrice: "£0",
+      displayPrice: "$0",
       period: "forever",
       description: "Try our bio generator",
       features: [
@@ -18,8 +19,8 @@ export const PRICING_CONFIG = {
     },
     daily: {
       name: "24-Hour Access",
-      price: 9,
-      displayPrice: "£9",
+      price: 10,
+      displayPrice: "$10",
       period: "24 hours",
       description: "Perfect for immediate needs",
       features: [
@@ -30,31 +31,48 @@ export const PRICING_CONFIG = {
       ],
       limitations: [],
       buttonText: "Get 24h Access",
-      stripeAmount: 900,
+      stripeAmount: 1000,
       popular: false
     },
-    monthly: {
-      name: "Monthly Plan",
-      price: 29,
-      displayPrice: "£29",
-      period: "per month",
-      description: "Great for regular use",
+    weekly: {
+      name: "1 Week Access",
+      price: 18,
+      displayPrice: "$18",
+      period: "7 days",
+      description: "Great for short-term projects",
       features: [
         "Unlimited bio generation",
         "All templates and tones",
         "Export to all formats",
-        "Auto-renew monthly",
-        "Cancel anytime"
+        "7 days of access"
       ],
       limitations: [],
-      buttonText: "Start Monthly",
-      stripeAmount: 2900,
+      buttonText: "Get 1 Week Access",
+      stripeAmount: 1800,
+      popular: false
+    },
+    monthly: {
+      name: "1 Month Access",
+      price: 30,
+      displayPrice: "$30",
+      period: "30 days",
+      description: "Perfect for ongoing projects",
+      features: [
+        "Unlimited bio generation",
+        "All templates and tones",
+        "Export to all formats",
+        "30 days of access",
+        "Priority support"
+      ],
+      limitations: [],
+      buttonText: "Get 1 Month Access",
+      stripeAmount: 3000,
       popular: true
     },
     lifetime: {
       name: "Lifetime Access",
-      price: 99,
-      displayPrice: "£99",
+      price: 90,
+      displayPrice: "$90",
       period: "one-time",
       description: "Best value for power users",
       features: [
@@ -62,11 +80,12 @@ export const PRICING_CONFIG = {
         "All current and future features",
         "Export to all formats",
         "No recurring payments",
-        "Permanent access"
+        "Permanent access",
+        "Priority support"
       ],
       limitations: [],
       buttonText: "Buy Lifetime",
-      stripeAmount: 9900,
+      stripeAmount: 9000,
       popular: false
     }
   }
@@ -74,7 +93,7 @@ export const PRICING_CONFIG = {
 
 export type PlanType = keyof typeof PRICING_CONFIG.plans;
 
-export const PLAN_TYPES: PlanType[] = ['free', 'daily', 'monthly', 'lifetime'];
+export const PLAN_TYPES: PlanType[] = ['free', 'daily', 'weekly', 'monthly', 'lifetime'];
 
 export const getPlanConfig = (planType: PlanType) => {
   return PRICING_CONFIG.plans[planType];
@@ -84,16 +103,19 @@ export const getStripeConfig = (planType: PlanType) => {
   const plan = getPlanConfig(planType);
   return {
     amount: plan.stripeAmount,
-    interval: planType === 'monthly' ? 'month' as const : planType === 'daily' ? 'day' as const : null,
-    interval_count: planType === 'monthly' || planType === 'daily' ? 1 : null
+    interval: planType === 'monthly' ? 'month' as const : 
+              planType === 'weekly' ? 'week' as const :
+              planType === 'daily' ? 'day' as const : null,
+    interval_count: planType === 'monthly' || planType === 'weekly' || planType === 'daily' ? 1 : null
   };
 };
 
 export const PLAN_HIERARCHY = {
   free: 0,
   daily: 1,
-  monthly: 2,
-  lifetime: 3
+  weekly: 2,
+  monthly: 3,
+  lifetime: 4
 } as const;
 
 export const isDowngrade = (fromPlan: PlanType, toPlan: PlanType): boolean => {

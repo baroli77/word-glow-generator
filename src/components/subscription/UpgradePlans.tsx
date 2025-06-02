@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Star, Crown, Sparkles } from 'lucide-react';
+import { Clock, Star, Crown, Sparkles, Calendar } from 'lucide-react';
 import { useUpgrade } from '@/hooks/useUpgrade';
 
 interface UpgradePlansProps {
@@ -39,7 +39,7 @@ const UpgradePlans: React.FC<UpgradePlansProps> = ({ toolType, hasUsedFree }) =>
       <div className="text-center">
         <h4 className="text-xl font-semibold mb-6 text-foreground">Choose Your Plan</h4>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
           
           {/* 24-Hour Access */}
           <Card className="border-2 border-brand-purple/20 hover:border-brand-purple/40 transition-all duration-200 hover:shadow-lg">
@@ -49,22 +49,45 @@ const UpgradePlans: React.FC<UpgradePlansProps> = ({ toolType, hasUsedFree }) =>
                 <h5 className="font-semibold text-lg">24-Hour Access</h5>
               </div>
               <div className="mb-4">
-                <span className="text-3xl font-bold text-brand-purple">£9</span>
+                <span className="text-3xl font-bold text-brand-purple">$10</span>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                Unlimited {toolType === 'bio_generator' ? 'bios' : 'cover letters'} for 24 hours
+                Unlimited access for 24 hours
               </p>
               <Button 
                 className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold"
                 onClick={() => handleUpgrade('daily')}
                 disabled={isLoading('daily')}
               >
-                {isLoading('daily') ? 'Processing...' : 'Upgrade Now'}
+                {isLoading('daily') ? 'Processing...' : 'Get 24h Access'}
               </Button>
             </CardContent>
           </Card>
 
-          {/* Monthly Plan */}
+          {/* 1 Week Access */}
+          <Card className="border-2 border-brand-purple/20 hover:border-brand-purple/40 transition-all duration-200 hover:shadow-lg">
+            <CardContent className="p-6 text-center">
+              <div className="mb-4">
+                <Calendar className="h-8 w-8 text-brand-purple mx-auto mb-2" />
+                <h5 className="font-semibold text-lg">1 Week Access</h5>
+              </div>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-brand-purple">$18</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                Unlimited access for 7 days
+              </p>
+              <Button 
+                className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold"
+                onClick={() => handleUpgrade('weekly')}
+                disabled={isLoading('weekly')}
+              >
+                {isLoading('weekly') ? 'Processing...' : 'Get 1 Week Access'}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* 1 Month Plan */}
           <Card className="border-2 border-brand-purple shadow-lg shadow-brand-purple/20 scale-105 relative">
             <CardContent className="p-6 text-center">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -74,21 +97,20 @@ const UpgradePlans: React.FC<UpgradePlansProps> = ({ toolType, hasUsedFree }) =>
               </div>
               <div className="mb-4 mt-2">
                 <Star className="h-8 w-8 text-brand-purple mx-auto mb-2" />
-                <h5 className="font-semibold text-lg">Monthly Plan</h5>
+                <h5 className="font-semibold text-lg">1 Month Access</h5>
               </div>
               <div className="mb-4">
-                <span className="text-3xl font-bold text-brand-purple">£29</span>
-                <span className="text-sm text-muted-foreground">/month</span>
+                <span className="text-3xl font-bold text-brand-purple">$30</span>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                Unlimited {toolType === 'bio_generator' ? 'bios' : 'cover letters'} all month long
+                Unlimited access for 30 days
               </p>
               <Button 
                 className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold"
                 onClick={() => handleUpgrade('monthly')}
                 disabled={isLoading('monthly')}
               >
-                {isLoading('monthly') ? 'Processing...' : 'Upgrade Now'}
+                {isLoading('monthly') ? 'Processing...' : 'Get 1 Month Access'}
               </Button>
             </CardContent>
           </Card>
@@ -101,17 +123,17 @@ const UpgradePlans: React.FC<UpgradePlansProps> = ({ toolType, hasUsedFree }) =>
                 <h5 className="font-semibold text-lg">Lifetime Access</h5>
               </div>
               <div className="mb-4">
-                <span className="text-3xl font-bold text-brand-purple">£99</span>
+                <span className="text-3xl font-bold text-brand-purple">$90</span>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                Unlimited {toolType === 'bio_generator' ? 'bios' : 'cover letters'} forever
+                Unlimited access forever
               </p>
               <Button 
                 className="w-full bg-brand-purple hover:bg-brand-purple-dark text-white font-semibold"
                 onClick={() => handleUpgrade('lifetime')}
                 disabled={isLoading('lifetime')}
               >
-                {isLoading('lifetime') ? 'Processing...' : 'Upgrade Now'}
+                {isLoading('lifetime') ? 'Processing...' : 'Buy Lifetime'}
               </Button>
             </CardContent>
           </Card>

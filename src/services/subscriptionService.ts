@@ -1,10 +1,11 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "@/components/ui/use-toast";
 import type { PlanType } from '@/config/pricing';
 
 export interface Subscription {
   id: string;
-  plan_type: 'free' | 'daily' | 'monthly' | 'lifetime';
+  plan_type: 'free' | 'daily' | 'weekly' | 'monthly' | 'lifetime';
   expires_at: string | null;
   is_active: boolean;
   subscription_cancelled?: boolean;
@@ -56,7 +57,7 @@ export class SubscriptionService {
       
       return data ? {
         id: data.id,
-        plan_type: data.plan_type as 'free' | 'daily' | 'monthly' | 'lifetime',
+        plan_type: data.plan_type as 'free' | 'daily' | 'weekly' | 'monthly' | 'lifetime',
         expires_at: data.expires_at,
         is_active: data.is_active,
         subscription_cancelled: data.subscription_cancelled,
@@ -72,26 +73,22 @@ export class SubscriptionService {
 
   async cancelSubscription(userId: string): Promise<boolean> {
     try {
-      const { data, error } = await supabase.functions.invoke('cancel-subscription', {
-        headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        }
-      });
+      // For one-time payments, we just deactivate the subscription
+      const { error } = await supabase
+        .from('user_subscriptions')
+        .update({ 
+          is_active: false,
+          subscription_cancelled: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('is_active', true);
 
       if (error) throw error;
 
-      if (data.error) {
-        toast({
-          title: "Cancellation failed",
-          description: data.error,
-          variant: "destructive"
-        });
-        return false;
-      }
-
       toast({
         title: "Subscription cancelled",
-        description: data.message || "Your subscription will remain active until the end of your billing period."
+        description: "Your subscription has been cancelled and you've been moved to the free plan."
       });
       
       return true;
@@ -106,16 +103,19 @@ export class SubscriptionService {
     }
   }
 
-  async upgradeSubscription(userId: string, planType: 'daily' | 'monthly' | 'lifetime'): Promise<boolean> {
+  async upgradeSubscription(userId: string, planType: 'daily' | 'weekly' | 'monthly' | 'lifetime'): Promise<boolean> {
     try {
       let expiresAt = null;
       
       if (planType === 'daily') {
         expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 1);
+      } else if (planType === 'weekly') {
+        expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
       } else if (planType === 'monthly') {
         expiresAt = new Date();
-        expiresAt.setMonth(expiresAt.getMonth() + 1);
+        expiresAt.setDate(expiresAt.getDate() + 30);
       }
 
       await supabase
@@ -137,7 +137,8 @@ export class SubscriptionService {
 
       const planNames = {
         daily: '24-hour access',
-        monthly: 'monthly plan',
+        weekly: '1 week access',
+        monthly: '1 month access',
         lifetime: 'lifetime access'
       };
       
@@ -174,19 +175,8 @@ export class SubscriptionService {
   }
 
   private shouldExpireSubscription(subscription: any): boolean {
-    if (subscription.plan_type === 'daily') {
-      return true;
-    }
-    
-    if (subscription.plan_type === 'monthly') {
-      return subscription.subscription_cancelled === true;
-    }
-    
-    if (subscription.plan_type === 'lifetime') {
-      return false;
-    }
-    
-    return false;
+    // All non-lifetime plans should expire when their expiry date is reached
+    return subscription.plan_type !== 'lifetime';
   }
 
   private getDefaultFreeSubscription(): Subscription {
@@ -208,15 +198,17 @@ export class SubscriptionService {
     
     if (timeLeft <= 0) return null;
     
-    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
     
-    if (hours > 24) {
-      const days = Math.floor(hours / 24);
+    if (days > 0) {
       return `${days} day${days !== 1 ? 's' : ''} remaining`;
+    } else if (hours > 0) {
+      return `${hours}h ${minutes}m remaining`;
+    } else {
+      return `${minutes}m remaining`;
     }
-    
-    return `${hours}h ${minutes}m remaining`;
   }
 
   getPlanDisplayName(planType: string, isAdminUser: boolean = false): string {
@@ -227,7 +219,8 @@ export class SubscriptionService {
     const names = {
       free: 'Free',
       daily: '24-Hour Access',
-      monthly: 'Monthly Plan',
+      weekly: '1 Week Access',
+      monthly: '1 Month Access',
       lifetime: 'Lifetime Access'
     };
     

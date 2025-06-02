@@ -49,11 +49,12 @@ serve(async (req) => {
       logStep("Found existing customer", { customerId });
     }
 
-    // Define plan pricing
+    // Define plan pricing in USD
     const planPricing = {
-      daily: { amount: 199, interval: 'month', interval_count: 1 }, // $1.99 for 24 hours
-      monthly: { amount: 799, interval: 'month', interval_count: 1 }, // $7.99/month
-      lifetime: { amount: 4999, interval: null, interval_count: null } // $49.99 one-time
+      daily: { amount: 1000, interval: null, interval_count: null }, // $10.00 for 24 hours
+      weekly: { amount: 1800, interval: null, interval_count: null }, // $18.00 for 1 week
+      monthly: { amount: 3000, interval: null, interval_count: null }, // $30.00 for 1 month
+      lifetime: { amount: 9000, interval: null, interval_count: null } // $90.00 one-time
     };
 
     const plan = planPricing[planType as keyof typeof planPricing];
@@ -71,7 +72,7 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: { 
-              name: `${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan`,
+              name: `${planType.charAt(0).toUpperCase() + planType.slice(1)} Plan - MakeMy.Bio`,
               description: `Unlimited bio generation - ${planType} access`
             },
             unit_amount: plan.amount,
@@ -79,7 +80,7 @@ serve(async (req) => {
           quantity: 1,
         },
       ],
-      mode: planType === 'lifetime' ? 'payment' : 'subscription',
+      mode: 'payment',
       success_url: `${req.headers.get("origin")}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/pricing`,
       metadata: {
@@ -87,14 +88,6 @@ serve(async (req) => {
         user_id: user.id
       }
     };
-
-    // Add recurring configuration for subscription plans
-    if (planType !== 'lifetime') {
-      sessionConfig.line_items[0].price_data.recurring = {
-        interval: plan.interval,
-        interval_count: plan.interval_count
-      };
-    }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
 

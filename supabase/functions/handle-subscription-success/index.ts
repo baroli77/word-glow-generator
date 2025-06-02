@@ -26,26 +26,27 @@ serve(async (req) => {
       throw new Error('No session_id provided');
     }
 
-    // Initialize Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
     });
 
-    // Retrieve the checkout session
     const session = await stripe.checkout.sessions.retrieve(session_id, {
-      expand: ['subscription', 'customer']
+      expand: ['customer']
     });
 
     logStep("Retrieved checkout session", { sessionId: session_id });
 
-    if (!session.customer || !session.subscription) {
-      throw new Error('Session does not contain customer or subscription data');
+    if (!session.customer) {
+      throw new Error('Session does not contain customer data');
     }
 
     const customer = session.customer as Stripe.Customer;
-    const subscription = session.subscription as Stripe.Subscription;
+    const planType = session.metadata?.plan_type;
 
-    // Initialize Supabase with service role
+    if (!planType) {
+      throw new Error('No plan type found in session metadata');
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -65,23 +66,31 @@ serve(async (req) => {
 
     logStep("Found user profile", { userId: profile.id });
 
-    // Determine plan type based on subscription
-    let planType = 'monthly';
-    if (subscription.items.data[0]?.price?.recurring?.interval === 'month') {
-      planType = 'monthly';
-    } else if (!subscription.items.data[0]?.price?.recurring) {
-      planType = 'lifetime';
-    }
+    // Calculate expiry based on plan type
+    const subscriptionStart = new Date();
+    let expiresAt = null;
 
-    // Calculate subscription start and expiry
-    const subscriptionStart = new Date(subscription.current_period_start * 1000);
-    const expiresAt = planType === 'lifetime' ? null : new Date(subscription.current_period_end * 1000);
+    switch (planType) {
+      case 'daily':
+        expiresAt = new Date(subscriptionStart.getTime() + 24 * 60 * 60 * 1000); // 24 hours
+        break;
+      case 'weekly':
+        expiresAt = new Date(subscriptionStart.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
+        break;
+      case 'monthly':
+        expiresAt = new Date(subscriptionStart.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+        break;
+      case 'lifetime':
+        expiresAt = null; // No expiry
+        break;
+      default:
+        throw new Error(`Invalid plan type: ${planType}`);
+    }
 
     logStep("Processing subscription", { 
       planType, 
       subscriptionStart, 
       expiresAt,
-      stripeSubscriptionId: subscription.id,
       customerId: customer.id 
     });
 
@@ -97,7 +106,7 @@ serve(async (req) => {
       .insert({
         user_id: profile.id,
         plan_type: planType,
-        subscription_id: subscription.id,
+        subscription_id: session.id,
         customer_id: customer.id,
         subscription_start: subscriptionStart.toISOString(),
         expires_at: expiresAt?.toISOString(),
@@ -115,7 +124,8 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: 'Subscription activated successfully',
-        plan_type: planType
+        plan_type: planType,
+        expires_at: expiresAt?.toISOString()
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -130,7 +140,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: errorMessage }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
       }
     );
