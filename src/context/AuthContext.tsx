@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +9,6 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -87,25 +87,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       toast({
         title: "Error signing in",
-        description: error.message,
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-      if (error) throw error;
-    } catch (error) {
-      toast({
-        title: "Error signing in with Google",
         description: error.message,
         variant: "destructive",
       });
@@ -207,7 +188,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     user,
     loading,
     signIn,
-    signInWithGoogle,
     signUp,
     signOut,
     resetPassword,
