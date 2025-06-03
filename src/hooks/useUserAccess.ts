@@ -75,8 +75,11 @@ export const useUserAccess = (): UserAccessState & UserAccessActions => {
       return;
     }
 
+    console.log('Fetching user access data for user:', user.email);
+
     // Admin users get automatic lifetime access
     if (isAdminUser) {
+      console.log('Admin user detected, setting lifetime access');
       setSubscription({
         id: "admin-access",
         plan_type: "lifetime",
@@ -91,11 +94,19 @@ export const useUserAccess = (): UserAccessState & UserAccessActions => {
     try {
       // Check and expire subscription first (unless we're skipping it to avoid loops)
       if (!skipExpiryCheck) {
+        console.log('Checking subscription expiry...');
         await checkAndExpireUserSubscription(user.id);
       }
 
       // Fetch user access data using the new service
+      console.log('Fetching subscription and usage data...');
       const accessData = await userAccessService.getUserAccessData(user.id, isAdminUser);
+      
+      console.log('Access data received:', {
+        subscription: accessData.subscription,
+        usageCount: accessData.usageCount
+      });
+      
       setSubscription(accessData.subscription);
       setUsageCount(accessData.usageCount);
     } catch (error) {
@@ -145,6 +156,31 @@ export const useUserAccess = (): UserAccessState & UserAccessActions => {
     return () => clearInterval(interval);
   }, [subscription, fetchData]);
 
+  // Auto-refresh when returning to the app (e.g., after checkout)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        console.log('Page became visible, refreshing subscription data...');
+        fetchData();
+      }
+    };
+
+    const handleFocus = () => {
+      if (user) {
+        console.log('Window focused, refreshing subscription data...');
+        fetchData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [user, fetchData]);
+
   const canUseTool = useCallback((toolType: 'cover_letter' | 'bio_generator'): boolean => {
     if (!user) return false;
     return userAccessService.canUseTool(toolType, subscription, isAdminUser, usageCount);
@@ -164,6 +200,7 @@ export const useUserAccess = (): UserAccessState & UserAccessActions => {
   }, [user, fetchData]);
 
   const refetch = useCallback(async () => {
+    console.log('Manual refetch requested');
     await fetchData(false); // false = don't skip expiry check
   }, [fetchData]);
 

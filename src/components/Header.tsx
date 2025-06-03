@@ -4,8 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { useAuth } from '../context/AuthContext';
 import { useAdmin } from '@/context/AdminContext';
+import { useUserAccess } from '@/hooks/useUserAccess';
 import { ThemeToggle } from './ThemeToggle';
-import { LogOut, Settings, Shield, ChevronDown } from 'lucide-react';
+import { LogOut, Settings, Shield, ChevronDown, RefreshCw } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ import {
 const Header = () => {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
+  const { refetch, getPlanDisplayName } = useUserAccess();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -28,6 +30,11 @@ const Header = () => {
       // Even if there's an error, navigate to home page
       navigate('/');
     }
+  };
+
+  const handleRefreshSubscription = async () => {
+    console.log('Refreshing subscription data...');
+    await refetch();
   };
 
   // Check if user is admin directly as well for consistent behavior
@@ -110,7 +117,9 @@ const Header = () => {
                   <div className="h-8 w-8 rounded-full bg-gradient-to-br from-makemybio-purple to-makemybio-pink flex items-center justify-center text-white text-sm font-bold">
                     {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                   </div>
-                  <span className="hidden sm:inline">{user.user_metadata?.full_name || user.email}</span>
+                  <span className="hidden sm:inline text-xs">
+                    {user.user_metadata?.full_name || user.email} - {getPlanDisplayName()}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -125,6 +134,10 @@ const Header = () => {
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleRefreshSubscription}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Refresh Subscription
                 </DropdownMenuItem>
                 {isAdminUser && (
                   <DropdownMenuItem asChild>
