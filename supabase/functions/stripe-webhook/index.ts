@@ -19,16 +19,30 @@ serve(async (req) => {
 
     const body = await req.text();
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2023-10-16',
+      apiVersion: '2024-06-20',
     });
 
-    // Verify webhook signature
+    // Verify webhook signature using async method
     const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
     let event: Stripe.Event;
 
     if (webhookSecret) {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      try {
+        // Use async version for Deno compatibility
+        event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
+        logStep("Event signature verified successfully");
+      } catch (err) {
+        logStep("Webhook signature verification failed", { error: err.message });
+        return new Response(
+          JSON.stringify({ error: "Webhook signature verification failed" }),
+          {
+            headers: { 'Content-Type': 'application/json' },
+            status: 400,
+          }
+        );
+      }
     } else {
+      logStep("No webhook secret provided, parsing body directly");
       event = JSON.parse(body);
     }
 
