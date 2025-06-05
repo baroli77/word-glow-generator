@@ -25,7 +25,7 @@ import "./App.css";
 
 function App() {
   // Set this to false to disable the splash screen
-  const showComingSoon = true;
+  const showComingSoon = false;
 
   if (showComingSoon) {
     return (
