@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "@/components/ui/use-toast";
 import { getDailyQuote } from '@/utils/dailyQuotes';
+import { Document, Packer, Paragraph, TextRun } from "docx";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -141,67 +142,129 @@ const Dashboard = () => {
     });
   };
 
-  const handleDownloadCoverLetter = async (content: string, companyName: string) => {
-    try {
-      // Create a temporary div for PDF generation
-      const element = document.createElement('div');
-      element.innerHTML = `
-        <div style="
-          font-family: Arial, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 40px 20px;
-        ">
-          <div style="white-space: pre-wrap; font-size: 12pt;">
-            ${content.replace(/\n/g, '<br>')}
-          </div>
-        </div>
-      `;
-
-      const opt = {
-        margin: 1,
-        filename: `cover-letter-${companyName || 'company'}-${new Date().toISOString().split('T')[0]}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-
-      // Generate and download PDF
-      const html2pdf = (await import('html2pdf.js')).default;
-      await html2pdf().set(opt).from(element).save();
+  const parseCoverLetterContent = (content: string) => {
+    const lines = content.split('\n').filter(line => line.trim());
+    const address = [];
+    const paragraphs = [];
+    let salutation = "Dear Hiring Manager,";
+    let inAddress = true;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
       
-      toast({
-        title: "PDF Downloaded",
-        description: "Your cover letter has been downloaded as a PDF.",
-      });
-    } catch (error) {
-      console.error('PDF generation error:', error);
-      // Fallback to text download
-      try {
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cover-letter-${companyName || 'company'}-${new Date().toISOString().split('T')[0]}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        toast({
-          title: "Downloaded as Text",
-          description: "PDF generation failed, downloaded as text file instead.",
-        });
-      } catch (fallbackError) {
-        toast({
-          title: "Download Failed",
-          description: "Could not download the cover letter. Please try copying the text instead.",
-          variant: "destructive",
-        });
+      // Skip empty lines
+      if (!line) continue;
+      
+      // Check if it's a salutation
+      if (line.toLowerCase().startsWith('dear ') && inAddress) {
+        salutation = line;
+        inAddress = false;
+        continue;
+      }
+      
+      // If we're still in address section (first few lines)
+      if (inAddress && i < 5) {
+        address.push(line);
+      } else {
+        inAddress = false;
+        // Skip salutation line if we already captured it
+        if (line !== salutation) {
+          paragraphs.push(line);
+        }
       }
     }
+    
+    return {
+      address: address.join('\n'),
+      salutation,
+      paragraphs
+    };
+  };
+
+  const exportCoverLetterToWord = (content: string, companyName: string) => {
+    const { address, salutation, paragraphs } = parseCoverLetterContent(content);
+    
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top: 1440, // 1 inch in twips (1440 twips = 1 inch)
+              right: 1440,
+              bottom: 1440,
+              left: 1440,
+            },
+          },
+        },
+        children: [
+          // Address block
+          ...(address ? [new Paragraph({
+            children: [new TextRun({
+              text: address,
+              font: "Calibri",
+              size: 24, // 12pt in half-points
+            })],
+            spacing: {
+              after: 400, // Space after address
+              line: 276, // 1.15 line spacing (240 * 1.15)
+            },
+          })] : []),
+          
+          // Salutation
+          new Paragraph({
+            children: [new TextRun({
+              text: salutation,
+              font: "Calibri",
+              size: 24,
+            })],
+            spacing: {
+              after: 200,
+              line: 276,
+            },
+          }),
+          
+          // Body paragraphs
+          ...paragraphs.map(paragraph => new Paragraph({
+            children: [new TextRun({
+              text: paragraph,
+              font: "Calibri",
+              size: 24,
+            })],
+            spacing: {
+              after: 200,
+              line: 276,
+            },
+          })),
+        ],
+      }],
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `cover-letter-${companyName || 'company'}-${new Date().toISOString().split('T')[0]}.docx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Word Document Downloaded",
+        description: "Your cover letter has been downloaded as a Word document.",
+      });
+    }).catch(error => {
+      console.error('Word document generation error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Could not generate Word document. Please try copying the text instead.",
+        variant: "destructive",
+      });
+    });
+  };
+
+  const handleDownloadCoverLetter = (content: string, companyName: string) => {
+    exportCoverLetterToWord(content, companyName);
   };
 
   const handlePrintCoverLetter = (content: string) => {
