@@ -62,105 +62,56 @@ const ResultStep: React.FC<ResultStepProps> = ({
     }
   };
 
-  const convertToSemanticHTML = (content: string) => {
-    // Clean the content first
-    const cleanContent = content.trim().replace(/\s+/g, ' ');
-    
-    // Split into lines and filter out empty ones
-    const lines = cleanContent.split('\n').filter(line => line.trim().length > 0);
-    
-    let semanticHTML = '';
-    let isContactInfo = true;
-    
-    lines.forEach((line, index) => {
-      const trimmedLine = line.trim();
-      
-      // Skip empty lines
-      if (!trimmedLine) return;
-      
-      // First few lines are usually contact info
-      if (isContactInfo && (
-        trimmedLine.includes('@') || 
-        trimmedLine.includes('Phone:') ||
-        trimmedLine.includes('Email:') ||
-        trimmedLine.includes('Address:') ||
-        /^\d/.test(trimmedLine) ||
-        index < 3
-      )) {
-        semanticHTML += `<address>${trimmedLine}</address>\n`;
-      } else {
-        isContactInfo = false;
-        semanticHTML += `<p>${trimmedLine}</p>\n`;
-      }
-    });
-    
-    return semanticHTML;
-  };
-
   const handlePrint = () => {
     if (!hasValidContent) return;
     
     try {
+      // Create a new window for printing
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
         throw new Error('Could not open print window');
       }
 
-      const semanticContent = convertToSemanticHTML(generatedLetter);
-
+      // Generate HTML content for printing
       const htmlContent = `
         <!DOCTYPE html>
         <html>
           <head>
             <title>Cover Letter</title>
             <style>
-              #cover-letter {
-                font-family: Arial, sans-serif;
-                font-size: 12pt;
-                line-height: 1.6;
-                margin: 40px auto;
-                padding: 20px;
-                width: 600px;
-                max-width: 100%;
-                color: #000;
-                background: #fff;
-                white-space: normal;
-              }
-
-              #cover-letter p {
-                margin-bottom: 12px;
-              }
-
-              #cover-letter address {
-                margin-bottom: 20px;
-                font-style: normal;
-              }
-
-              body {
-                background: #fff;
-                margin: 0;
-                padding: 0;
-              }
-
               @media print {
                 body {
-                  margin: 0;
-                  padding: 0;
-                }
-                #cover-letter {
+                  font-family: 'Times New Roman', serif;
+                  line-height: 1.6;
+                  max-width: 8.5in;
                   margin: 0;
                   padding: 1in;
-                  width: auto;
-                  max-width: none;
+                  color: #000;
+                  font-size: 12pt;
+                }
+                .cover-letter {
+                  white-space: pre-wrap;
                 }
                 @page {
                   margin: 1in;
                 }
               }
+              body {
+                font-family: 'Times New Roman', serif;
+                line-height: 1.6;
+                max-width: 8.5in;
+                margin: 0 auto;
+                padding: 1in;
+                color: #000;
+                font-size: 12pt;
+              }
+              .cover-letter {
+                white-space: pre-wrap;
+              }
             </style>
           </head>
           <body>
-            <div id="cover-letter">${semanticContent}</div>
+            <div class="cover-letter">${generatedLetter.replace(/\n/g, '<br>')}</div>
           </body>
         </html>
       `;
@@ -168,6 +119,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
       printWindow.document.write(htmlContent);
       printWindow.document.close();
       
+      // Wait for content to load, then trigger print
       printWindow.onload = () => {
         printWindow.print();
         printWindow.onafterprint = () => {
@@ -193,60 +145,33 @@ const ResultStep: React.FC<ResultStepProps> = ({
     if (!hasValidContent) return;
     
     try {
-      // Create semantic HTML structure
-      const semanticContent = convertToSemanticHTML(generatedLetter);
-      
-      // Create a temporary container
-      const tempContainer = document.createElement('div');
-      tempContainer.innerHTML = `
-        <style>
-          #cover-letter {
-            font-family: Arial, sans-serif;
-            font-size: 12pt;
-            line-height: 1.6;
-            margin: 40px auto;
-            padding: 20px;
-            width: 600px;
-            max-width: 100%;
-            color: #000;
-            background: #fff;
-            white-space: normal;
-          }
-
-          #cover-letter p {
-            margin-bottom: 12px;
-          }
-
-          #cover-letter address {
-            margin-bottom: 20px;
-            font-style: normal;
-          }
-
-          body {
-            background: #fff;
-            margin: 0;
-            padding: 0;
-          }
-        </style>
-        <div id="cover-letter">${semanticContent}</div>
+      // Create a temporary div for PDF generation
+      const element = document.createElement('div');
+      element.innerHTML = `
+        <div style="
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 40px 20px;
+        ">
+          <div style="white-space: pre-wrap; font-size: 12pt;">
+            ${generatedLetter.replace(/\n/g, '<br>')}
+          </div>
+        </div>
       `;
-      
-      // Add to document temporarily
-      document.body.appendChild(tempContainer);
 
       const opt = {
-        margin: 0,
+        margin: 1,
         filename: `cover-letter-${formData?.companyName || 'company'}-${new Date().toISOString().split('T')[0]}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
-        jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
 
       // Generate and download PDF
-      await html2pdf().set(opt).from(tempContainer.querySelector('#cover-letter')).save();
-      
-      // Clean up
-      document.body.removeChild(tempContainer);
+      await html2pdf().set(opt).from(element).save();
       
       toast({
         title: "PDF Downloaded",
@@ -260,7 +185,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `cover-letter-${formData?.companyName || 'company'}-${new Date().toISOString().split('T')[0]}.txt`;
+        a.download = `cover-letter-${new Date().toISOString().split('T')[0]}.txt`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
