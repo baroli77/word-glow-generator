@@ -63,27 +63,34 @@ const ResultStep: React.FC<ResultStepProps> = ({
   };
 
   const convertToSemanticHTML = (content: string) => {
-    // Split content into paragraphs
-    const paragraphs = content.trim().split('\n').filter(p => p.trim());
+    // Clean the content first
+    const cleanContent = content.trim().replace(/\s+/g, ' ');
+    
+    // Split into lines and filter out empty ones
+    const lines = cleanContent.split('\n').filter(line => line.trim().length > 0);
     
     let semanticHTML = '';
-    let isFirstParagraph = true;
+    let isContactInfo = true;
     
-    paragraphs.forEach((paragraph, index) => {
-      const trimmedParagraph = paragraph.trim();
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
       
-      // Check if it's an address block (typically at the beginning)
-      if (isFirstParagraph && (
-        trimmedParagraph.includes('@') || 
-        trimmedParagraph.includes('Phone:') ||
-        trimmedParagraph.includes('Email:') ||
-        /^\d/.test(trimmedParagraph) // Starts with a number (likely address)
+      // Skip empty lines
+      if (!trimmedLine) return;
+      
+      // First few lines are usually contact info
+      if (isContactInfo && (
+        trimmedLine.includes('@') || 
+        trimmedLine.includes('Phone:') ||
+        trimmedLine.includes('Email:') ||
+        trimmedLine.includes('Address:') ||
+        /^\d/.test(trimmedLine) ||
+        index < 3
       )) {
-        semanticHTML += `<address>${trimmedParagraph}</address>\n`;
-        isFirstParagraph = false;
+        semanticHTML += `<address>${trimmedLine}</address>\n`;
       } else {
-        semanticHTML += `<p>${trimmedParagraph}</p>\n`;
-        isFirstParagraph = false;
+        isContactInfo = false;
+        semanticHTML += `<p>${trimmedLine}</p>\n`;
       }
     });
     
