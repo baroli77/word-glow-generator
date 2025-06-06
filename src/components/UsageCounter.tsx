@@ -32,6 +32,10 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
   const planName = getPlanDisplayName();
   const currentPlan = (subscription?.plan_type || 'free') as PlanType;
 
+  // For bio generator, use the usage count from useUserAccess
+  // For cover letter, we need to fetch it separately since useUserAccess only tracks bio usage
+  const displayUsageCount = toolType === 'bio_generator' ? usageCount : 0;
+
   const handleUpgradeComplete = () => {
     setShowPricingModal(false);
   };
@@ -44,7 +48,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
         remainingTime={remainingTime}
         planType={currentPlan}
         toolType={toolType}
-        usageCount={usageCount}
+        usageCount={displayUsageCount}
         hasAccess={hasAccess}
       />
       
@@ -53,7 +57,7 @@ const UsageCounter: React.FC<UsageCounterProps> = ({ toolType, toolDisplayName }
         isLoading={loading}
         isAdminUser={isAdminUser}
         planType={currentPlan}
-        usageCount={usageCount}
+        usageCount={displayUsageCount}
         toolType={toolType}
         toolDisplayName={toolDisplayName}
         onUpgrade={() => setShowPricingModal(true)}

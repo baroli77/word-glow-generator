@@ -12,8 +12,10 @@ export class UsageService {
     return UsageService.instance;
   }
 
-  async fetchUsageCount(userId: string, toolType: string = 'bio_generator'): Promise<number> {
+  async fetchUsageCount(userId: string, toolType: 'cover_letter' | 'bio_generator' = 'bio_generator'): Promise<number> {
     try {
+      console.log(`Fetching usage count for user ${userId}, tool type: ${toolType}`);
+      
       const { data, error } = await supabase
         .from('tool_usage')
         .select('*')
@@ -25,7 +27,9 @@ export class UsageService {
         return 0;
       }
       
-      return data?.length || 0;
+      const count = data?.length || 0;
+      console.log(`Usage count for ${toolType}: ${count}`);
+      return count;
     } catch (error) {
       console.error('Error in fetchUsageCount:', error);
       return 0;
@@ -34,6 +38,8 @@ export class UsageService {
 
   async recordUsage(userId: string, toolType: 'cover_letter' | 'bio_generator'): Promise<boolean> {
     try {
+      console.log(`Recording usage for user ${userId}, tool type: ${toolType}`);
+      
       const { error } = await supabase
         .from('tool_usage')
         .insert({
@@ -46,6 +52,7 @@ export class UsageService {
         return false;
       }
       
+      console.log(`Successfully recorded usage for ${toolType}`);
       return true;
     } catch (error) {
       console.error('Error in recordUsage:', error);
@@ -59,24 +66,35 @@ export class UsageService {
     isAdminUser: boolean,
     usageCount: number
   ): boolean {
+    console.log(`Checking tool access for ${toolType}:`, {
+      subscription: subscription?.plan_type,
+      isAdminUser,
+      usageCount
+    });
+
     // Admin users have unlimited access
     if (isAdminUser) {
+      console.log('Admin user - unlimited access granted');
       return true;
     }
 
     // If user has an active paid subscription, they can use the tool
     if (subscription && subscription.plan_type !== 'free') {
+      console.log('Paid subscription - access granted');
       return true;
     }
 
-    // Cover letter is premium only
+    // Cover letter is premium only for free users
     if (toolType === 'cover_letter') {
+      console.log('Cover letter requires premium subscription');
       return false;
     }
 
     // For free users and bio generator, check if they've used their allocation
     if (toolType === 'bio_generator') {
-      return usageCount < 1;
+      const hasAccess = usageCount < 1;
+      console.log(`Bio generator access: ${hasAccess} (usage: ${usageCount}/1)`);
+      return hasAccess;
     }
 
     return false;

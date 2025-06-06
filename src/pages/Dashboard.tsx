@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -8,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { FileText, UserCircle, Star, Copy, Trash2, Plus, Edit, Settings, Printer, Download } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useUserAccess } from '@/hooks/useUserAccess';
 import { getUserBios, getUserCoverLetters } from '@/services/supabaseService';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -18,10 +19,15 @@ import { Document, Packer, Paragraph, TextRun } from "docx";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { subscription, getPlanDisplayName } = useSubscription();
+  const { 
+    subscription, 
+    usageCount: bioUsageCount, 
+    getPlanDisplayName,
+    isAdminUser 
+  } = useUserAccess();
+  
   const [savedBios, setSavedBios] = useState([]);
   const [savedCoverLetters, setSavedCoverLetters] = useState([]);
-  const [bioUsageCount, setBioUsageCount] = useState(0);
   const [coverLetterUsageCount, setCoverLetterUsageCount] = useState(0);
   const [selectedBio, setSelectedBio] = useState(null);
   const [selectedCoverLetter, setSelectedCoverLetter] = useState(null);
@@ -48,30 +54,26 @@ const Dashboard = () => {
     const coverLetters = await getUserCoverLetters();
     setSavedCoverLetters(coverLetters);
 
-    // Load usage counts
+    // Load cover letter usage count specifically
     try {
-      const { data: bioUsage } = await supabase
-        .from('tool_usage')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('tool_type', 'bio_generator');
-      
       const { data: coverLetterUsage } = await supabase
         .from('tool_usage')
         .select('*')
         .eq('user_id', user.id)
         .eq('tool_type', 'cover_letter');
 
-      setBioUsageCount(bioUsage?.length || 0);
       setCoverLetterUsageCount(coverLetterUsage?.length || 0);
     } catch (error) {
-      console.error('Error loading usage data:', error);
+      console.error('Error loading cover letter usage data:', error);
+      setCoverLetterUsageCount(0);
     }
   };
 
   const getUsageLimit = (toolType: string) => {
+    if (isAdminUser) return 'Unlimited';
+    
     if (!subscription || subscription.plan_type === 'free') {
-      return toolType === 'bio_generator' ? 1 : 1;
+      return toolType === 'bio_generator' ? 1 : 0; // Free users get 1 bio, 0 cover letters
     }
     return 'Unlimited';
   };
