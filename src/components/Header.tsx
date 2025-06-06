@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -40,8 +39,27 @@ const Header = () => {
   // Check if user is admin directly as well for consistent behavior
   const isAdminUser = user?.email === 'obarton77@gmail.com' || isAdmin;
 
-  // Get the current plan display name which properly handles expired subscriptions
-  const currentPlanName = getPlanDisplayName();
+  // Get the current plan display name with explicit expiry check
+  const getCurrentPlanName = () => {
+    if (isAdminUser) {
+      return 'Admin (Unlimited)';
+    }
+    
+    // Check if subscription is expired
+    if (subscription && subscription.expires_at && subscription.plan_type !== 'lifetime') {
+      const expirationDate = new Date(subscription.expires_at);
+      const currentDate = new Date();
+      
+      if (currentDate > expirationDate) {
+        return 'Free';
+      }
+    }
+    
+    // Use the standard function for non-expired subscriptions
+    return getPlanDisplayName();
+  };
+
+  const currentPlanName = getCurrentPlanName();
 
   return (
     <header className="bg-background border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-background/60">
