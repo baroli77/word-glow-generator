@@ -14,7 +14,8 @@ const tones = [
   { value: 'casual', label: 'Casual', description: 'Relaxed and friendly' },
   { value: 'creative', label: 'Creative', description: 'Unique and expressive' },
   { value: 'confident', label: 'Confident', description: 'Bold and assertive' },
-  { value: 'friendly', label: 'Friendly', description: 'Warm and approachable' }
+  { value: 'friendly', label: 'Friendly', description: 'Warm and approachable' },
+  { value: 'funny', label: 'Funny', description: 'Humorous and entertaining' }
 ];
 
 const ToneSelector: React.FC<ToneSelectorProps> = ({

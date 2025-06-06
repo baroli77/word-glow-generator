@@ -8,6 +8,7 @@ import { Copy, Download, Sparkles, Save, Printer } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { saveCoverLetter } from '@/services/supabaseService';
 import { useAuth } from '@/context/AuthContext';
+import html2pdf from 'html2pdf.js';
 
 interface ResultStepProps {
   generatedLetter: string;
@@ -140,60 +141,41 @@ const ResultStep: React.FC<ResultStepProps> = ({
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!hasValidContent) return;
     
     try {
-      // Create a new window for PDF generation
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        throw new Error('Could not open print window');
-      }
-
-      // Generate HTML content for PDF
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>Cover Letter</title>
-            <style>
-              body {
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 40px 20px;
-                color: #333;
-              }
-              .cover-letter {
-                white-space: pre-wrap;
-                font-size: 12pt;
-              }
-              @media print {
-                body { margin: 0; padding: 20px; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="cover-letter">${generatedLetter.replace(/\n/g, '<br>')}</div>
-          </body>
-        </html>
+      // Create a temporary div for PDF generation
+      const element = document.createElement('div');
+      element.innerHTML = `
+        <div style="
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 40px 20px;
+        ">
+          <div style="white-space: pre-wrap; font-size: 12pt;">
+            ${generatedLetter.replace(/\n/g, '<br>')}
+          </div>
+        </div>
       `;
 
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      
-      // Wait for content to load, then trigger print
-      printWindow.onload = () => {
-        printWindow.print();
-        printWindow.onafterprint = () => {
-          printWindow.close();
-        };
+      const opt = {
+        margin: 1,
+        filename: `cover-letter-${formData?.companyName || 'company'}-${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
+
+      // Generate and download PDF
+      await html2pdf().set(opt).from(element).save();
       
       toast({
-        title: "PDF Download Ready",
-        description: "Your cover letter is ready to download as PDF. Please use the print dialog to save as PDF.",
+        title: "PDF Downloaded",
+        description: "Your cover letter has been downloaded as a PDF.",
       });
     } catch (error) {
       console.error('PDF generation error:', error);
