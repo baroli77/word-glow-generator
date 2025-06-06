@@ -83,6 +83,17 @@ const Dashboard = () => {
 
   const getPlanDisplayName = () => {
     if (isAdminUser) return 'Admin';
+    
+    // Check if subscription is expired
+    if (subscription && subscription.expires_at && subscription.plan_type !== 'lifetime') {
+      const expirationDate = new Date(subscription.expires_at);
+      const currentDate = new Date();
+      
+      if (currentDate > expirationDate) {
+        return 'Free Plan';
+      }
+    }
+    
     if (!subscription || subscription.plan_type === 'free') return 'Free Plan';
     return subscription.plan_type.charAt(0).toUpperCase() + subscription.plan_type.slice(1) + ' Plan';
   };
