@@ -60,17 +60,17 @@ const Dashboard = () => {
 
       // Load subscription info
       const { data: subscriptionData } = await supabase
-        .from('subscriptions')
+        .from('user_subscriptions')
         .select('*')
         .eq('user_id', user.id)
-        .eq('status', 'active')
+        .eq('is_active', true)
         .single();
 
       setSubscription(subscriptionData);
 
       // Check if user is admin
       const { data: adminData } = await supabase
-        .from('admin_users')
+        .from('admin_roles')
         .select('*')
         .eq('user_id', user.id)
         .single();
@@ -487,30 +487,14 @@ const Dashboard = () => {
                   <div>
                     <div className="flex justify-between text-sm mb-1">
                       <span>Bios Created</span>
-                      <span className="font-medium">
-                        {bioUsageCount}/{bioLimit === 'Unlimited' ? '∞' : bioLimit}
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted h-2 rounded-full">
-                      <div 
-                        className="bg-brand-purple h-2 rounded-full" 
-                        style={{ width: `${bioLimit === 'Unlimited' ? 0 : getUsagePercentage(bioUsageCount, bioLimit)}%` }}
-                      ></div>
+                      <span className="font-medium">{bioUsageCount}</span>
                     </div>
                   </div>
                   
                   <div>
                     <div className="flex justify-between text-sm mb-1">
                       <span>Cover Letters Created</span>
-                      <span className="font-medium">
-                        {coverLetterUsageCount}/{coverLetterLimit === 'Unlimited' ? '∞' : coverLetterLimit}
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted h-2 rounded-full">
-                      <div 
-                        className="bg-brand-pink h-2 rounded-full" 
-                        style={{ width: `${coverLetterLimit === 'Unlimited' ? 0 : getUsagePercentage(coverLetterUsageCount, coverLetterLimit)}%` }}
-                      ></div>
+                      <span className="font-medium">{coverLetterUsageCount}</span>
                     </div>
                   </div>
                 </div>
