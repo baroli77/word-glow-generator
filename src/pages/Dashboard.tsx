@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -9,33 +8,30 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { FileText, UserCircle, Star, Copy, Trash2, Plus, Edit, Settings, Printer, Download } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useUserAccess } from '@/hooks/useUserAccess';
+import { usageService } from '@/services/usageService';
 import { getUserBios, getUserCoverLetters } from '@/services/supabaseService';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { getDailyQuote } from '@/utils/dailyQuotes';
 import { Document, Packer, Paragraph, TextRun } from "docx";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { 
-    subscription, 
-    usageCount: bioUsageCount, 
-    getPlanDisplayName,
-    isAdminUser 
-  } = useUserAccess();
+  const navigate = useNavigate();
   
   const [savedBios, setSavedBios] = useState([]);
   const [savedCoverLetters, setSavedCoverLetters] = useState([]);
+  const [bioUsageCount, setBioUsageCount] = useState(0);
   const [coverLetterUsageCount, setCoverLetterUsageCount] = useState(0);
+  const [subscription, setSubscription] = useState(null);
+  const [isAdminUser, setIsAdminUser] = useState(false);
   const [selectedBio, setSelectedBio] = useState(null);
   const [selectedCoverLetter, setSelectedCoverLetter] = useState(null);
   const [isViewBioOpen, setIsViewBioOpen] = useState(false);
   const [isViewCoverLetterOpen, setIsViewCoverLetterOpen] = useState(false);
   const [editedCoverLetterContent, setEditedCoverLetterContent] = useState('');
   const [isEditingCoverLetter, setIsEditingCoverLetter] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -46,27 +42,49 @@ const Dashboard = () => {
   const loadUserData = async () => {
     if (!user) return;
 
-    // Load saved bios
-    const bios = await getUserBios();
-    setSavedBios(bios);
-
-    // Load saved cover letters
-    const coverLetters = await getUserCoverLetters();
-    setSavedCoverLetters(coverLetters);
-
-    // Load cover letter usage count specifically
     try {
-      const { data: coverLetterUsage } = await supabase
-        .from('tool_usage')
+      // Load saved bios
+      const bios = await getUserBios();
+      setSavedBios(bios);
+
+      // Load saved cover letters
+      const coverLetters = await getUserCoverLetters();
+      setSavedCoverLetters(coverLetters);
+
+      // Load usage counts using the service
+      const bioUsage = await usageService.fetchUsageCount(user.id, 'bio_generator');
+      const coverLetterUsage = await usageService.fetchUsageCount(user.id, 'cover_letter');
+      
+      setBioUsageCount(bioUsage);
+      setCoverLetterUsageCount(coverLetterUsage);
+
+      // Load subscription info
+      const { data: subscriptionData } = await supabase
+        .from('subscriptions')
         .select('*')
         .eq('user_id', user.id)
-        .eq('tool_type', 'cover_letter');
+        .eq('status', 'active')
+        .single();
 
-      setCoverLetterUsageCount(coverLetterUsage?.length || 0);
+      setSubscription(subscriptionData);
+
+      // Check if user is admin
+      const { data: adminData } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      setIsAdminUser(!!adminData);
     } catch (error) {
-      console.error('Error loading cover letter usage data:', error);
-      setCoverLetterUsageCount(0);
+      console.error('Error loading user data:', error);
     }
+  };
+
+  const getPlanDisplayName = () => {
+    if (isAdminUser) return 'Admin';
+    if (!subscription || subscription.plan_type === 'free') return 'Free Plan';
+    return subscription.plan_type.charAt(0).toUpperCase() + subscription.plan_type.slice(1) + ' Plan';
   };
 
   const getUsageLimit = (toolType: string) => {
@@ -533,7 +551,7 @@ const Dashboard = () => {
             </div>
             
             <div className="lg:w-3/4">
-              <div className="brand-card mb-8">
+              <div className="brand-card">
                 <Tabs defaultValue="bios">
                   <TabsList className="mb-4 grid w-full grid-cols-2">
                     <TabsTrigger value="bios">My Bios</TabsTrigger>
@@ -702,41 +720,6 @@ const Dashboard = () => {
                     )}
                   </TabsContent>
                 </Tabs>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase">
-                      Total Bios
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">{savedBios.length}</div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase">
-                      Total Cover Letters
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">{savedCoverLetters.length}</div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase">
-                      Total Usage
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold">{bioUsageCount + coverLetterUsageCount}</div>
-                  </CardContent>
-                </Card>
               </div>
             </div>
           </div>
