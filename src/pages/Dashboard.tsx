@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, UserCircle, Star, Copy, Trash2, Plus, Edit, Settings } from 'lucide-react';
+import { FileText, UserCircle, Star, Copy, Trash2, Plus, Edit, Settings, Printer, Download } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { getUserBios, getUserCoverLetters } from '@/services/supabaseService';
@@ -139,6 +139,146 @@ const Dashboard = () => {
         variant: "destructive"
       });
     });
+  };
+
+  const handleDownloadCoverLetter = async (content: string, companyName: string) => {
+    try {
+      // Create a temporary div for PDF generation
+      const element = document.createElement('div');
+      element.innerHTML = `
+        <div style="
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 40px 20px;
+        ">
+          <div style="white-space: pre-wrap; font-size: 12pt;">
+            ${content.replace(/\n/g, '<br>')}
+          </div>
+        </div>
+      `;
+
+      const opt = {
+        margin: 1,
+        filename: `cover-letter-${companyName || 'company'}-${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      // Generate and download PDF
+      const html2pdf = (await import('html2pdf.js')).default;
+      await html2pdf().set(opt).from(element).save();
+      
+      toast({
+        title: "PDF Downloaded",
+        description: "Your cover letter has been downloaded as a PDF.",
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      // Fallback to text download
+      try {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cover-letter-${companyName || 'company'}-${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        toast({
+          title: "Downloaded as Text",
+          description: "PDF generation failed, downloaded as text file instead.",
+        });
+      } catch (fallbackError) {
+        toast({
+          title: "Download Failed",
+          description: "Could not download the cover letter. Please try copying the text instead.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handlePrintCoverLetter = (content: string) => {
+    try {
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        throw new Error('Could not open print window');
+      }
+
+      // Generate HTML content for printing
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Cover Letter</title>
+            <style>
+              @media print {
+                body {
+                  font-family: 'Times New Roman', serif;
+                  line-height: 1.6;
+                  max-width: 8.5in;
+                  margin: 0;
+                  padding: 1in;
+                  color: #000;
+                  font-size: 12pt;
+                }
+                .cover-letter {
+                  white-space: pre-wrap;
+                }
+                @page {
+                  margin: 1in;
+                }
+              }
+              body {
+                font-family: 'Times New Roman', serif;
+                line-height: 1.6;
+                max-width: 8.5in;
+                margin: 0 auto;
+                padding: 1in;
+                color: #000;
+                font-size: 12pt;
+              }
+              .cover-letter {
+                white-space: pre-wrap;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="cover-letter">${content.replace(/\n/g, '<br>')}</div>
+          </body>
+        </html>
+      `;
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Wait for content to load, then trigger print
+      printWindow.onload = () => {
+        printWindow.print();
+        printWindow.onafterprint = () => {
+          printWindow.close();
+        };
+      };
+      
+      toast({
+        title: "Print Dialog Opened",
+        description: "Your cover letter is ready to print.",
+      });
+    } catch (error) {
+      console.error('Print error:', error);
+      toast({
+        title: "Print Failed",
+        description: "Could not open print dialog. Please try copying the text and printing manually.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteBio = async (bioId: string) => {
@@ -457,6 +597,26 @@ const Dashboard = () => {
                                     }}
                                   >
                                     <Copy className="h-4 w-4" />
+                                  </Button>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handlePrintCoverLetter(displayLetter.content);
+                                    }}
+                                  >
+                                    <Printer className="h-4 w-4" />
+                                  </Button>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDownloadCoverLetter(displayLetter.content, displayLetter.company);
+                                    }}
+                                  >
+                                    <Download className="h-4 w-4" />
                                   </Button>
                                   <Button 
                                     variant="ghost" 
