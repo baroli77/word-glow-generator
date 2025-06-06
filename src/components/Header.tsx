@@ -18,7 +18,7 @@ import {
 const Header = () => {
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin();
-  const { refetch, getPlanDisplayName } = useUserAccess();
+  const { refetch, getPlanDisplayName, subscription } = useUserAccess();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -39,6 +39,9 @@ const Header = () => {
 
   // Check if user is admin directly as well for consistent behavior
   const isAdminUser = user?.email === 'obarton77@gmail.com' || isAdmin;
+
+  // Get the current plan display name which properly handles expired subscriptions
+  const currentPlanName = getPlanDisplayName();
 
   return (
     <header className="bg-background border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -118,7 +121,7 @@ const Header = () => {
                     {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || 'U'}
                   </div>
                   <span className="hidden sm:inline text-xs">
-                    {user.user_metadata?.full_name || user.email} - {getPlanDisplayName()}
+                    {user.user_metadata?.full_name || user.email} - {currentPlanName}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
